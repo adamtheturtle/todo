@@ -1,11 +1,6 @@
 language: python
 python:
   - "3.5"
-addons:
-  apt:
-    packages:
-      # A spellchecking system used by Sphinx's spellchecking.
-      - enchant
 install:
   - "pip install -e .[dev]"
 before_script:
@@ -28,4 +23,3 @@ after_success:
 # See http://docs.travis-ci.com/user/caching/#pip-cache.
 cache:
   - pip
-  - apt
