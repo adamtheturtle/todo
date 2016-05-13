@@ -140,7 +140,7 @@ def specific_user_delete(email):
 @jsonschema.validate('users', 'create')
 def create_user():
     """
-    Create a new user. See ``users_route`` for details.
+    Create a new user. See ``users_post`` for details.
     """
     email = request.json['email']
     password_hash = request.json['password_hash']
