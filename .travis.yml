@@ -1,0 +1,45 @@
+language: python
+python:
+  # These versions are semi-arbitrary. We have no need right now for two Python
+  # versions. They are the latest versions for the two languages (Python 2 and
+  # Python 3)
+  - "2.7"
+  - "3.5"
+addons:
+  apt:
+    packages:
+      # A spellchecking system used by Sphinx's spellchecking.
+      - enchant
+install:
+  # Install a link checker on Python 2 but not Python 3 as it will not install
+  # on Python 3.
+  - "if [[ $TRAVIS_PYTHON_VERSION < 3 ]]; then pip install linkchecker; fi"
+  - "pip install -e .[dev]"
+before_script:
+  # Run various code analysis tools, for linting and correctness:
+  - "flake8 ."
+  # Style check the documentation:
+  - "doc8 docs/"
+  # Check links in the README. The link checker cannot be installed on
+  # Python 3 so only do this on Python 2.
+  - "if [[ $TRAVIS_PYTHON_VERSION < 3 ]]; then linkchecker README.md; fi"
+script:
+  # Build documentation HTML.
+  - sphinx-build -W -b html -d build/doctrees docs/source build/html
+  # Check that links in the documentation work.
+  # Only do this on Python versions < 3.5 to work around
+  # https://github.com/sphinx-doc/sphinx/issues/1945
+  - if [[ $TRAVIS_PYTHON_VERSION < 3.5 ]]; then sphinx-build -W -b linkcheck -d build/doctrees docs/source build/linkcheck; fi
+  # Check spelling in the documentation.
+  - sphinx-build -W -b spelling -d build/doctrees docs/source build/spelling
+  # Run all discoverable tests, but set the source directories so that the coverage tool knows not to include coverage for all dependencies.
+  - "coverage run --branch --source=authentication,storage -m unittest discover"
+after_success:
+  # Sends the coverage report to coveralls.io which can report to Pull Requests
+  # and track test coverage over time.
+  - "coveralls"
+# Cache pip dependencies.
+# See http://docs.travis-ci.com/user/caching/#pip-cache.
+cache:
+  directories:
+    - $HOME/.cache/pip
