@@ -32,6 +32,4 @@ after_success:
   - "coveralls"
 # Cache pip dependencies.
 # See http://docs.travis-ci.com/user/caching/#pip-cache.
-cache:
-  directories:
-    - $HOME/.cache/pip
+cache: pip
