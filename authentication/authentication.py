@@ -9,7 +9,6 @@ from urllib.parse import urljoin
 from flask import Flask, jsonify, request, json
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import (
-    current_user,
     LoginManager,
     login_required,
     login_user,
@@ -275,24 +274,6 @@ def signup():
     )
 
     return jsonify(email=email, password=password), codes.CREATED
-
-
-@app.route('/status', methods=['GET'])
-@consumes('application/json')
-def status():
-    """
-    Get information about the current activated user.
-
-    :reqheader Content-Type: application/json
-    :resheader Content-Type: application/json
-    :resjson bool is_authenticated: There is a current authenticated user.
-    :resjson string email: The email address of the current user. This is only
-        given if there is a current authenticated user.
-    :status 200:
-    """
-    if current_user.is_authenticated:
-        return jsonify(is_authenticated=True, email=current_user.email)
-    return jsonify(is_authenticated=False)
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
