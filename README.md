@@ -23,25 +23,24 @@ to start the API service.
 
 To run commands against the API:
 
-```
-$ curl -X POST \
-  -H "Content-Type: application/json" \
-  -g '127.0.0.1:5000/signup' \
-  -d '{"email": "user@example.com","password":"secret"}'
-$ curl -X POST \
-  -H "Content-Type: application/json" \
-  -g '127.0.0.1:5000/login' \
-  -d '{"email": "user@example.com","password":"secret"}' \
-  --cookie-jar ~/Desktop/my_cookie
-$ curl -X GET \
-  -H "Content-Type: application/json" \
-  -g '127.0.0.1:5000/status' \
-  --cookie-jar ~/Desktop/my_cookie
-$ curl -X POST \
-  -H "Content-Type: application/json" \
-  -g '127.0.0.1:5000/logout' \
-  --cookie ~/Desktop/my_cookie
-```
+  ```
+  # Create a user.
+  $ curl -X POST \
+    -H "Content-Type: application/json" \
+    -g '127.0.0.1:5000/signup' \
+    -d '{"email": "user@example.com","password":"secret"}'
+  # Log in as the new user.
+  $ curl -X POST \
+    -H "Content-Type: application/json" \
+    -g '127.0.0.1:5000/login' \
+    -d '{"email": "user@example.com","password":"secret"}' \
+    --cookie-jar ~/Desktop/my_cookie
+  # Log out.
+  $ curl -X POST \
+    -H "Content-Type: application/json" \
+    -g '127.0.0.1:5000/logout' \
+    --cookie ~/Desktop/my_cookie
+  ```
 
 The above assumes that Docker is running on `127.0.0.1`.
 
