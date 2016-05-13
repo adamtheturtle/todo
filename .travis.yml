@@ -11,18 +11,12 @@ addons:
       # A spellchecking system used by Sphinx's spellchecking.
       - enchant
 install:
-  # Install a link checker on Python 2 but not Python 3 as it will not install
-  # on Python 3.
-  - "if [[ $TRAVIS_PYTHON_VERSION < 3 ]]; then pip install linkchecker; fi"
   - "pip install -e .[dev]"
 before_script:
   # Run various code analysis tools, for linting and correctness:
   - "flake8 ."
   # Style check the documentation:
   - "doc8 docs/"
-  # Check links in the README. The link checker cannot be installed on
-  # Python 3 so only do this on Python 2.
-  - "if [[ $TRAVIS_PYTHON_VERSION < 3 ]]; then linkchecker README.md; fi"
 script:
   # Build documentation HTML.
   - sphinx-build -W -b html -d build/doctrees docs/source build/html
