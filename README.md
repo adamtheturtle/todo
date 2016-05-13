@@ -1,2 +1,3 @@
-# todo
-RESTful API for simple TODO management
+# todoer
+
+A TODO manager with authentication.
