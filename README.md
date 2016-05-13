@@ -19,6 +19,35 @@ docker-compose build
 docker-compose up
 ```
 
+to start the API service.
+
+To run commands against the API:
+
+```
+$ curl -X POST \
+  -H "Content-Type: application/json" \
+  -g '127.0.0.1:5000/signup' \
+  -d '{"email": "user@example.com","password":"secret"}'
+$ curl -X POST \
+  -H "Content-Type: application/json" \
+  -g '127.0.0.1:5000/login' \
+  -d '{"email": "user@example.com","password":"secret"}' \
+  --cookie-jar ~/Desktop/my_cookie
+$ curl -X GET \
+  -H "Content-Type: application/json" \
+  -g '127.0.0.1:5000/status' \
+  --cookie-jar ~/Desktop/my_cookie
+$ curl -X POST \
+  -H "Content-Type: application/json" \
+  -g '127.0.0.1:5000/logout' \
+  --cookie ~/Desktop/my_cookie
+```
+
+The above assumes that Docker is running on `127.0.0.1`.
+
+If using OS X with Docker Machine for example,
+replace `127.0.0.1` with the result of `docker-machine ip dev`.
+
 ## Development
 
 This service is written using Python and [Flask](http://flask.pocoo.org).
