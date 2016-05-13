@@ -18,8 +18,6 @@ script:
   - sphinx-build -W -b html -d build/doctrees docs/source build/html
   # Check links in the documentation.
   - sphinx-build -W -b linkcheck -d build/doctrees docs/source build/linkcheck
-  # Check spelling in the documentation.
-  - sphinx-build -W -b spelling -d build/doctrees docs/source build/spelling
   # Run all discoverable tests, but set the source directories so that the coverage tool knows not to include coverage for all dependencies.
   - "coverage run --branch --source=authentication,storage -m unittest discover"
 after_success:
