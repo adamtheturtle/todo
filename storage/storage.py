@@ -137,28 +137,6 @@ def specific_user_delete(email):
     return return_data, codes.OK
 
 
-@jsonschema.validate('users', 'create')
-def create_user():
-    """
-    Create a new user. See ``users_post`` for details.
-    """
-    email = request.json['email']
-    password_hash = request.json['password_hash']
-
-    if load_user_from_id(email) is not None:
-        return jsonify(
-            title='There is already a user with the given email address.',
-            detail='A user already exists with the email "{email}"'.format(
-                email=email),
-        ), codes.CONFLICT
-
-    user = User(email=email, password_hash=password_hash)
-    db.session.add(user)
-    db.session.commit()
-
-    return jsonify(email=email, password_hash=password_hash), codes.CREATED
-
-
 @app.route('/users', methods=['GET'])
 @consumes('application/json')
 def users_get():
@@ -183,6 +161,7 @@ def users_get():
 
 @app.route('/users', methods=['POST'])
 @consumes('application/json')
+@jsonschema.validate('users', 'create')
 def users_post():
     """
     Create a new user.
@@ -200,7 +179,21 @@ def users_post():
         created.
     :status 409: There already exists a user with the given ``email``.
     """
-    return create_user()
+    email = request.json['email']
+    password_hash = request.json['password_hash']
+
+    if load_user_from_id(email) is not None:
+        return jsonify(
+            title='There is already a user with the given email address.',
+            detail='A user already exists with the email "{email}"'.format(
+                email=email),
+        ), codes.CONFLICT
+
+    user = User(email=email, password_hash=password_hash)
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify(email=email, password_hash=password_hash), codes.CREATED
 
 
 if __name__ == '__main__':   # pragma: no cover
