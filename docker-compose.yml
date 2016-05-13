@@ -8,7 +8,8 @@ authenticate:
    - "5000:5000"
   volumes:
    # This is used to share the code with the container.
-   # It is used by Flask in debug mode to reload the server after each code change.
+   # It is used by Flask in debug mode to reload the server after each code
+   # change.
    # See http://flask.pocoo.org/docs/0.10/quickstart/#debug-mode.
    - .:/code
   environment:
