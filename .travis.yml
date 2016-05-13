@@ -1,9 +1,5 @@
 language: python
 python:
-  # These versions are semi-arbitrary. We have no need right now for two Python
-  # versions. They are the latest versions for the two languages (Python 2 and
-  # Python 3)
-  - "2.7"
   - "3.5"
 addons:
   apt:
