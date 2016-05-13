@@ -159,12 +159,32 @@ def create_user():
     return jsonify(email=email, password_hash=password_hash), codes.CREATED
 
 
-@app.route('/users', methods=['GET', 'POST'])
+@app.route('/users', methods=['GET'])
 @consumes('application/json')
-def users_route():
+def users_get():
     """
-    **POST**:
+    Get information about all users.
 
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjsonarr string email: The email address of a user.
+    :resjsonarr string password_hash: The password hash of a user.
+    :status 200: Information about all users is returned.
+    """
+    details = [
+        {'email': user.email, 'password_hash': user.password_hash} for user
+        in User.query.all()]
+
+    return make_response(
+        json.dumps(details),
+        codes.OK,
+        {'Content-Type': 'application/json'})
+
+
+@app.route('/users', methods=['POST'])
+@consumes('application/json')
+def users_post():
+    """
     Create a new user.
 
     :param email: The email address of the new user.
@@ -179,30 +199,9 @@ def users_route():
     :status 200: A user with the given ``email`` and ``password_hash`` has been
         created.
     :status 409: There already exists a user with the given ``email``.
-
-    **GET**:
-
-    Get information about all users.
-
-    :reqheader Content-Type: application/json
-    :resheader Content-Type: application/json
-    :resjsonarr string email: The email address of a user.
-    :resjsonarr string password_hash: The password hash of a user.
-    :status 200: Information about all users is returned.
     """
+    return create_user()
 
-    if request.method == 'POST':
-        return create_user()
-
-    # It the method type is not POST it is GET.
-    details = [
-        {'email': user.email, 'password_hash': user.password_hash} for user
-        in User.query.all()]
-
-    return make_response(
-        json.dumps(details),
-        codes.OK,
-        {'Content-Type': 'application/json'})
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
