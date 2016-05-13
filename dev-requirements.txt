@@ -1,0 +1,9 @@
+coverage # Allows us to measure code coverage
+coveralls # Allows us to upload coverage data
+doc8 # Style check documentation
+flake8 # Code analysis tool with linting
+PyEnchant # Dictionary interaction for spellchecking
+Sphinx # Build documentation
+sphinxcontrib-httpdomain # Describe RESTful HTTP APIs in Sphinx
+sphinxcontrib-spelling # Check spelling in the documentation
+sphinx_rtd_theme # Theme for documentation
