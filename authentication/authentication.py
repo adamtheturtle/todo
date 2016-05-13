@@ -140,7 +140,7 @@ def on_validation_error(error):
     """
     return jsonify(
         title='There was an error validating the given arguments.',
-        detail=error.messag,
+        detail=error.message,
     ), codes.BAD_REQUEST
 
 
