@@ -20,10 +20,8 @@ before_script:
 script:
   # Build documentation HTML.
   - sphinx-build -W -b html -d build/doctrees docs/source build/html
-  # Check that links in the documentation work.
-  # Only do this on Python versions < 3.5 to work around
-  # https://github.com/sphinx-doc/sphinx/issues/1945
-  - if [[ $TRAVIS_PYTHON_VERSION < 3.5 ]]; then sphinx-build -W -b linkcheck -d build/doctrees docs/source build/linkcheck; fi
+  # Check links in the documentation.
+  - sphinx-build -W -b linkcheck -d build/doctrees docs/source build/linkcheck
   # Check spelling in the documentation.
   - sphinx-build -W -b spelling -d build/doctrees docs/source build/spelling
   # Run all discoverable tests, but set the source directories so that the coverage tool knows not to include coverage for all dependencies.
