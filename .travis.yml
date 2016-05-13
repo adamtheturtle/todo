@@ -32,4 +32,6 @@ after_success:
   - "coveralls"
 # Cache pip dependencies.
 # See http://docs.travis-ci.com/user/caching/#pip-cache.
-cache: pip
+cache:
+  - pip
+  - apt
