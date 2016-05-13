@@ -3,3 +3,5 @@ coveralls # Allows us to upload coverage data
 doc8 # Style check documentation
 flake8 # Code analysis tool with linting
 PyEnchant # Dictionary interaction for spellchecking
+Sphinx # Build documentation
+sphinx_rtd_theme # Theme for documentation
