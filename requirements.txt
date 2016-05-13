@@ -2,3 +2,4 @@ flask==0.10.1
 Flask-SQLAlchemy==2.1
 flask_jsonschema==0.1.1
 Flask-Negotiate==0.1.0
+requests==2.10.0
