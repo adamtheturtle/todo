@@ -1,5 +1,5 @@
 """
-A storage service for use by a Jenca Cloud authentication service.
+A storage service for use by a todoer authentication service.
 """
 
 import os
