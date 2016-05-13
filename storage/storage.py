@@ -106,36 +106,6 @@ def specific_user_get(email):
     return return_data, codes.OK
 
 
-@app.route('/users/<email>', methods=['DELETE'])
-@consumes('application/json')
-def specific_user_delete(email):
-    """
-    Delete a particular user.
-
-    :reqheader Content-Type: application/json
-    :resheader Content-Type: application/json
-    :resjson string email: The email address of the deleted user.
-    :resjson string password_hash: The password hash of the deleted user.
-    :status 200: The user has been deleted.
-    :status 404: There is no user with the given ``email``.
-    """
-    user = load_user_from_id(email)
-
-    if user is None:
-        return jsonify(
-            title='The requested user does not exist.',
-            detail='No user exists with the email "{email}"'.format(
-                email=email),
-        ), codes.NOT_FOUND
-
-    else:
-        db.session.delete(user)
-        db.session.commit()
-
-    return_data = jsonify(email=user.email, password_hash=user.password_hash)
-    return return_data, codes.OK
-
-
 @app.route('/users', methods=['GET'])
 @consumes('application/json')
 def users_get():
