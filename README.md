@@ -9,6 +9,9 @@
    :target: http://todoer.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
+.. image:: https://coveralls.io/repos/github/adamtheturtle/todo/badge.svg?branch=master
+   :target: https://coveralls.io/github/adamtheturtle/todo?branch=master
+
 # todoer
 
 A TODO manager with authentication.
