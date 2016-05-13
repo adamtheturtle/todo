@@ -1,0 +1,10 @@
+{
+  "create": {
+    "type": "object",
+    "properties": {
+      "email": {},
+      "password_hash": {}
+    },
+    "required": ["email", "password_hash"]
+  }
+}
