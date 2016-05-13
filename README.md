@@ -7,3 +7,14 @@
 # todoer
 
 A TODO manager with authentication.
+
+## Running this service
+
+This comes with a [Docker Compose](https://docs.docker.com/compose/) file.
+
+With Docker Compose available:
+
+```
+docker-compose build
+docker-compose up
+```
