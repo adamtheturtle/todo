@@ -278,6 +278,8 @@ class CreateTodoTests(InMemoryStorageTests):
         """
         A ``POST /todos`` request without a completion time returns a
         BAD_REQUEST status code and an error message.
+
+        TODO this should be optional.
         """
         data = TODO_DATA.copy()
         data.pop('completion_time')
