@@ -20,6 +20,8 @@ from flask.ext.login import (
 from flask_jsonschema import JsonSchema, ValidationError
 from flask_negotiate import consumes
 
+import pytz
+
 import requests
 from requests import codes
 
@@ -272,7 +274,7 @@ def create_todo():
 
     completion_time = None
     if completed:
-        completion_time = datetime.datetime.utcnow().strftime('%s')
+        completion_time = int(datetime.datetime.now(tz=pytz.utc).timestamp())
 
     return jsonify(
         content=content,

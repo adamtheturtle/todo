@@ -2,16 +2,18 @@
 Tests for authentication.authentication.
 """
 
+import datetime
 import json
 import re
 import unittest
 
-from urllib.parse import urljoin
+import pytz
+import responses
 
 from flask.ext.login import make_secure_token
 from freezegun import freeze_time
 from requests import codes
-import responses
+from urllib.parse import urljoin
 from werkzeug.http import parse_cookie
 
 from authentication.authentication import (
@@ -509,7 +511,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     @responses.activate
-    @freeze_time("1970-01-01 01:00:05 UTC")
+    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
     def test_current_completion_time(self):
         """
         If the completed flag is set to ``true`` then the completed time is
@@ -523,7 +525,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_time'] = '5'
+        expected['completion_time'] = 5
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     def test_missing_text(self):
