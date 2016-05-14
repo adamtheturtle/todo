@@ -175,14 +175,16 @@ def todos_post():
     :param content: The content of the new item.
     :type content: string
     :param completed: Whether the item is completed.
-    :type completed: bool
-    TODO res and req - completion time
+    :type completed: boolean
+    :param completion_time: The completion UNIX timestamp.
+    :type completion_time: number
+
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :resjson string completed: TODO.
-    :resjson bool completed: TODO.
-    :status 200: TODO
-    :status 409: TODO
+    :resjson string content: The content of the new item.
+    :resjson boolean completed: Whether the item is completed.
+    :resjson number completion_time: The completion UNIX timestamp.
+    :status 200: An item with the given details has been created.
     """
     content = request.json['content']
     completed = request.json['completed']
