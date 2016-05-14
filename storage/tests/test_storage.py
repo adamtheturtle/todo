@@ -277,8 +277,8 @@ class CreateTodoTests(InMemoryStorageTests):
 
     def test_missing_completion_time(self):
         """
-        A ``POST /todos`` request without a completion time returns ``null``
-        in the place of a .
+        A ``POST /todos`` request without a completion time creates an item
+        with a ``null`` completion time.
         """
         data = TODO_DATA.copy()
         data.pop('completion_time')
