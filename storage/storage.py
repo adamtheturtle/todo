@@ -165,6 +165,28 @@ def users_post():
     return jsonify(email=email, password_hash=password_hash), codes.CREATED
 
 
+@app.route('/todos', methods=['POST'])
+@consumes('application/json')
+@jsonschema.validate('todos', 'create')
+def todos_post():
+    """
+    Create a new todo.
+
+    :param content: The content of the new item.
+    :type content: string
+    :param completed: Whether the item is completed.
+    :type completed: bool
+    TODO res and req - completion time
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjson string completed: TODO.
+    :resjson bool completed: TODO.
+    :status 200: TODO
+    :status 409: TODO
+    """
+    return jsonify(), codes.CREATED
+
+
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.

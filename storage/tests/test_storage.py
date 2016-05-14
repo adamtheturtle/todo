@@ -12,7 +12,7 @@ USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
 TODO_DATA = {
     'content': 'Buy milk',
     'completed': True,
-    'completion_time': None,
+    'completion_time': 1463237269,
 }
 
 
@@ -243,7 +243,8 @@ class CreateTodoTests(InMemoryStorageTests):
         response = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(data))
+            data=json.dumps(data),
+        )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.BAD_REQUEST)
         expected = {
@@ -263,7 +264,8 @@ class CreateTodoTests(InMemoryStorageTests):
         response = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']}))
+            data=json.dumps(data),
+        )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.BAD_REQUEST)
         expected = {
@@ -283,7 +285,8 @@ class CreateTodoTests(InMemoryStorageTests):
         response = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']}))
+            data=json.dumps(data),
+        )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.BAD_REQUEST)
         expected = {

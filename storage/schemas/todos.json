@@ -1,0 +1,17 @@
+{
+  "create": {
+    "type": "object",
+    "properties": {
+      "content": {
+      	"type": "string"
+      },
+      "completed": {
+      	"type": "boolean"
+      },
+      "completion_time": {
+      	"type": "number"
+      }
+    },
+    "required": ["content", "completed", "completion_time"]
+  }
+}
