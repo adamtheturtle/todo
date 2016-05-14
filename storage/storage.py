@@ -184,7 +184,18 @@ def todos_post():
     :status 200: TODO
     :status 409: TODO
     """
-    return jsonify(), codes.CREATED
+    content = request.json['content']
+    completed = request.json['completed']
+    completion_time = request.json.get('completion_time')
+
+    if completion_time is not None:
+        return jsonify(
+            content=content,
+            completed=completed,
+            completion_time=completion_time,
+        ), codes.CREATED
+
+    return jsonify(content=content, completed=completed), codes.CREATED
 
 
 if __name__ == '__main__':   # pragma: no cover

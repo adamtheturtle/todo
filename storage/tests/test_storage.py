@@ -227,10 +227,11 @@ class CreateTodoTests(InMemoryStorageTests):
         response = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA))
+            data=json.dumps(TODO_DATA),
+        )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(json.loads(response.data.decode('utf8')), {'TODO'})
+        self.assertEqual(json.loads(response.data.decode('utf8')), TODO_DATA)
 
     def test_missing_text(self):
         """
