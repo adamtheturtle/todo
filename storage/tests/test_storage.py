@@ -9,7 +9,11 @@ from requests import codes
 from .testtools import InMemoryStorageTests
 
 USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
-TODO_DATA = {'content': 'Buy milk', 'completed': True}
+TODO_DATA = {
+    'content': 'Buy milk',
+    'completed': True,
+    'completion_time': None,
+}
 
 
 class CreateUserTests(InMemoryStorageTests):
@@ -215,10 +219,10 @@ class CreateTodoTests(InMemoryStorageTests):
 
     def test_success_response(self):
         """
-        A ``POST /todos`` request with the item's text content and a flag
-        describing it as completed, a JSON response with a CREATED status is
-        returned, and this includes the given details as well as an identifier
-        and a completed datetime.
+        A ``POST /todos`` request with the item's text content, a flag
+        describing it as completed and a completion time returns a JSON
+        response with a CREATED status, and this includes the given details as
+        well as an identifier.
         """
         response = self.storage_app.post(
             '/todos',
@@ -248,10 +252,10 @@ class CreateTodoTests(InMemoryStorageTests):
         }
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
-    def test_missing_completion_flag(self):
+    def test_missing_completed_flag(self):
         """
-        A ``POST /users`` request without a password hash returns a BAD_REQUEST
-        status code and an error message.
+        A ``POST /todos`` request without a completed flag returns a
+        BAD_REQUEST status code and an error message.
         """
         data = TODO_DATA.copy()
         data.pop('completed')
@@ -265,6 +269,26 @@ class CreateTodoTests(InMemoryStorageTests):
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'completed' is a required property",
+        }
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+    def test_missing_completion_time(self):
+        """
+        A ``POST /todos`` request without a completion time returns a
+        BAD_REQUEST status code and an error message.
+        """
+        data = TODO_DATA.copy()
+        data.pop('completion_time')
+
+        response = self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'email': USER_DATA['email']}))
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        expected = {
+            'title': 'There was an error validating the given arguments.',
+            'detail': "'completion_time' is a required property",
         }
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
