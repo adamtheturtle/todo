@@ -245,6 +245,37 @@ def signup():
 
     return jsonify(email=email, password=password), codes.CREATED
 
+
+@app.route('/todos', methods=['POST'])
+@consumes('application/json')
+@jsonschema.validate('todos', 'create')
+def create_todo():
+    """
+    Create a new todo item.
+
+    :param content: The content of the new item.
+    :type content: string
+    :param completed: Whether the item is completed.
+    :type completed: boolean
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjson string content: The content of the new item.
+    :resjson boolean completed: Whether the item is completed.
+    :resjson number completion_time: The completion UNIX timestamp (now), or
+        ``null`` if there is none.
+    :status 200: An item with the given details has been created.
+    """
+    content = request.json['content']
+    completed = request.json['completed']
+    completion_time = request.json.get('completion_time')
+
+    return jsonify(
+        content=content,
+        completed=completed,
+        completion_time=completion_time,
+    ), codes.CREATED
+
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.

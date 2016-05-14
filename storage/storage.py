@@ -170,7 +170,7 @@ def users_post():
 @jsonschema.validate('todos', 'create')
 def todos_post():
     """
-    Create a new todo.
+    Create a new todo item.
 
     :param content: The content of the new item.
     :type content: string
