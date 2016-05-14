@@ -7,6 +7,7 @@ import json
 import re
 import unittest
 
+import dateparser
 import pytz
 import responses
 
@@ -524,9 +525,13 @@ class CreateTodoTests(AuthenticationTests):
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_time'] = 5
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+        response_data = json.loads(response.data.decode('utf8'))
+        response_completion_time = response_data['completion_time']
+        response_seconds_since_epoch = dateparser.parse(
+            date_string=response_completion_time).replace(
+                tzinfo=pytz.UTC).timestamp()
+        self.assertEqual(response_seconds_since_epoch, 5)
 
     def test_missing_text(self):
         """

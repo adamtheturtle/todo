@@ -272,14 +272,16 @@ def create_todo():
     content = request.json['content']
     completed = request.json['completed']
 
-    completion_time = None
+    completion_time = completion_time_representation = None
+    now = datetime.datetime.now(tz=pytz.utc)
     if completed:
-        completion_time = int(datetime.datetime.now(tz=pytz.utc).timestamp())
+        completion_time = int(now.timestamp())
+        completion_time_representation = now.strftime('%c')
 
     return jsonify(
         content=content,
         completed=completed,
-        completion_time=completion_time,
+        completion_time=completion_time_representation,
     ), codes.CREATED
 
 if __name__ == '__main__':   # pragma: no cover

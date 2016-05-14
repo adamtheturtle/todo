@@ -1,5 +1,6 @@
 coverage # Allows us to measure code coverage
 coveralls # Allows us to upload coverage data
+dateparser # Parse date strings
 doc8 # Style check documentation
 flake8 # Code analysis tool with linting
 freezegun # Freeze clock for unit tests
