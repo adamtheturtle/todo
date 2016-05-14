@@ -231,6 +231,7 @@ class CreateTodoTests(InMemoryStorageTests):
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
+        # TODO Require a unique id
         self.assertEqual(json.loads(response.data.decode('utf8')), TODO_DATA)
 
     def test_missing_text(self):
