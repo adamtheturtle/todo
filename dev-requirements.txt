@@ -1,10 +1,10 @@
 coverage # Allows us to measure code coverage
 coveralls # Allows us to upload coverage data
+dateparser # Parse date strings
 doc8 # Style check documentation
 flake8 # Code analysis tool with linting
-PyEnchant # Dictionary interaction for spellchecking
+freezegun # Freeze clock for unit tests
 responses # Add mocks for requests
 Sphinx # Build documentation
 sphinxcontrib-httpdomain # Describe RESTful HTTP APIs in Sphinx
-sphinxcontrib-spelling # Check spelling in the documentation
 sphinx_rtd_theme # Theme for documentation
