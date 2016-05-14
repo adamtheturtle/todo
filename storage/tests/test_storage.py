@@ -9,6 +9,7 @@ from requests import codes
 from .testtools import InMemoryStorageTests
 
 USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
+TODO_DATA = {'content': 'Buy milk', 'completed': True}
 
 
 class CreateUserTests(InMemoryStorageTests):
@@ -209,83 +210,61 @@ class GetUsersTests(InMemoryStorageTests):
 
 class CreateTodoTests(InMemoryStorageTests):
     """
-    Tests for the user creation endpoint at ``POST /todo``.
+    Tests for the user creation endpoint at ``POST /todos``.
     """
 
     def test_success_response(self):
         """
-        A ``POST /todo`` request with an email address and password hash
-        returns a JSON response with user details and a CREATED status.
+        A ``POST /todos`` request with the item's text content and a flag
+        describing it as completed, a JSON response with a CREATED status is
+        returned, and this includes the given details as well as an identifier
+        and a completed datetime.
         """
         response = self.storage_app.post(
-            '/users',
+            '/todos',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(TODO_DATA))
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(json.loads(response.data.decode('utf8')), USER_DATA)
+        self.assertEqual(json.loads(response.data.decode('utf8')), {'TODO'})
 
-    def test_missing_email(self):
+    def test_missing_text(self):
         """
-        A ``POST /users`` request without an email address returns a
-        BAD_REQUEST status code and an error message.
+        A ``POST /todos`` request without text content returns a BAD_REQUEST
+        status code and an error message.
         """
-        data = USER_DATA.copy()
-        data.pop('email')
+        data = TODO_DATA.copy()
+        data.pop('content')
 
         response = self.storage_app.post(
-            '/users',
+            '/todos',
             content_type='application/json',
             data=json.dumps(data))
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.BAD_REQUEST)
         expected = {
             'title': 'There was an error validating the given arguments.',
-            'detail': "'email' is a required property",
+            'detail': "'content' is a required property",
         }
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
-    def test_missing_password_hash(self):
+    def test_missing_completion_flag(self):
         """
         A ``POST /users`` request without a password hash returns a BAD_REQUEST
         status code and an error message.
         """
-        data = USER_DATA.copy()
-        data.pop('password_hash')
+        data = TODO_DATA.copy()
+        data.pop('completed')
 
         response = self.storage_app.post(
-            '/users',
+            '/todos',
             content_type='application/json',
             data=json.dumps({'email': USER_DATA['email']}))
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.BAD_REQUEST)
         expected = {
             'title': 'There was an error validating the given arguments.',
-            'detail': "'password_hash' is a required property",
-        }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
-
-    def test_existing_user(self):
-        """
-        A ``POST /users`` request for an email address which already exists
-        returns a CONFLICT status code and error details.
-        """
-        self.storage_app.post(
-            '/users',
-            content_type='application/json',
-            data=json.dumps(USER_DATA))
-        data = USER_DATA.copy()
-        data['password'] = 'different'
-        response = self.storage_app.post(
-            '/users',
-            content_type='application/json',
-            data=json.dumps(USER_DATA))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CONFLICT)
-        expected = {
-            'title': 'There is already a user with the given email address.',
-            'detail': 'A user already exists with the email "{email}"'.format(
-                email=USER_DATA['email']),
+            'detail': "'completed' is a required property",
         }
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
@@ -294,5 +273,5 @@ class CreateTodoTests(InMemoryStorageTests):
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.post('/users', content_type='text/html')
+        response = self.storage_app.post('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
