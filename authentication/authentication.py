@@ -278,6 +278,18 @@ def create_todo():
         completion_time = int(now.timestamp())
         completion_time_representation = now.strftime('%c')
 
+    data = {
+        'content': content,
+        'completed': completed,
+        'completion_time': completion_time,
+    }
+
+    requests.post(
+        urljoin(STORAGE_URL, '/todos'),
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps(data),
+    )
+
     return jsonify(
         content=content,
         completed=completed,
