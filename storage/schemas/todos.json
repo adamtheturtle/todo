@@ -12,6 +12,6 @@
       	"type": "number"
       }
     },
-    "required": ["content", "completed", "completion_time"]
+    "required": ["content", "completed"]
   }
 }

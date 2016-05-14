@@ -231,7 +231,6 @@ class CreateTodoTests(InMemoryStorageTests):
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        # TODO Require a unique id
         self.assertEqual(json.loads(response.data.decode('utf8')), TODO_DATA)
 
     def test_missing_text(self):
@@ -278,10 +277,8 @@ class CreateTodoTests(InMemoryStorageTests):
 
     def test_missing_completion_time(self):
         """
-        A ``POST /todos`` request without a completion time returns a
-        BAD_REQUEST status code and an error message.
-
-        TODO this should be optional.
+        A ``POST /todos`` request without a completion time returns ``null``
+        in the place of a .
         """
         data = TODO_DATA.copy()
         data.pop('completion_time')
@@ -292,12 +289,10 @@ class CreateTodoTests(InMemoryStorageTests):
             data=json.dumps(data),
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
-        expected = {
-            'title': 'There was an error validating the given arguments.',
-            'detail': "'completion_time' is a required property",
-        }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.status_code, codes.CREATED)
+        expected = TODO_DATA.copy()
+        expected['completion_time'] = None
+        self.assertEqual(json.loads(response.data.decode('utf8')), data)
 
     def test_incorrect_content_type(self):
         """
