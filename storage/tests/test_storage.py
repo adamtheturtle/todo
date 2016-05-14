@@ -292,7 +292,7 @@ class CreateTodoTests(InMemoryStorageTests):
         self.assertEqual(response.status_code, codes.CREATED)
         expected = TODO_DATA.copy()
         expected['completion_time'] = None
-        self.assertEqual(json.loads(response.data.decode('utf8')), data)
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     def test_incorrect_content_type(self):
         """
