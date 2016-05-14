@@ -9,6 +9,7 @@ import unittest
 from urllib.parse import urljoin
 
 from flask.ext.login import make_secure_token
+from freezegun import freeze_time
 from requests import codes
 import responses
 from werkzeug.http import parse_cookie
@@ -499,19 +500,20 @@ class CreateTodoTests(AuthenticationTests):
         response = self.app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        expected = COMPLETED_TODO_DATA.copy()
+        expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_time'] = None
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     @responses.activate
+    @freeze_time("1970-01-01 01:00:05", tz_offset=0)
     def test_current_completion_time(self):
         """
         If the completed flag is set to ``true`` then the completed time is
-        now.
+        the number of seconds since the epoch.
         """
         response = self.app.post(
             '/todos',
@@ -521,7 +523,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_time'] = 'TODO'
+        expected['completion_time'] = '5'
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     def test_missing_text(self):

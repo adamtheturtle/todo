@@ -2,6 +2,7 @@
 An authentication service.
 """
 
+import datetime
 import os
 
 from urllib.parse import urljoin
@@ -268,7 +269,10 @@ def create_todo():
     """
     content = request.json['content']
     completed = request.json['completed']
-    completion_time = request.json.get('completion_time')
+
+    completion_time = None
+    if completed:
+        completion_time = datetime.datetime.utcnow().strftime('%s')
 
     return jsonify(
         content=content,
