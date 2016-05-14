@@ -1,0 +1,18 @@
+{
+  "create": {
+    "type": "object",
+    "properties": {
+      "email": {},
+      "password": {}
+    },
+    "required": ["email", "password"]
+  },
+  "get": {
+    "type": "object",
+    "properties": {
+      "email": {},
+      "password": {}
+    },
+    "required": ["email", "password"]
+  }
+}

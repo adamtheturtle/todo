@@ -1,3 +1,23 @@
+authenticate:
+  build: .
+  ports:
+   # HOST:CONTAINER
+
+   # Flask defaults to listening on port 5000 but this is configurable.
+   # See http://flask.pocoo.org/docs/0.10/api/#flask.Flask.run
+   - "5000:5000"
+  volumes:
+   # This is used to share the code with the container.
+   # It is used by Flask in debug mode to reload the server after each code
+   # change.
+   # See http://flask.pocoo.org/docs/0.10/quickstart/#debug-mode.
+   - .:/code
+  environment:
+   # In production use the host environment variable instead of 'secret'
+   - SECRET_KEY=secret
+  command: python authentication/authentication.py
+  links:
+    - storage
 storage:
   build: .
   ports:
