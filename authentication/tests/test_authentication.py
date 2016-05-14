@@ -25,6 +25,8 @@ from authentication.authentication import (
 from storage.tests.testtools import InMemoryStorageTests
 
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
+COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
+NOT_COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': False}
 
 
 class AuthenticationTests(InMemoryStorageTests):
@@ -480,3 +482,94 @@ class UserTests(unittest.TestCase):
         with app.app_context():
             self.assertNotEqual(user_1.get_auth_token(),
                                 user_2.get_auth_token())
+
+
+class CreateTodoTests(AuthenticationTests):
+    """
+    Tests for the user creation endpoint at ``POST /todos``.
+    """
+
+    @responses.activate
+    def test_success_response(self):
+        """
+        A ``POST`` request with content and a completed flag set to ``false``
+        returns a JSON response with the given data and a ``null``
+        ``completion_time``.
+        """
+        response = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.CREATED)
+        expected = COMPLETED_TODO_DATA.copy()
+        expected['completion_time'] = None
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+    @responses.activate
+    def test_current_completion_time(self):
+        """
+        If the completed flag is set to ``true`` then the completed time is
+        now.
+        """
+        response = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.CREATED)
+        expected = COMPLETED_TODO_DATA.copy()
+        expected['completion_time'] = 'TODO'
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+    def test_missing_text(self):
+        """
+        A ``POST /todos`` request without text content returns a BAD_REQUEST
+        status code and an error message.
+        """
+        data = COMPLETED_TODO_DATA.copy()
+        data.pop('content')
+
+        response = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(data),
+        )
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        expected = {
+            'title': 'There was an error validating the given arguments.',
+            'detail': "'content' is a required property",
+        }
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+    def test_missing_completed_flag(self):
+        """
+        A ``POST /todos`` request without a completed flag returns a
+        BAD_REQUEST status code and an error message.
+        """
+        data = COMPLETED_TODO_DATA.copy()
+        data.pop('completed')
+
+        response = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(data),
+        )
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        expected = {
+            'title': 'There was an error validating the given arguments.',
+            'detail': "'completed' is a required property",
+        }
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.post('/todos', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
