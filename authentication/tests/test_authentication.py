@@ -509,7 +509,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     @responses.activate
-    @freeze_time("1970-01-01 01:00:05")
+    @freeze_time("1970-01-01 01:00:05 UTC")
     def test_current_completion_time(self):
         """
         If the completed flag is set to ``true`` then the completed time is
