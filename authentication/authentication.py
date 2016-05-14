@@ -264,7 +264,7 @@ def create_todo():
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_time: The completion UNIX timestamp (now), or
-        ``null`` if there is none.
+        ``null`` if the item is not completed.
     :status 200: An item with the given details has been created.
     """
     content = request.json['content']
