@@ -607,10 +607,36 @@ class ReadTodoTests(AuthenticationTests):
             data=json.dumps({}),
         )
 
-        # TODO one with timestamp of completion
         self.assertEqual(read.status_code, codes.OK)
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+
+    @responses.activate
+    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    def test_completed(self):
+        """
+        A ``GET`` request for an existing todo an OK status code and the todo's
+        details, included the completion timestamp.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(read.status_code, codes.OK)
+        expected = COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = 5
         self.assertEqual(json.loads(read.data.decode('utf8')), expected)
 
     @responses.activate
