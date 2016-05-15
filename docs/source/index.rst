@@ -1,14 +1,5 @@
-Welcome to ``todoer``'s documentation!
-======================================
-
-Authentication Service API Endpoints
-------------------------------------
+``todoer`` API Documentation
+============================
 
 .. autoflask:: authentication.authentication:app
-   :undoc-static:
-
-Storage Service API Endpoints
------------------------------
-
-.. autoflask:: storage.storage:app
    :undoc-static:

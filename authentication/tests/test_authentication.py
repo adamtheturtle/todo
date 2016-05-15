@@ -583,7 +583,7 @@ class CreateTodoTests(AuthenticationTests):
 
 class ReadTodoTests(AuthenticationTests):
     """
-    Tests for getting a todo item at ``GET /todos/{id}.``.
+    Tests for getting a todo item at ``GET /todos/{id}``.
     """
 
     @responses.activate
@@ -604,7 +604,6 @@ class ReadTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -632,7 +631,6 @@ class ReadTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -670,7 +668,6 @@ class ReadTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -726,7 +723,6 @@ class DeleteTodoTests(AuthenticationTests):
         delete = self.app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(delete.status_code, codes.OK)
@@ -734,7 +730,6 @@ class DeleteTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.NOT_FOUND)
@@ -756,13 +751,11 @@ class DeleteTodoTests(AuthenticationTests):
         self.app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         delete = self.app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(delete.status_code, codes.NOT_FOUND)
@@ -778,4 +771,64 @@ class DeleteTodoTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.delete('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class ListTodosTests(AuthenticationTests):
+    """
+    Tests for listing todo items at ``GET /todos``.
+    """
+
+    @responses.activate
+    def test_no_todos(self):
+        """
+        When there are no todos, an empty array is returned.
+        """
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        self.assertEqual(list_todos_data['todos'], [])
+
+    @responses.activate
+    def test_list(self):
+        """
+        All todos are listed.
+        """
+        other_todo = NOT_COMPLETED_TODO_DATA.copy()
+        other_todo['content'] = 'Get a haircut'
+
+        todos = [NOT_COMPLETED_TODO_DATA, other_todo]
+        expected = []
+        for index, data in enumerate(todos):
+            create = self.app.post(
+                '/todos',
+                content_type='application/json',
+                data=json.dumps(data),
+            )
+            create_data = json.loads(create.data.decode('utf8'))
+            expected_data = data.copy()
+            expected_data['id'] = create_data['id']
+            expected_data['completion_timestamp'] = None
+            expected.append(expected_data)
+
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+        )
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+        self.assertEqual(list_todos_data['todos'], expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.get('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)

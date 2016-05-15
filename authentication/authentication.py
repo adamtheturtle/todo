@@ -154,10 +154,9 @@ def login():
     """
     Log in a given user.
 
-    :param email: An email address to log in as.
-    :type email: string
-    :param password: A password associated with the given ``email`` address.
-    :type password: string
+    :reqjson string email: An email address to log in as.
+    :reqjson string password: A password associated with the given ``email``
+        address.
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resheader Set-Cookie: A ``remember_token``.
@@ -212,10 +211,9 @@ def signup():
     """
     Sign up a new user.
 
-    :param email: The email address of the new user.
-    :type email: string
-    :param password: A password to associate with the given ``email`` address.
-    :type password: string
+    :reqjson string email: The email address of the new user.
+    :reqjson string password: A password to associate with the given ``email``
+        address.
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjson string email: The email address of the new user.
@@ -256,13 +254,10 @@ def create_todo():
     """
     Create a new todo item.
 
-    :param content: The content of the new item.
-    :type content: string
-    :param completed: Whether the item is completed.
-    :type completed: boolean
-
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
+    :reqjson string content: The content of the new item.
+    :reqjson boolean completed: Whether the item is completed.
     :resjson string id: The id of the todo item.
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
@@ -298,9 +293,9 @@ def read_todo(id):
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :resjson string id: The id of the todo item.
+    :queryparameter number id: The id of the todo item.
     :resjson boolean completed: Whether the item is completed.
-    :resjson number completion_time: The completion UNIX timestamp, or
+    :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
@@ -318,12 +313,33 @@ def delete_todo(id):
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
+    :queryparameter number id: The id of the todo item.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
     url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
     headers = {'Content-Type': 'application/json'}
     response = requests.delete(url, headers=headers)
+    return jsonify(response.json()), response.status_code
+
+
+@app.route('/todos', methods=['GET'])
+@consumes('application/json')
+def list_todos():
+    """
+    List todo items.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjsonarr boolean completed: Whether the item is completed.
+    :resjsonarr number completion_timestamp: The completion UNIX timestamp, or
+        ``null`` if there is none.
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
+    """
+    url = urljoin(STORAGE_URL, 'todos')
+    headers = {'Content-Type': 'application/json'}
+    response = requests.get(url, headers=headers)
     return jsonify(response.json()), response.status_code
 
 if __name__ == '__main__':   # pragma: no cover
