@@ -78,3 +78,9 @@ To view this built documentation, run:
 ```
 $ open docs/build/html/index.html
 ```
+
+### Technical details
+
+`todoer` is composed of two services.
+One service serves the public API and the other interacts with a SQLite database.
+This allows the business logic to be separated from the storage logic.
