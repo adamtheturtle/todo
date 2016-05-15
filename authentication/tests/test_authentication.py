@@ -699,3 +699,82 @@ class ReadTodoTests(AuthenticationTests):
         """
         response = self.app.get('/todos/1', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class DeleteTodoTests(AuthenticationTests):
+    """
+    Tests for deleting a todo item at ``DELETE /todos/{id}.``.
+    """
+
+    @responses.activate
+    def test_success(self):
+        """
+        It is possible to delete a todo item.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
+
+        delete = self.app.delete(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        expected = {'id': item_id}
+        self.assertEqual(delete.status_code, codes.OK)
+        self.assertEqual(json.loads(delete.data.decode('utf8')), expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(read.status_code, codes.NOT_FOUND)
+
+    @responses.activate
+    def test_delete_twice(self):
+        """
+        Deleting an item twice gives returns a 404 code and error message.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
+
+        self.app.delete(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        delete = self.app.delete(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(delete.status_code, codes.NOT_FOUND)
+        expected = {
+            'title': 'The requested todo does not exist.',
+            'detail': 'No todo exists with the id "1"',
+        }
+        self.assertEqual(json.loads(delete.data.decode('utf8')), expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.delete('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
