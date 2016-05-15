@@ -63,6 +63,7 @@ To start developing quickly, it is recommended that you create a `virtualenv` wi
 
 Tests are run on [Travis-CI](https://travis-ci.org/adamtheturtle/todo).
 
+See `.travis.yml` for details of exactly what tests are run.
 
 ### Documentation
 
