@@ -176,25 +176,25 @@ def todos_post():
     :type content: string
     :param completed: Whether the item is completed.
     :type completed: boolean
-    :param completion_time: The completion UNIX timestamp (optional).
-    :type completion_time: number
+    :param completion_timestamp: The completion UNIX timestamp (optional).
+    :type completion_timestamp: number
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
-    :resjson number completion_time: The completion UNIX timestamp, or
+    :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: An item with the given details has been created.
     """
     content = request.json['content']
     completed = request.json['completed']
-    completion_time = request.json.get('completion_time')
+    completion_timestamp = request.json.get('completion_timestamp')
 
     return jsonify(
         content=content,
         completed=completed,
-        completion_time=completion_time,
+        completion_timestamp=completion_timestamp,
     ), codes.CREATED
 
 

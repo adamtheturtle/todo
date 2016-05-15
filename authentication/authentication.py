@@ -269,31 +269,24 @@ def create_todo():
         or ``null`` if the item is not completed.
     :status 200: An item with the given details has been created.
     """
-    content = request.json['content']
     completed = request.json['completed']
 
-    completion_timestamp = None
-    if completed:
-        now = datetime.datetime.now(tz=pytz.utc)
-        completion_timestamp = int(now.timestamp())
-
     data = {
-        'content': content,
+        'content': request.json['content'],
         'completed': completed,
-        'completion_timestamp': completion_timestamp,
     }
 
-    requests.post(
+    if completed:
+        now = datetime.datetime.now(tz=pytz.utc)
+        data['completion_timestamp'] = int(now.timestamp())
+
+    create = requests.post(
         urljoin(STORAGE_URL, '/todos'),
         headers={'Content-Type': 'application/json'},
         data=json.dumps(data),
     )
 
-    return jsonify(
-        content=content,
-        completed=completed,
-        completion_timestamp=completion_timestamp,
-    ), codes.CREATED
+    return jsonify(create.json()), create.status_code
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on

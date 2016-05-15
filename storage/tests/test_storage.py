@@ -12,7 +12,7 @@ USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
 TODO_DATA = {
     'content': 'Buy milk',
     'completed': True,
-    'completion_time': 1463237269,
+    'completion_timestamp': 1463237269,
 }
 
 
@@ -281,7 +281,7 @@ class CreateTodoTests(InMemoryStorageTests):
         with a ``null`` completion time.
         """
         data = TODO_DATA.copy()
-        data.pop('completion_time')
+        data.pop('completion_timestamp')
 
         response = self.storage_app.post(
             '/todos',
@@ -291,7 +291,7 @@ class CreateTodoTests(InMemoryStorageTests):
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
         expected = TODO_DATA.copy()
-        expected['completion_time'] = None
+        expected['completion_timestamp'] = None
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     def test_incorrect_content_type(self):
