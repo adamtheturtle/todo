@@ -4,4 +4,3 @@ doc8 # Style check documentation
 flake8 # Code analysis tool with linting
 freezegun # Freeze clock for unit tests
 responses # Add mocks for requests
-
