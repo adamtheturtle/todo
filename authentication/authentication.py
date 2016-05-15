@@ -293,7 +293,16 @@ def create_todo():
 @consumes('application/json')
 def read_todo(id):
     """
-    TODO
+    Get information about particular todo item.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjson string id: The id of the todo item.
+    :resjson boolean completed: Whether the item is completed.
+    :resjson number completion_time: The completion UNIX timestamp, or
+        ``null`` if there is none.
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
     """
     url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
     response = requests.get(url, headers={'Content-Type': 'application/json'})
