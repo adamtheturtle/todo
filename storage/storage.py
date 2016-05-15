@@ -192,6 +192,7 @@ def todos_post():
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
+    :resjson string id: The id of the todo item.
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp, or
@@ -242,7 +243,7 @@ def specific_todo_get(id):
         ), codes.NOT_FOUND
 
     return jsonify(
-        # TODO needs ID
+        id=todo.id,
         content=todo.content,
         completed=todo.completed,
         completion_timestamp=todo.completion_timestamp,

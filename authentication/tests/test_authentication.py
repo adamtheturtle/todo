@@ -610,6 +610,7 @@ class ReadTodoTests(AuthenticationTests):
         self.assertEqual(read.status_code, codes.OK)
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
+        expected['id'] = 1
         self.assertEqual(json.loads(read.data.decode('utf8')), expected)
 
     @responses.activate
@@ -637,6 +638,7 @@ class ReadTodoTests(AuthenticationTests):
         self.assertEqual(read.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = 5
+        expected['id'] = item_id
         self.assertEqual(json.loads(read.data.decode('utf8')), expected)
 
     @responses.activate
@@ -674,6 +676,7 @@ class ReadTodoTests(AuthenticationTests):
         self.assertEqual(read.status_code, codes.OK)
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
+        expected['id'] = item_id
         self.assertEqual(json.loads(read.data.decode('utf8')), expected)
 
     @responses.activate
