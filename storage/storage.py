@@ -289,14 +289,14 @@ def list_todos():
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    data = [dict(
+    todos = [dict(
         id=todo.id,
         content=todo.content,
         completed=todo.completed,
         completion_timestamp=todo.completion_timestamp,
     ) for todo in Todo.query.all()]
 
-    return jsonify(data=data), codes.OK
+    return jsonify(todos=todos), codes.OK
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on

@@ -797,33 +797,43 @@ class ListTodosTests(AuthenticationTests):
             data=json.dumps({}),
         )
 
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
         self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(json.loads(list_todos.data.decode('utf8')), [])
+        self.assertEqual(list_todos_data['todos'], [])
 
     @responses.activate
     def test_list(self):
         """
         All todos are listed.
         """
-        for data in [COMPLETED_TODO_DATA, NOT_COMPLETED_TODO_DATA]:
-            self.app.post(
+        todos = [NOT_COMPLETED_TODO_DATA]
+        expected = []
+        for index, data in enumerate(todos):
+            create = self.app.post(
                 '/todos',
                 content_type='application/json',
                 data=json.dumps(data),
             )
+            create_data = json.loads(create.data.decode('utf8'))
+            expected_data = data.copy()
+            expected_data['id'] = create_data['id']
+            expected_data['completion_timestamp'] = None
+            expected.append(expected_data)
 
-        read = self.app.get(
+        list_todos = self.app.get(
             '/todos',
             content_type='application/json',
             # TODO get rid of this and similar
             data=json.dumps({}),
         )
 
-        self.assertEqual(read.status_code, codes.OK)
-        expected = [NOT_COMPLETED_TODO_DATA.copy()]
+        self.assertEqual(list_todos.status_code, codes.OK)
+        # expected = [NOT_COMPLETED_TODO_DATA.copy()]
         # expected['completion_timestamp'] = None
         # expected['id'] = 1
-        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+        self.assertEqual(list_todos_data['todos'], expected)
 
     def test_incorrect_content_type(self):
         """
