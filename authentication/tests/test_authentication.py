@@ -588,6 +588,8 @@ class ReadTodoTests(AuthenticationTests):
     """
     Tests for getting a todo item at ``GET /todos/{id}.``.
     """
+
+    @responses.activate
     def test_success(self):
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
@@ -596,19 +598,25 @@ class ReadTodoTests(AuthenticationTests):
         create = self.app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
         create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create_data['id']),
+            '/todos/{id}'.format(id=item_id),
             content_type='application/json',
+            data=json.dumps({}),
         )
-        self.assertEqual(read.status_code, codes.OK)
-        data = json.loads(read.data.decode('utf8'))
-        self.assertEqual(data, COMPLETED_TODO_DATA)
 
+        # TODO one with timestamp of completion
+        self.assertEqual(read.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = None
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+
+    @responses.activate
     def test_non_existant(self):
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND

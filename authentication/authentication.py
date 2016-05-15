@@ -272,39 +272,37 @@ def create_todo():
     content = request.json['content']
     completed = request.json['completed']
 
-    completion_time = completion_time_representation = None
+    completion_time = None
     now = datetime.datetime.now(tz=pytz.utc)
     if completed:
         completion_time = int(now.timestamp())
-        completion_time_representation = now.strftime('%c')
 
     data = {
         'content': content,
         'completed': completed,
-        'completion_time': completion_time,
+        'completion_timestamp': completion_time,
     }
 
-    requests.post(
+    create = requests.post(
         urljoin(STORAGE_URL, '/todos'),
         headers={'Content-Type': 'application/json'},
         data=json.dumps(data),
     )
 
-    return jsonify(
-        content=content,
-        completed=completed,
-        completion_time=completion_time_representation,
-    ), codes.CREATED
+    return jsonify(create.json()), create.status_code
+
 
 @app.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
 # TODO create this schema
 # @jsonschema.validate('todos', 'get')
-def read_todo():
-    item_id = request.json['id']
-    url = urljoin(STORAGE_URL, 'users/{email}').format(email=user_id)
+def read_todo(id):
+    """
+    TODO
+    """
+    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
     response = requests.get(url, headers={'Content-Type': 'application/json'})
-    return response
+    return jsonify(response.json()), response.status_code
 
 
 if __name__ == '__main__':   # pragma: no cover
