@@ -274,6 +274,30 @@ def delete_todo(id):
 
     return jsonify(), codes.OK
 
+
+@app.route('/todos', methods=['GET'])
+@consumes('application/json')
+def list_todos():
+    """
+    List todo items.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjsonarr boolean completed: Whether the item is completed.
+    :resjsonarr number completion_timestamp: The completion UNIX timestamp, or
+        ``null`` if there is none.
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
+    """
+    data = [dict(
+        id=todo.id,
+        content=todo.content,
+        completed=todo.completed,
+        completion_timestamp=todo.completion_timestamp,
+    ) for todo in Todo.query.all()]
+
+    return jsonify(data=data), codes.OK
+
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.

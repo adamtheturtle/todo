@@ -339,7 +339,7 @@ def list_todos():
     """
     url = urljoin(STORAGE_URL, 'todos')
     headers = {'Content-Type': 'application/json'}
-    response = requests.delete(url, headers=headers)
+    response = requests.get(url, headers=headers)
     return jsonify(response.json()), response.status_code
 
 if __name__ == '__main__':   # pragma: no cover
