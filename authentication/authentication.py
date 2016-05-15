@@ -293,7 +293,7 @@ def create_todo():
 @consumes('application/json')
 def read_todo(id):
     """
-    Get information about particular todo item.
+    Get information about a particular todo item.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
