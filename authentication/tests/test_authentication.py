@@ -582,3 +582,52 @@ class CreateTodoTests(AuthenticationTests):
         """
         response = self.app.post('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class ReadTodoTests(AuthenticationTests):
+    """
+    Tests for getting a todo item at ``GET /todos/{id}.``.
+    """
+    def test_success(self):
+        """
+        A ``GET`` request for an existing todo an OK status code and the todo's
+        details.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create_data['id']),
+            content_type='application/json',
+        )
+        self.assertEqual(read.status_code, codes.OK)
+        data = json.loads(read.data.decode('utf8'))
+        self.assertEqual(data, COMPLETED_TODO_DATA)
+
+    def test_non_existant(self):
+        """
+        A ``GET`` request for a todo which does not exist returns a NOT_FOUND
+        status code and error details.
+        """
+        response = self.app.get('/todos/1', content_type='application/json')
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        expected = {
+            'title': 'The requested item does not exist.',
+            'detail': 'No todo exists with the id "1"',
+        }
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.get('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
