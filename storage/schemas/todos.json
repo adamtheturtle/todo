@@ -8,7 +8,7 @@
       "completed": {
       	"type": "boolean"
       },
-      "completion_time": {
+      "completion_timestamp": {
       	"type": "number"
       }
     },

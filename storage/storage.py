@@ -23,6 +23,18 @@ class User(db.Model):
     password_hash = db.Column(db.String)
 
 
+class Todo(db.Model):
+    """
+    A todo has text content, a completed flag and a timestamp of when it was
+    completed.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String)
+    completed = db.Column(db.Boolean)
+    # TODO this has to be optional
+    completion_timestamp = db.Column(db.Integer)
+
+
 def create_app(database_uri):
     """
     Create an application with a database in a given location.
@@ -167,7 +179,7 @@ def users_post():
 
 @app.route('/todos', methods=['POST'])
 @consumes('application/json')
-@jsonschema.validate('todos', 'create')
+# @jsonschema.validate('todos', 'create')
 def todos_post():
     """
     Create a new todo item.
@@ -189,14 +201,52 @@ def todos_post():
     """
     content = request.json['content']
     completed = request.json['completed']
-    completion_time = request.json.get('completion_time')
+    completion_timestamp = request.json.get('completion_timestamp')
 
-    return jsonify(
+    todo = Todo(
         content=content,
         completed=completed,
-        completion_time=completion_time,
+        completion_timestamp=completion_timestamp,
+    )
+    db.session.add(todo)
+    db.session.commit()
+
+    return jsonify(
+        id=1,
+        content=content,
+        completed=completed,
+        completion_timestamp=completion_timestamp,
     ), codes.CREATED
 
+
+@app.route('/todos/<id>', methods=['GET'])
+@consumes('application/json')
+def specific_todo_get(id):
+    """
+    Get information about particular todo item.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjson string id: The id of the todo item.
+    :resjson boolean completed: Whether the item is completed.
+    :resjson number completion_time: The completion UNIX timestamp, or
+        ``null`` if there is none.
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
+    """
+    todo = Todo.query.filter_by(id=id).first()
+
+    if todo is None:
+        return jsonify(
+            title='The requested todo does not exist.',
+            detail='No todo exists with the id "{id}"'.format(id=id),
+        ), codes.NOT_FOUND
+
+    return jsonify(
+        content=todo.content,
+        completed=todo.completed,
+        completion_timestamp=todo.completion_timestamp,
+    ), codes.OK
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on

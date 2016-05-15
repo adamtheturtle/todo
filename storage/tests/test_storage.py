@@ -12,7 +12,7 @@ USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
 TODO_DATA = {
     'content': 'Buy milk',
     'completed': True,
-    'completion_time': 1463237269,
+    'completion_timestamp': 1463237269,
 }
 
 
