@@ -508,6 +508,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(response.status_code, codes.CREATED)
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
+        expected['id'] = 1
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     @responses.activate

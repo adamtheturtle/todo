@@ -231,7 +231,9 @@ class CreateTodoTests(InMemoryStorageTests):
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(json.loads(response.data.decode('utf8')), TODO_DATA)
+        expected = TODO_DATA.copy()
+        expected['id'] = 1
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     def test_missing_text(self):
         """
@@ -292,6 +294,7 @@ class CreateTodoTests(InMemoryStorageTests):
         self.assertEqual(response.status_code, codes.CREATED)
         expected = TODO_DATA.copy()
         expected['completion_timestamp'] = None
+        expected['id'] = 1
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     def test_incorrect_content_type(self):
