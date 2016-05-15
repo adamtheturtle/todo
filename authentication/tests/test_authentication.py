@@ -799,7 +799,10 @@ class ListTodosTests(AuthenticationTests):
         """
         All todos are listed.
         """
-        todos = [NOT_COMPLETED_TODO_DATA]
+        other_todo = NOT_COMPLETED_TODO_DATA.copy()
+        other_todo['content'] = 'Get a haircut'
+
+        todos = [NOT_COMPLETED_TODO_DATA, other_todo]
         expected = []
         for index, data in enumerate(todos):
             create = self.app.post(
@@ -819,9 +822,6 @@ class ListTodosTests(AuthenticationTests):
         )
 
         self.assertEqual(list_todos.status_code, codes.OK)
-        # expected = [NOT_COMPLETED_TODO_DATA.copy()]
-        # expected['completion_timestamp'] = None
-        # expected['id'] = 1
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
         self.assertEqual(list_todos_data['todos'], expected)
 

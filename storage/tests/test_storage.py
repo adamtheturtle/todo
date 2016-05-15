@@ -461,3 +461,60 @@ class DeleteTodoTests(InMemoryStorageTests):
             content_type='text/html',
         )
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class ListTodosTests(InMemoryStorageTests):
+    """
+    Tests for listing todo items at ``GET /todos``.
+    """
+
+    def test_no_todos(self):
+        """
+        When there are no todos, an empty array is returned.
+        """
+        list_todos = self.storage_app.get(
+            '/todos',
+            content_type='application/json',
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        self.assertEqual(list_todos_data['todos'], [])
+
+    def test_list(self):
+        """
+        All todos are listed.
+        """
+        other_todo = TODO_DATA.copy()
+        other_todo['content'] = 'Get a haircut'
+
+        todos = [TODO_DATA, other_todo]
+        expected = []
+        for index, data in enumerate(todos):
+            create = self.storage_app.post(
+                '/todos',
+                content_type='application/json',
+                data=json.dumps(data),
+            )
+            create_data = json.loads(create.data.decode('utf8'))
+            expected_data = data.copy()
+            expected_data['id'] = create_data['id']
+            expected.append(expected_data)
+
+        list_todos = self.storage_app.get(
+            '/todos',
+            content_type='application/json',
+        )
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+        self.assertEqual(list_todos_data['todos'], expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.storage_app.get('/todos', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
