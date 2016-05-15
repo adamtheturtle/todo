@@ -31,7 +31,6 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String)
     completed = db.Column(db.Boolean)
-    # TODO this has to be optional
     completion_timestamp = db.Column(db.Integer)
 
 
@@ -179,7 +178,7 @@ def users_post():
 
 @app.route('/todos', methods=['POST'])
 @consumes('application/json')
-# @jsonschema.validate('todos', 'create')
+@jsonschema.validate('todos', 'create')
 def todos_post():
     """
     Create a new todo item.
@@ -188,14 +187,14 @@ def todos_post():
     :type content: string
     :param completed: Whether the item is completed.
     :type completed: boolean
-    :param completion_time: The completion UNIX timestamp (optional).
-    :type completion_time: number
+    :param completion_timestamp: The completion UNIX timestamp (optional).
+    :type completion_timestamp: number
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
-    :resjson number completion_time: The completion UNIX timestamp, or
+    :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: An item with the given details has been created.
     """
@@ -212,10 +211,10 @@ def todos_post():
     db.session.commit()
 
     return jsonify(
-        id=1,
-        content=content,
-        completed=completed,
-        completion_timestamp=completion_timestamp,
+        id=todo.id,
+        content=todo.content,
+        completed=todo.completed,
+        completion_timestamp=todo.completion_timestamp,
     ), codes.CREATED
 
 
