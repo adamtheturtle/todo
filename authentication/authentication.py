@@ -293,7 +293,7 @@ def create_todo():
 @consumes('application/json')
 def read_todo(id):
     """
-    Get information about particular todo item.
+    Get information about a particular todo item.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -306,6 +306,23 @@ def read_todo(id):
     """
     url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
     response = requests.get(url, headers={'Content-Type': 'application/json'})
+    return jsonify(response.json()), response.status_code
+
+
+@app.route('/todos/<id>', methods=['DELETE'])
+@consumes('application/json')
+def delete_todo(id):
+    """
+    Delete a particular todo item.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
+    """
+    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    headers = {'Content-Type': 'application/json'}
+    response = requests.delete(url, headers=headers)
     return jsonify(response.json()), response.status_code
 
 if __name__ == '__main__':   # pragma: no cover
