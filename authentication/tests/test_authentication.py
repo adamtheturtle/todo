@@ -512,7 +512,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(5.01, tz=pytz.utc))
     def test_current_completion_time(self):
         """
         If the completed flag is set to ``true`` then the completed time is
@@ -525,10 +525,11 @@ class CreateTodoTests(AuthenticationTests):
         )
 
         response_data = json.loads(response.data.decode('utf8'))
+        response_timestamp = response_data['completion_timestamp']
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(response_data['completion_timestamp'], 5)
+        self.assertAlmostEqual(response_timestamp, 5.01, places=3)
 
     def test_missing_text(self):
         """

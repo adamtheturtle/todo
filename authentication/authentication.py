@@ -274,7 +274,7 @@ def create_todo():
 
     if completed:
         now = datetime.datetime.now(tz=pytz.utc)
-        data['completion_timestamp'] = int(now.timestamp())
+        data['completion_timestamp'] = now.timestamp()
 
     create = requests.post(
         urljoin(STORAGE_URL, '/todos'),

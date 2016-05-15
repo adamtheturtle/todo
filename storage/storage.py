@@ -31,7 +31,7 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String)
     completed = db.Column(db.Boolean)
-    completion_timestamp = db.Column(db.Integer)
+    completion_timestamp = db.Column(db.Float)
 
     def as_dict(self):
         """
