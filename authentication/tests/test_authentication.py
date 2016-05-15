@@ -7,7 +7,6 @@ import json
 import re
 import unittest
 
-import dateparser
 import pytz
 import responses
 
@@ -498,7 +497,7 @@ class CreateTodoTests(AuthenticationTests):
         """
         A ``POST`` request with content and a completed flag set to ``false``
         returns a JSON response with the given data and a ``null``
-        ``completion_time``.
+        ``completion_timestamp``.
         """
         response = self.app.post(
             '/todos',
@@ -508,7 +507,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
         expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['completion_time'] = None
+        expected['completion_timestamp'] = None
         self.assertEqual(json.loads(response.data.decode('utf8')), expected)
 
     @responses.activate
@@ -523,15 +522,12 @@ class CreateTodoTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CREATED)
 
         response_data = json.loads(response.data.decode('utf8'))
-        response_completion_time = response_data['completion_time']
-        response_seconds_since_epoch = dateparser.parse(
-            date_string=response_completion_time).replace(
-                tzinfo=pytz.UTC).timestamp()
-        self.assertEqual(response_seconds_since_epoch, 5)
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.CREATED)
+        self.assertEqual(response_data['completion_timestamp'], 5)
 
     def test_missing_text(self):
         """
