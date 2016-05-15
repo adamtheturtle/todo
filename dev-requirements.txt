@@ -4,6 +4,4 @@ doc8 # Style check documentation
 flake8 # Code analysis tool with linting
 freezegun # Freeze clock for unit tests
 responses # Add mocks for requests
-Sphinx # Build documentation
-sphinxcontrib-httpdomain # Describe RESTful HTTP APIs in Sphinx
-sphinx_rtd_theme # Theme for documentation
+
