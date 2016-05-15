@@ -300,7 +300,7 @@ def read_todo(id):
     :resheader Content-Type: application/json
     :resjson string id: The id of the todo item.
     :resjson boolean completed: Whether the item is completed.
-    :resjson number completion_time: The completion UNIX timestamp, or
+    :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
@@ -322,6 +322,27 @@ def delete_todo(id):
     :status 404: There is no item with the given ``id``.
     """
     url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    headers = {'Content-Type': 'application/json'}
+    response = requests.delete(url, headers=headers)
+    return jsonify(response.json()), response.status_code
+
+
+@app.route('/todos', methods=['GET'])
+@consumes('application/json')
+def list_todos(id):
+    """
+    List todo items.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :resjsonarr string id: The id of the todo item.
+    :resjsonarr boolean completed: Whether the item is completed.
+    :resjsonarr number completion_timestamp: The completion UNIX timestamp, or
+        ``null`` if there is none.
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
+    """
+    url = urljoin(STORAGE_URL, 'todos')
     headers = {'Content-Type': 'application/json'}
     response = requests.delete(url, headers=headers)
     return jsonify(response.json()), response.status_code
