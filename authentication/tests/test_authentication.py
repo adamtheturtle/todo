@@ -604,7 +604,6 @@ class ReadTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -632,7 +631,6 @@ class ReadTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -670,7 +668,6 @@ class ReadTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -726,7 +723,6 @@ class DeleteTodoTests(AuthenticationTests):
         delete = self.app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(delete.status_code, codes.OK)
@@ -734,7 +730,6 @@ class DeleteTodoTests(AuthenticationTests):
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.NOT_FOUND)
@@ -756,13 +751,11 @@ class DeleteTodoTests(AuthenticationTests):
         self.app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         delete = self.app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(delete.status_code, codes.NOT_FOUND)
@@ -794,7 +787,6 @@ class ListTodosTests(AuthenticationTests):
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -824,8 +816,6 @@ class ListTodosTests(AuthenticationTests):
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
-            # TODO get rid of this and similar
-            data=json.dumps({}),
         )
 
         self.assertEqual(list_todos.status_code, codes.OK)

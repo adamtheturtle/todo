@@ -328,7 +328,6 @@ class GetTodoTests(InMemoryStorageTests):
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -355,7 +354,6 @@ class GetTodoTests(InMemoryStorageTests):
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.OK)
@@ -412,7 +410,6 @@ class DeleteTodoTests(InMemoryStorageTests):
         delete = self.storage_app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(delete.status_code, codes.OK)
@@ -420,7 +417,6 @@ class DeleteTodoTests(InMemoryStorageTests):
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(read.status_code, codes.NOT_FOUND)
@@ -441,13 +437,11 @@ class DeleteTodoTests(InMemoryStorageTests):
         self.storage_app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         delete = self.storage_app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
-            data=json.dumps({}),
         )
 
         self.assertEqual(delete.status_code, codes.NOT_FOUND)
