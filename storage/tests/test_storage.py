@@ -332,7 +332,9 @@ class GetTodoTests(InMemoryStorageTests):
         )
 
         self.assertEqual(read.status_code, codes.OK)
-        self.assertEqual(json.loads(read.data.decode('utf8')), TODO_DATA)
+        expected = TODO_DATA.copy()
+        expected['id'] = item_id
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
 
     def test_timestamp_null(self):
         """
@@ -359,6 +361,7 @@ class GetTodoTests(InMemoryStorageTests):
         self.assertEqual(read.status_code, codes.OK)
         expected = TODO_DATA.copy()
         expected['completion_timestamp'] = None
+        expected['id'] = item_id
         self.assertEqual(json.loads(read.data.decode('utf8')), expected)
 
     def test_non_existant(self):
