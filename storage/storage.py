@@ -253,8 +253,12 @@ def specific_todo_get(id):
 @consumes('application/json')
 def delete_todo(id):
     """
-    TODO docstring
-    TODO direct tests for this
+    Delete a particular todo item.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
     """
     todo = Todo.query.filter_by(id=id).first()
 

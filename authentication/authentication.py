@@ -313,7 +313,12 @@ def read_todo(id):
 @consumes('application/json')
 def delete_todo(id):
     """
-    TODO
+    Delete a particular todo item.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :status 200: The requested item's information is returned.
+    :status 404: There is no item with the given ``id``.
     """
     url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
     headers = {'Content-Type': 'application/json'}
