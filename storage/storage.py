@@ -253,7 +253,8 @@ def specific_todo_get(id):
 @consumes('application/json')
 def delete_todo(id):
     """
-    TODO
+    TODO docstring
+    TODO direct tests for this
     """
     todo = Todo.query.filter_by(id=id).first()
 
@@ -262,6 +263,9 @@ def delete_todo(id):
             title='The requested todo does not exist.',
             detail='No todo exists with the id "{id}"'.format(id=id),
         ), codes.NOT_FOUND
+
+    db.session.delete(todo)
+    db.session.commit()
 
     return jsonify(), codes.OK
 
