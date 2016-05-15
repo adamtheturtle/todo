@@ -23,6 +23,17 @@ class User(db.Model):
     password_hash = db.Column(db.String)
 
 
+class Todo(db.Model):
+    """
+    A todo has text content, a completed flag and a timestamp of when it was
+    completed.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String)
+    completed = db.Column(db.Boolean)
+    completion_timestamp = db.Column(db.Integer)
+
+
 def create_app(database_uri):
     """
     Create an application with a database in a given location.
@@ -176,25 +187,34 @@ def todos_post():
     :type content: string
     :param completed: Whether the item is completed.
     :type completed: boolean
-    :param completion_time: The completion UNIX timestamp (optional).
-    :type completion_time: number
+    :param completion_timestamp: The completion UNIX timestamp (optional).
+    :type completion_timestamp: number
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
-    :resjson number completion_time: The completion UNIX timestamp, or
+    :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: An item with the given details has been created.
     """
     content = request.json['content']
     completed = request.json['completed']
-    completion_time = request.json.get('completion_time')
+    completion_timestamp = request.json.get('completion_timestamp')
 
-    return jsonify(
+    todo = Todo(
         content=content,
         completed=completed,
-        completion_time=completion_time,
+        completion_timestamp=completion_timestamp,
+    )
+    db.session.add(todo)
+    db.session.commit()
+
+    return jsonify(
+        id=todo.id,
+        content=todo.content,
+        completed=todo.completed,
+        completion_timestamp=todo.completion_timestamp,
     ), codes.CREATED
 
 

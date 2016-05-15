@@ -265,36 +265,28 @@ def create_todo():
     :resheader Content-Type: application/json
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
-    :resjson number completion_time: The completion UNIX timestamp (now), or
-        ``null`` if the item is not completed.
+    :resjson number completion_timestamp: The completion UNIX timestamp (now),
+        or ``null`` if the item is not completed.
     :status 200: An item with the given details has been created.
     """
-    content = request.json['content']
     completed = request.json['completed']
 
-    completion_time = completion_time_representation = None
-    now = datetime.datetime.now(tz=pytz.utc)
-    if completed:
-        completion_time = int(now.timestamp())
-        completion_time_representation = now.strftime('%c')
-
     data = {
-        'content': content,
+        'content': request.json['content'],
         'completed': completed,
-        'completion_time': completion_time,
     }
 
-    requests.post(
+    if completed:
+        now = datetime.datetime.now(tz=pytz.utc)
+        data['completion_timestamp'] = int(now.timestamp())
+
+    create = requests.post(
         urljoin(STORAGE_URL, '/todos'),
         headers={'Content-Type': 'application/json'},
         data=json.dumps(data),
     )
 
-    return jsonify(
-        content=content,
-        completed=completed,
-        completion_time=completion_time_representation,
-    ), codes.CREATED
+    return jsonify(create.json()), create.status_code
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
