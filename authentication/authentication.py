@@ -291,8 +291,6 @@ def create_todo():
 
 @app.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
-# TODO create this schema
-# @jsonschema.validate('todos', 'get')
 def read_todo(id):
     """
     TODO
