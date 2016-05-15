@@ -308,6 +308,18 @@ def read_todo(id):
     response = requests.get(url, headers={'Content-Type': 'application/json'})
     return jsonify(response.json()), response.status_code
 
+
+@app.route('/todos/<id>', methods=['DELETE'])
+@consumes('application/json')
+def delete_todo(id):
+    """
+    TODO
+    """
+    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    headers = {'Content-Type': 'application/json'}
+    response = requests.delete(url, headers=headers)
+    return jsonify(response.json()), response.status_code
+
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.

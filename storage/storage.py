@@ -242,10 +242,28 @@ def specific_todo_get(id):
         ), codes.NOT_FOUND
 
     return jsonify(
+        # TODO needs ID
         content=todo.content,
         completed=todo.completed,
         completion_timestamp=todo.completion_timestamp,
     ), codes.OK
+
+
+@app.route('/todos/<id>', methods=['DELETE'])
+@consumes('application/json')
+def delete_todo(id):
+    """
+    TODO
+    """
+    todo = Todo.query.filter_by(id=id).first()
+
+    if todo is None:
+        return jsonify(
+            title='The requested todo does not exist.',
+            detail='No todo exists with the id "{id}"'.format(id=id),
+        ), codes.NOT_FOUND
+
+    return jsonify(), codes.OK
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on

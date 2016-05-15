@@ -726,9 +726,7 @@ class DeleteTodoTests(AuthenticationTests):
             data=json.dumps({}),
         )
 
-        expected = {'id': item_id}
         self.assertEqual(delete.status_code, codes.OK)
-        self.assertEqual(json.loads(delete.data.decode('utf8')), expected)
 
         read = self.app.get(
             '/todos/{id}'.format(id=item_id),
