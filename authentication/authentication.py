@@ -299,9 +299,13 @@ def create_todo():
 @app.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
 # TODO create this schema
-@jsonschema.validate('todos', 'get')
+# @jsonschema.validate('todos', 'get')
 def read_todo():
-    pass
+    item_id = request.json['id']
+    url = urljoin(STORAGE_URL, 'users/{email}').format(email=user_id)
+    response = requests.get(url, headers={'Content-Type': 'application/json'})
+    return response
+
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
