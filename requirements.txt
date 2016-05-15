@@ -6,3 +6,4 @@ flask_jsonschema==0.1.1
 Flask-Negotiate==0.1.0
 pytz==2016.4
 requests==2.10.0
+sphinxcontrib-httpdomain # Describe RESTful HTTP APIs in Sphinx
