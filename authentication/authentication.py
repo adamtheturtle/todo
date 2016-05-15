@@ -296,6 +296,13 @@ def create_todo():
         completion_time=completion_time_representation,
     ), codes.CREATED
 
+@app.route('/todos/<id>', methods=['GET'])
+@consumes('application/json')
+# TODO create this schema
+@jsonschema.validate('todos', 'get')
+def read_todo():
+    pass
+
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
