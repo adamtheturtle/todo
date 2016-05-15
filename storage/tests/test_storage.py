@@ -114,8 +114,8 @@ class GetUserTests(InMemoryStorageTests):
 
     def test_success(self):
         """
-        A ``GET`` request for an existing user an OK status code and the user's
-        details.
+        A ``GET`` request for an existing user returns an OK status code and
+        the user's details.
         """
         self.storage_app.post(
             '/users',
