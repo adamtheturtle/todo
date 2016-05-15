@@ -640,6 +640,43 @@ class ReadTodoTests(AuthenticationTests):
         self.assertEqual(json.loads(read.data.decode('utf8')), expected)
 
     @responses.activate
+    def test_multiple_todos(self):
+        """
+        A ``GET`` request gets the correct todo when there are multiple.
+        """
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(read.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = None
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+
+    @responses.activate
     def test_non_existant(self):
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
