@@ -583,7 +583,7 @@ class CreateTodoTests(AuthenticationTests):
 
 class ReadTodoTests(AuthenticationTests):
     """
-    Tests for getting a todo item at ``GET /todos/{id}.``.
+    Tests for getting a todo item at ``GET /todos/{id}``.
     """
 
     @responses.activate
@@ -778,4 +778,57 @@ class DeleteTodoTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.delete('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class ListTodosTests(AuthenticationTests):
+    """
+    Tests for listing todo items at ``GET /todos``.
+    """
+
+    @responses.activate
+    def test_no_todos(self):
+        """
+        When there are no todos, an empty array is returned.
+        """
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        self.assertEqual(json.loads(list_todos.data.decode('utf8')), [])
+
+    @responses.activate
+    def test_list(self):
+        """
+        All todos are listed.
+        """
+        for data in [COMPLETED_TODO_DATA, NOT_COMPLETED_TODO_DATA]:
+            self.app.post(
+                '/todos',
+                content_type='application/json',
+                data=json.dumps(data),
+            )
+
+        read = self.app.get(
+            '/todos',
+            content_type='application/json',
+            # TODO get rid of this and similar
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(read.status_code, codes.OK)
+        expected = [NOT_COMPLETED_TODO_DATA.copy()]
+        # expected['completion_timestamp'] = None
+        # expected['id'] = 1
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.get('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
