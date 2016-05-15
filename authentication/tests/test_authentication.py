@@ -579,3 +579,123 @@ class CreateTodoTests(AuthenticationTests):
         """
         response = self.app.post('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class ReadTodoTests(AuthenticationTests):
+    """
+    Tests for getting a todo item at ``GET /todos/{id}.``.
+    """
+
+    @responses.activate
+    def test_success(self):
+        """
+        A ``GET`` request for an existing todo an OK status code and the todo's
+        details.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(read.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = None
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+
+    @responses.activate
+    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    def test_completed(self):
+        """
+        A ``GET`` request for an existing todo an OK status code and the todo's
+        details, included the completion timestamp.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(read.status_code, codes.OK)
+        expected = COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = 5
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+
+    @responses.activate
+    def test_multiple_todos(self):
+        """
+        A ``GET`` request gets the correct todo when there are multiple.
+        """
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        create_data = json.loads(create.data.decode('utf8'))
+        item_id = create_data['id']
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(read.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = None
+        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+
+    @responses.activate
+    def test_non_existant(self):
+        """
+        A ``GET`` request for a todo which does not exist returns a NOT_FOUND
+        status code and error details.
+        """
+        response = self.app.get('/todos/1', content_type='application/json')
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        expected = {
+            'title': 'The requested todo does not exist.',
+            'detail': 'No todo exists with the id "1"',
+        }
+        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.get('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
