@@ -8,7 +8,7 @@
 
 A TODO manager with authentication.
 
-## Running this service
+## Running the service
 
 This comes with a [Docker Compose](https://docs.docker.com/compose/) file.
 
@@ -21,7 +21,11 @@ docker-compose up
 
 to start the API service.
 
-To run commands against the API:
+## Using the service
+
+Full API documentation is available [on ReadTheDocs](http://todoer.readthedocs.io/en/latest/).
+
+Some examples of running commands against the API with ``cURL``:
 
   ```
   # Create a user.
@@ -42,7 +46,7 @@ To run commands against the API:
     --cookie ~/Desktop/my_cookie
   ```
 
-The above assumes that Docker is running on `127.0.0.1`.
+The above assumes that the service is running on `127.0.0.1`.
 
 If using OS X with Docker Machine for example,
 replace `127.0.0.1` with the result of `docker-machine ip dev`.
