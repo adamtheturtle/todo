@@ -33,6 +33,17 @@ class Todo(db.Model):
     completed = db.Column(db.Boolean)
     completion_timestamp = db.Column(db.Integer)
 
+    def as_dict(self):
+        """
+        Return a representation of a todo item suitable for JSON responses.
+        """
+        return dict(
+            id=self.id,
+            content=self.content,
+            completed=self.completed,
+            completion_timestamp=self.completion_timestamp,
+        )
+
 
 def create_app(database_uri):
     """
@@ -211,12 +222,7 @@ def todos_post():
     db.session.add(todo)
     db.session.commit()
 
-    return jsonify(
-        id=todo.id,
-        content=todo.content,
-        completed=todo.completed,
-        completion_timestamp=todo.completion_timestamp,
-    ), codes.CREATED
+    return jsonify(todo.as_dict()), codes.CREATED
 
 
 @app.route('/todos/<id>', methods=['GET'])
@@ -242,12 +248,7 @@ def specific_todo_get(id):
             detail='No todo exists with the id "{id}"'.format(id=id),
         ), codes.NOT_FOUND
 
-    return jsonify(
-        id=todo.id,
-        content=todo.content,
-        completed=todo.completed,
-        completion_timestamp=todo.completion_timestamp,
-    ), codes.OK
+    return jsonify(todo.as_dict()), codes.OK
 
 
 @app.route('/todos/<id>', methods=['DELETE'])
@@ -289,13 +290,7 @@ def list_todos():
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todos = [dict(
-        id=todo.id,
-        content=todo.content,
-        completed=todo.completed,
-        completion_timestamp=todo.completion_timestamp,
-    ) for todo in Todo.query.all()]
-
+    todos = [todo.as_dict() for todo in Todo.query.all()]
     return jsonify(todos=todos), codes.OK
 
 if __name__ == '__main__':   # pragma: no cover
