@@ -1029,6 +1029,44 @@ class UpdateTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
+    def test_flag_completed_already_completed(self):
+        """
+        Flagging an already completed item as completed does not change the
+        completion timestamp.
+        """
+        create_time = datetime.datetime.fromtimestamp(5.0, tz=pytz.utc)
+        with freeze_time(create_time):
+            create = self.app.post(
+                '/todos',
+                content_type='application/json',
+                data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            )
+
+        patch_time = datetime.datetime.fromtimestamp(6.0, tz=pytz.utc)
+        with freeze_time(patch_time):
+            patch = self.app.patch(
+                '/todos/{id}'.format(id=create.json['id']),
+                content_type='application/json',
+                data=json.dumps({'completed': True}),
+            )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completed'] = True
+        # Timestamp set to now, the time it is first marked completed.
+        expected['completion_timestamp'] = 5.0
+        expected['id'] = create.json['id']
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    @responses.activate
     def test_non_existant(self):
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
