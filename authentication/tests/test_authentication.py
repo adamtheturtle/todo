@@ -910,10 +910,8 @@ class UpdateTodoTests(AuthenticationTests):
             data=json.dumps({'content': new_content}),
         )
 
-        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected = create.json
         expected['content'] = new_content
-        expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -943,11 +941,10 @@ class UpdateTodoTests(AuthenticationTests):
             data=json.dumps({'completed': True}),
         )
 
-        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected = create.json
         expected['completed'] = True
         # Timestamp set to now, the time it is first marked completed.
         expected['completion_timestamp'] = 5.0
-        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -976,11 +973,10 @@ class UpdateTodoTests(AuthenticationTests):
             data=json.dumps({'completed': False}),
         )
 
-        expected = COMPLETED_TODO_DATA.copy()
+        expected = create.json
         expected['completed'] = False
         # Marking an item as not completed removes the completion timestamp.
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -1012,11 +1008,10 @@ class UpdateTodoTests(AuthenticationTests):
             data=json.dumps({'content': new_content, 'completed': False}),
         )
 
-        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected = create.json
         expected['content'] = new_content
         expected['completed'] = False
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -1050,11 +1045,9 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps({'completed': True}),
             )
 
-        expected = COMPLETED_TODO_DATA.copy()
-        expected['completed'] = True
+        expected = create.json
         # Timestamp set to the time it is first marked completed.
         expected['completion_timestamp'] = 5.0
-        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -1082,20 +1075,6 @@ class UpdateTodoTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps({}),
         )
-
-        # expected = COMPLETED_TODO_DATA.copy()
-        # expected['completed'] = True
-        # # Timestamp set to the time it is first marked completed.
-        # expected['completion_timestamp'] = 5.0
-        # expected['id'] = create.json['id']
-
-        # self.assertEqual(patch.status_code, codes.OK)
-        # self.assertEqual(patch.json, expected)
-        #
-        # read = self.app.get(
-        #     '/todos/{id}'.format(id=create.json['id']),
-        #     content_type='application/json',
-        # )
 
         self.assertEqual(create.json, patch.json)
 
