@@ -371,6 +371,8 @@ def update_todo(id):
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
+    # If not exists, raise, else, if EXISTING, get whether it is completed, if not, calculate timestamp, pass that on. Document that there is a timestamp going in at the storage end.
+
     response = requests.patch(
         urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
         headers={'Content-Type': 'application/json'},
