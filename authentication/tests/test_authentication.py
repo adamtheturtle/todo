@@ -840,6 +840,31 @@ class UpdateTodoTests(AuthenticationTests):
     Tests for updating a todo item at ``PATCH /todos/{id}.``.
     """
 
+    @responses.activate
+    def test_change_content(self):
+        """
+        It is possible to change the content of a todo item.
+        """
+
+    @responses.activate
+    def test_flag_completed(self):
+        """
+        It is possible to flag a todo item as completed.
+        """
+
+    @responses.activate
+    def test_flag_not_completed(self):
+        """
+        It is possible to flag a todo item as not completed.
+        """
+
+    @responses.activate
+    def test_change_content_and_flag(self):
+        """
+        It is possible to change the content of a todo item, as well as marking
+        the item as completed.
+        """
+
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an
