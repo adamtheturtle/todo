@@ -1172,19 +1172,27 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps({'completed': True}),
             )
 
-        expected = create.json
-        # Timestamp set to the time it is first marked completed.
-        expected['completion_timestamp'] = TIMESTAMP
-
+        self.assertAlmostEqual(
+            patch.json.pop('completion_timestamp'),
+            # Timestamp set to the time it is first marked completed.
+            create.json.pop('completion_timestamp'),
+            places=3,
+        )
         self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        self.assertEqual(patch.json, create.json)
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        self.assertAlmostEqual(
+            read.json.pop('completion_timestamp'),
+            # Timestamp set to the time it is first marked completed.
+            TIMESTAMP,
+            places=3,
+        )
+        self.assertEqual(read.json, create.json)
 
     @responses.activate
     def test_remain_same(self):
