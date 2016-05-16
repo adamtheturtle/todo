@@ -943,9 +943,14 @@ class ListTodosTests(AuthenticationTests):
 
         self.assertEqual(list_todos.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = TIMESTAMP
         expected['id'] = 2
-        self.assertEqual(list_todos_data['todos'], [expected])
+        [todo] = list_todos_data['todos']
+        self.assertAlmostEqual(
+            todo.pop('completion_timestamp'),
+            TIMESTAMP,
+            places=3,
+        )
+        self.assertEqual(todo, expected)
 
     @responses.activate
     def test_filter_not_completed(self):
