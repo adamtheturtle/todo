@@ -291,12 +291,11 @@ def list_todos():
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    try:
-        filter_dict = request.json.get('filter', {})
-    except:
-        filter_dict = {}
+    todo_filter = {}
+    if request.data:
+        todo_filter = request.json['filter']
 
-    todos = Todo.query.filter_by(**filter_dict).all()
+    todos = Todo.query.filter_by(**todo_filter).all()
     return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
 
 if __name__ == '__main__':   # pragma: no cover

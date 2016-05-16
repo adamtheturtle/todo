@@ -341,10 +341,9 @@ def list_todos():
     """
     url = urljoin(STORAGE_URL, 'todos')
     headers = {'Content-Type': 'application/json'}
-    try:
-        todo_filter = request.json.get('filter', {})
-    except:
-        todo_filter = {}
+    todo_filter = {}
+    if request.data:
+        todo_filter = request.json['filter']
 
     data = {'filter': todo_filter}
     response = requests.get(url, headers=headers, data=json.dumps(data))
