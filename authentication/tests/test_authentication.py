@@ -833,3 +833,17 @@ class ListTodosTests(AuthenticationTests):
         """
         response = self.app.get('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class UpdateTodoTests(AuthenticationTests):
+    """
+    Tests for updating a todo item at ``PATCH /todos/{id}.``.
+    """
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.patch('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
