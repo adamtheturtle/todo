@@ -371,11 +371,11 @@ def update_todo(id):
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    # If not exists, raise, else, if EXISTING, get whether it is completed, if not, calculate timestamp, pass that on. Document that there is a timestamp going in at the storage end.
-
     get_response, get_status_code = read_todo(id)
+
     if not get_status_code == codes.OK:
-        return get_response
+        return jsonify(get_response.json), get_status_code
+
 
     already_completed = get_response.json['completed']
     data = json.loads(request.data)
