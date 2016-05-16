@@ -1028,7 +1028,7 @@ class UpdateTodoTests(AuthenticationTests):
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
-        response = self.app.get('/todos/1', content_type='application/json')
+        response = self.app.patch('/todos/1', content_type='application/json')
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.NOT_FOUND)

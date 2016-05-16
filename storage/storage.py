@@ -310,6 +310,7 @@ def update_todo(id):
 
     :reqjson string content: The new of the item.
     :reqjson boolean completed: Whether the item is completed.
+    :reqjson number completion_timestamp: The completion UNIX timestamp.
 
     :resheader Content-Type: application/json
 
@@ -323,6 +324,25 @@ def update_todo(id):
     :status 404: There is no item with the given ``id``.
     """
     todo = Todo.query.filter_by(id=id).first()
+
+    if todo is None:
+        return jsonify(
+            title='The requested todo does not exist.',
+            detail='No todo exists with the id "{id}"'.format(id=id),
+        ), codes.NOT_FOUND
+
+    import ipdb; ipdb.set_trace()
+
+    if 'content' in request.json:
+        todo.content = request.json['content']
+    #
+    # if 'completed' in request.json:
+    #     todo.completed = request.json['completed']
+    #
+    # if 'completion_timestamp' in request.json:
+    #     todo.completed = request.json['completion_timestamp']
+
+    db.session.commit()
     return jsonify(todo.as_dict()), codes.OK
 
 if __name__ == '__main__':   # pragma: no cover

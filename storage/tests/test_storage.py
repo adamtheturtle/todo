@@ -574,3 +574,158 @@ class ListTodosTests(InMemoryStorageTests):
         """
         response = self.storage_app.get('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+class UpdateTodoTests(InMemoryStorageTests):
+    """
+    Tests for updating a todo item at ``PATCH /todos/{id}.``.
+    """
+
+    def test_change_content(self):
+        """
+        It is possible to change the content of a todo item.
+        """
+        create = self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        new_content = 'Book vacation'
+
+        patch = self.storage_app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data={'content': new_content},
+        )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['content'] = new_content
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.storage_app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    def test_flag_completed(self):
+        """
+        It is possible to flag a todo item as completed.
+        """
+        create = self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        patch = self.storage_app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'completed': True}),
+        )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completed'] = True
+        # Timestamp set to now, the time it is first marked completed.
+        expected['completion_timestamp'] = 100
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.storage_app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    def test_flag_not_completed(self):
+        """
+        It is possible to flag a todo item as not completed.
+        """
+        create = self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        patch = self.storage_app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'completed': False}),
+        )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completed'] = False
+        # Marking an item as not completed removes the completion timestamp.
+        expected['completion_timestamp'] = None
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.storage_app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    def test_change_content_and_flag(self):
+        """
+        It is possible to change the content of a todo item, as well as marking
+        the item as completed.
+        """
+        create = self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        new_content = 'Book vacation'
+
+        patch = self.storage_app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'content': new_content, 'completed': False}),
+        )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['content'] = new_content
+        expected['completed'] = False
+        expected['completion_timestamp'] = None
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.storage_app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    def test_non_existant(self):
+        """
+        If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
+        returned.
+        """
+        response = self.storage_app.patch('/todos/1', content_type='application/json')
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        expected = {
+            'title': 'The requested todo does not exist.',
+            'detail': 'No todo exists with the id "1"',
+        }
+        self.assertEqual(response.json, expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.storage_app.patch('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
