@@ -354,10 +354,21 @@ def update_todo(id):
     Update a todo item.
 
     :reqheader Content-Type: application/json
-    :resheader Content-Type: application/json
+
     :queryparameter number id: The id of the todo item.
 
-    XXX
+    :reqjson string content: The new of the item.
+    :reqjson boolean completed: Whether the item is completed.
+
+    :resheader Content-Type: application/json
+
+    :resjson string id: The id of the item.
+    :resjson string content: The content item.
+    :resjson boolean completed: Whether the item is completed.
+    :resjson number completion_timestamp: The completion UNIX timestamp (now),
+        or ``null`` if the item is not completed.
+
+    :status 200: An item with the given details has been created.
     """
     response = requests.patch(
         urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
