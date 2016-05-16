@@ -670,8 +670,12 @@ class ReadTodoTests(AuthenticationTests):
 
         self.assertEqual(read.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = TIMESTAMP
         expected['id'] = create.json['id']
+        self.assertAlmostEqual(
+            read.json.pop('completion_timestamp'),
+            TIMESTAMP,
+            places=3
+        )
         self.assertEqual(read.json, expected)
 
     @responses.activate
