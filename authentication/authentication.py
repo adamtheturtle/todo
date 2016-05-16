@@ -250,9 +250,10 @@ def signup():
 @app.route('/todos', methods=['POST'])
 @consumes('application/json')
 @jsonschema.validate('todos', 'create')
+@login_required
 def create_todo():
     """
-    Create a new todo item.
+    Create a new todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -287,9 +288,10 @@ def create_todo():
 
 @app.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
+@login_required
 def read_todo(id):
     """
-    Get information about a particular todo item.
+    Get information about a particular todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -307,9 +309,10 @@ def read_todo(id):
 
 @app.route('/todos/<id>', methods=['DELETE'])
 @consumes('application/json')
+@login_required
 def delete_todo(id):
     """
-    Delete a particular todo item.
+    Delete a particular todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -325,9 +328,10 @@ def delete_todo(id):
 
 @app.route('/todos', methods=['GET'])
 @consumes('application/json')
+@login_required
 def list_todos():
     """
-    List todo items, with optional filters.
+    List todo items, with optional filters. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -349,10 +353,11 @@ def list_todos():
 
 @app.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
+@login_required
 def update_todo(id):
     """
     Update a todo item. If an item is changed from not-completed to completed,
-    the ``completion_timestamp`` is set as now.
+    the ``completion_timestamp`` is set as now. Requires log in.
 
     :reqheader Content-Type: application/json
 

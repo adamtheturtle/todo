@@ -30,6 +30,7 @@ from storage.tests.testtools import InMemoryStorageTests
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
 NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
+TIMESTAMP = 1463437744.335567
 
 
 class AuthenticationTests(InMemoryStorageTests):
@@ -92,6 +93,19 @@ class AuthenticationTests(InMemoryStorageTests):
             response.status_code,
             {key: value for (key, value) in response.headers},
             response.data)
+
+    def log_in_as_new_user(self):
+        """
+        Create a user and log in as that user.
+        """
+        self.app.post(
+            '/signup',
+            content_type='application/json',
+            data=json.dumps(USER_DATA))
+        self.app.post(
+            '/login',
+            content_type='application/json',
+            data=json.dumps(USER_DATA))
 
 
 class SignupTests(AuthenticationTests):
@@ -503,6 +517,7 @@ class CreateTodoTests(AuthenticationTests):
         returns a JSON response with the given data and a ``null``
         ``completion_timestamp``.
         """
+        self.log_in_as_new_user()
         response = self.app.post(
             '/todos',
             content_type='application/json',
@@ -516,12 +531,13 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(response.json, expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5.01, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_current_completion_time(self):
         """
         If the completed flag is set to ``true`` then the completed time is
         the number of seconds since the epoch.
         """
+        self.log_in_as_new_user()
         response = self.app.post(
             '/todos',
             content_type='application/json',
@@ -534,7 +550,7 @@ class CreateTodoTests(AuthenticationTests):
         # some accuracy).
         self.assertAlmostEqual(
             response.json['completion_timestamp'],
-            5.01,
+            TIMESTAMP,
             places=3,
         )
 
@@ -580,13 +596,28 @@ class CreateTodoTests(AuthenticationTests):
         }
         self.assertEqual(response.json, expected)
 
+    @responses.activate
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
+        self.log_in_as_new_user()
         response = self.app.post('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+    @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        response = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.assertEqual(response.status_code, codes.UNAUTHORIZED)
 
 
 class ReadTodoTests(AuthenticationTests):
@@ -600,6 +631,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -618,12 +650,13 @@ class ReadTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_completed(self):
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details, included the completion timestamp.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -637,8 +670,12 @@ class ReadTodoTests(AuthenticationTests):
 
         self.assertEqual(read.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = 5
         expected['id'] = create.json['id']
+        self.assertAlmostEqual(
+            read.json.pop('completion_timestamp'),
+            TIMESTAMP,
+            places=3
+        )
         self.assertEqual(read.json, expected)
 
     @responses.activate
@@ -646,6 +683,7 @@ class ReadTodoTests(AuthenticationTests):
         """
         A ``GET`` request gets the correct todo when there are multiple.
         """
+        self.log_in_as_new_user()
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -681,6 +719,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
         """
+        self.log_in_as_new_user()
         response = self.app.get('/todos/1', content_type='application/json')
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -699,6 +738,27 @@ class ReadTodoTests(AuthenticationTests):
         response = self.app.get('/todos/1', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
 
+    @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        self.log_in_as_new_user()
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post('/logout', content_type='application/json')
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.status_code, codes.UNAUTHORIZED)
+
 
 class DeleteTodoTests(AuthenticationTests):
     """
@@ -710,6 +770,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         It is possible to delete a todo item.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -735,6 +796,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -758,13 +820,37 @@ class DeleteTodoTests(AuthenticationTests):
         }
         self.assertEqual(delete.json, expected)
 
+    @responses.activate
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
+        self.log_in_as_new_user()
         response = self.app.delete('/todos/1', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+    @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        self.log_in_as_new_user()
+
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        self.app.post('/logout', content_type='application/json')
+
+        delete = self.app.delete(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(delete.status_code, codes.UNAUTHORIZED)
 
 
 class ListTodosTests(AuthenticationTests):
@@ -777,6 +863,7 @@ class ListTodosTests(AuthenticationTests):
         """
         When there are no todos, an empty array is returned.
         """
+        self.log_in_as_new_user()
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
@@ -786,10 +873,23 @@ class ListTodosTests(AuthenticationTests):
         self.assertEqual(list_todos.json['todos'], [])
 
     @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+        )
+
+        self.assertEqual(list_todos.status_code, codes.UNAUTHORIZED)
+
+    @responses.activate
     def test_list(self):
         """
         All todos are listed.
         """
+        self.log_in_as_new_user()
         other_todo = NOT_COMPLETED_TODO_DATA.copy()
         other_todo['content'] = 'Get a haircut'
 
@@ -815,11 +915,12 @@ class ListTodosTests(AuthenticationTests):
         self.assertEqual(list_todos.json['todos'], expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_filter_completed(self):
         """
         It is possible to filter by only completed items.
         """
+        self.log_in_as_new_user()
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -842,15 +943,21 @@ class ListTodosTests(AuthenticationTests):
 
         self.assertEqual(list_todos.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = 5.0
         expected['id'] = 2
-        self.assertEqual(list_todos_data['todos'], [expected])
+        [todo] = list_todos_data['todos']
+        self.assertAlmostEqual(
+            todo.pop('completion_timestamp'),
+            TIMESTAMP,
+            places=3,
+        )
+        self.assertEqual(todo, expected)
 
     @responses.activate
     def test_filter_not_completed(self):
         """
         It is possible to filter by only items which are not completed.
         """
+        self.log_in_as_new_user()
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -877,6 +984,7 @@ class ListTodosTests(AuthenticationTests):
         expected['id'] = 1
         self.assertEqual(list_todos_data['todos'], [expected])
 
+    @responses.activate
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -896,6 +1004,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to change the content of a todo item.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -924,11 +1033,34 @@ class UpdateTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5.0, tz=pytz.utc))
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        self.log_in_as_new_user()
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post('/logout', content_type='application/json')
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'content': 'Book vacation'}),
+        )
+
+        self.assertEqual(patch.status_code, codes.UNAUTHORIZED)
+
+    @responses.activate
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_flag_completed(self):
         """
         It is possible to flag a todo item as completed.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -943,10 +1075,14 @@ class UpdateTodoTests(AuthenticationTests):
 
         expected = create.json
         expected['completed'] = True
-        # Timestamp set to now, the time it is first marked completed.
-        expected['completion_timestamp'] = 5.0
+        expected['completion_timestamp'] = TIMESTAMP
 
         self.assertEqual(patch.status_code, codes.OK)
+        self.assertAlmostEqual(
+            patch.json.pop('completion_timestamp'),
+            expected.pop('completion_timestamp'),
+            places=3,
+        )
         self.assertEqual(patch.json, expected)
 
         read = self.app.get(
@@ -954,6 +1090,11 @@ class UpdateTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
+        self.assertAlmostEqual(
+            read.json.pop('completion_timestamp'),
+            TIMESTAMP,
+            places=3,
+        )
         self.assertEqual(read.json, expected)
 
     @responses.activate
@@ -961,6 +1102,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to flag a todo item as not completed.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -994,6 +1136,7 @@ class UpdateTodoTests(AuthenticationTests):
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1029,7 +1172,8 @@ class UpdateTodoTests(AuthenticationTests):
         Flagging an already completed item as completed does not change the
         completion timestamp.
         """
-        create_time = datetime.datetime.fromtimestamp(5.0, tz=pytz.utc)
+        self.log_in_as_new_user()
+        create_time = datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc)
         with freeze_time(create_time):
             create = self.app.post(
                 '/todos',
@@ -1037,7 +1181,8 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps(COMPLETED_TODO_DATA),
             )
 
-        patch_time = datetime.datetime.fromtimestamp(6.0, tz=pytz.utc)
+        patch_time = datetime.datetime.fromtimestamp(
+            TIMESTAMP + 1, tz=pytz.utc)
         with freeze_time(patch_time):
             patch = self.app.patch(
                 '/todos/{id}'.format(id=create.json['id']),
@@ -1045,25 +1190,34 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps({'completed': True}),
             )
 
-        expected = create.json
-        # Timestamp set to the time it is first marked completed.
-        expected['completion_timestamp'] = 5.0
-
+        self.assertAlmostEqual(
+            patch.json.pop('completion_timestamp'),
+            # Timestamp set to the time it is first marked completed.
+            create.json.pop('completion_timestamp'),
+            places=3,
+        )
         self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        self.assertEqual(patch.json, create.json)
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        self.assertAlmostEqual(
+            read.json.pop('completion_timestamp'),
+            # Timestamp set to the time it is first marked completed.
+            TIMESTAMP,
+            places=3,
+        )
+        self.assertEqual(read.json, create.json)
 
     @responses.activate
     def test_remain_same(self):
         """
         Not requesting any changes keeps the item the same.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1084,6 +1238,7 @@ class UpdateTodoTests(AuthenticationTests):
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
+        self.log_in_as_new_user()
         response = self.app.patch('/todos/1', content_type='application/json')
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
