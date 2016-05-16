@@ -9,10 +9,14 @@ from requests import codes
 from .testtools import InMemoryStorageTests
 
 USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
-TODO_DATA = {
+COMPLETED_TODO_DATA = {
     'content': 'Buy milk',
     'completed': True,
-    'completion_timestamp': 1463237269,
+    'completion_timestamp': 1463237269.0,
+}
+NOT_COMPLETED_TODO_DATA = {
+    'content': 'Get haircut',
+    'completed': False,
 }
 
 
@@ -32,7 +36,7 @@ class CreateUserTests(InMemoryStorageTests):
             data=json.dumps(USER_DATA))
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(json.loads(response.data.decode('utf8')), USER_DATA)
+        self.assertEqual(response.json, USER_DATA)
 
     def test_missing_email(self):
         """
@@ -52,7 +56,7 @@ class CreateUserTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_password_hash(self):
         """
@@ -72,7 +76,7 @@ class CreateUserTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'password_hash' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_existing_user(self):
         """
@@ -96,7 +100,7 @@ class CreateUserTests(InMemoryStorageTests):
             'detail': 'A user already exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -125,7 +129,7 @@ class GetUserTests(InMemoryStorageTests):
             '/users/{email}'.format(email=USER_DATA['email']),
             content_type='application/json')
         self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(json.loads(response.data.decode('utf8')), USER_DATA)
+        self.assertEqual(response.json, USER_DATA)
 
     def test_non_existant_user(self):
         """
@@ -142,7 +146,7 @@ class GetUserTests(InMemoryStorageTests):
             'detail': 'No user exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -174,7 +178,7 @@ class GetUsersTests(InMemoryStorageTests):
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(json.loads(response.data.decode('utf8')), [])
+        self.assertEqual(response.json, [])
 
     def test_with_users(self):
         """
@@ -201,7 +205,7 @@ class GetUsersTests(InMemoryStorageTests):
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(json.loads(response.data.decode('utf8')), users)
+        self.assertEqual(response.json, users)
 
     def test_incorrect_content_type(self):
         """
@@ -227,20 +231,20 @@ class CreateTodoTests(InMemoryStorageTests):
         response = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = 1
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_text(self):
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         data.pop('content')
 
         response = self.storage_app.post(
@@ -254,14 +258,14 @@ class CreateTodoTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'content' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_completed_flag(self):
         """
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         data.pop('completed')
 
         response = self.storage_app.post(
@@ -275,14 +279,14 @@ class CreateTodoTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'completed' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_completion_time(self):
         """
         A ``POST /todos`` request without a completion time creates an item
         with a ``null`` completion time.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         data.pop('completion_timestamp')
 
         response = self.storage_app.post(
@@ -292,10 +296,10 @@ class CreateTodoTests(InMemoryStorageTests):
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = 1
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -319,11 +323,10 @@ class GetTodoTests(InMemoryStorageTests):
         create = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
@@ -331,15 +334,15 @@ class GetTodoTests(InMemoryStorageTests):
         )
 
         self.assertEqual(read.status_code, codes.OK)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = item_id
-        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+        self.assertEqual(read.json, expected)
 
     def test_timestamp_null(self):
         """
         If the timestamp is not given, the response includes a null timestamp.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         del data['completion_timestamp']
 
         create = self.storage_app.post(
@@ -348,8 +351,7 @@ class GetTodoTests(InMemoryStorageTests):
             data=json.dumps(data),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
@@ -357,10 +359,10 @@ class GetTodoTests(InMemoryStorageTests):
         )
 
         self.assertEqual(read.status_code, codes.OK)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = item_id
-        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+        self.assertEqual(read.json, expected)
 
     def test_non_existant(self):
         """
@@ -378,7 +380,7 @@ class GetTodoTests(InMemoryStorageTests):
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -401,11 +403,10 @@ class DeleteTodoTests(InMemoryStorageTests):
         create = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         delete = self.storage_app.delete(
             '/todos/{id}'.format(id=item_id),
@@ -428,11 +429,10 @@ class DeleteTodoTests(InMemoryStorageTests):
         create = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         self.storage_app.delete(
             '/todos/{id}'.format(id=item_id),
@@ -449,7 +449,7 @@ class DeleteTodoTests(InMemoryStorageTests):
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(json.loads(delete.data.decode('utf8')), expected)
+        self.assertEqual(delete.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -477,19 +477,17 @@ class ListTodosTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        list_todos_data = json.loads(list_todos.data.decode('utf8'))
-
         self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(list_todos_data['todos'], [])
+        self.assertEqual(list_todos.json['todos'], [])
 
     def test_list(self):
         """
         All todos are listed.
         """
-        other_todo = TODO_DATA.copy()
+        other_todo = COMPLETED_TODO_DATA.copy()
         other_todo['content'] = 'Get a haircut'
 
-        todos = [TODO_DATA, other_todo]
+        todos = [COMPLETED_TODO_DATA, other_todo]
         expected = []
         for index, data in enumerate(todos):
             create = self.storage_app.post(
@@ -497,9 +495,8 @@ class ListTodosTests(InMemoryStorageTests):
                 content_type='application/json',
                 data=json.dumps(data),
             )
-            create_data = json.loads(create.data.decode('utf8'))
             expected_data = data.copy()
-            expected_data['id'] = create_data['id']
+            expected_data['id'] = create.json['id']
             expected.append(expected_data)
 
         list_todos = self.storage_app.get(
@@ -508,8 +505,67 @@ class ListTodosTests(InMemoryStorageTests):
         )
 
         self.assertEqual(list_todos.status_code, codes.OK)
+        self.assertEqual(list_todos.json['todos'], expected)
+
+    def test_filter_completed(self):
+        """
+        It is possible to filter by only completed items.
+        """
+        self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        create_completed = self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.storage_app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': True}}),
+        )
+
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
-        self.assertEqual(list_todos_data['todos'], expected)
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        expected = COMPLETED_TODO_DATA.copy()
+        item_id = json.loads(create_completed.data.decode('utf8')).get('id')
+        expected['id'] = item_id
+        self.assertEqual(list_todos_data['todos'], [expected])
+
+    def test_filter_not_completed(self):
+        """
+        It is possible to filter by only items which are not completed.
+        """
+        self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.storage_app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': False}}),
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['id'] = 1
+        expected['completion_timestamp'] = None
+        self.assertEqual(list_todos_data['todos'], [expected])
 
     def test_incorrect_content_type(self):
         """
