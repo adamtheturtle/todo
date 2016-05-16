@@ -6,15 +6,9 @@ authenticate:
    # Flask defaults to listening on port 5000 but this is configurable.
    # See http://flask.pocoo.org/docs/0.10/api/#flask.Flask.run
    - "5000:5000"
-  volumes:
-   # This is used to share the code with the container.
-   # It is used by Flask in debug mode to reload the server after each code
-   # change.
-   # See http://flask.pocoo.org/docs/0.10/quickstart/#debug-mode.
-   - .:/code
   environment:
-   # In production use the host environment variable instead of 'secret'
-   - SECRET_KEY=secret
+   # Set the environment variable SECRET_KEY else the secret will be insecure.
+   - SECRET_KEY
   command: python authentication/authentication.py
   links:
     - storage
@@ -29,10 +23,6 @@ storage:
    - "5001:5001"
   volumes:
    - /tmp/authentication:/data
-   # This is used to share the code with the container.
-   # It is used by Flask in debug mode to reload the server after each code change.
-   # See http://flask.pocoo.org/docs/0.10/quickstart/#debug-mode.
-   - .:/code
   environment:
    - SQLALCHEMY_DATABASE_URI=sqlite:////data/authentication.db
   command: python storage/storage.py
