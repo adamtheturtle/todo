@@ -322,7 +322,8 @@ def update_todo(id):
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    return jsonify(), codes.OK
+    todo = Todo.query.filter_by(id=id).first()
+    return jsonify(todo.as_dict()), codes.OK
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
