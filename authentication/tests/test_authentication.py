@@ -38,6 +38,10 @@ class AuthenticationTests(InMemoryStorageTests):
     fake for ``requests`` to connect to.
     """
 
+    def create_app(self):
+        app.config['TESTING'] = True
+        return app
+
     def setUp(self):
         """
         Create an environment with a fake storage app available and mocked for
@@ -790,7 +794,8 @@ class ListTodosTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        list_todos_data = list_todos.json
 
         self.assertEqual(list_todos.status_code, codes.OK)
         self.assertEqual(list_todos_data['todos'], [])
