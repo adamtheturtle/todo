@@ -855,6 +855,7 @@ class ListTodosTests(AuthenticationTests):
         """
         When there are no todos, an empty array is returned.
         """
+        self.log_in_as_new_user()
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
@@ -864,10 +865,23 @@ class ListTodosTests(AuthenticationTests):
         self.assertEqual(list_todos.json['todos'], [])
 
     @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+        )
+
+        self.assertEqual(list_todos.status_code, codes.UNAUTHORIZED)
+
+    @responses.activate
     def test_list(self):
         """
         All todos are listed.
         """
+        self.log_in_as_new_user()
         other_todo = NOT_COMPLETED_TODO_DATA.copy()
         other_todo['content'] = 'Get a haircut'
 
@@ -898,6 +912,7 @@ class ListTodosTests(AuthenticationTests):
         """
         It is possible to filter by only completed items.
         """
+        self.log_in_as_new_user()
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -929,6 +944,7 @@ class ListTodosTests(AuthenticationTests):
         """
         It is possible to filter by only items which are not completed.
         """
+        self.log_in_as_new_user()
         self.app.post(
             '/todos',
             content_type='application/json',

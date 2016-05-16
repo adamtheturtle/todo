@@ -328,9 +328,10 @@ def delete_todo(id):
 
 @app.route('/todos', methods=['GET'])
 @consumes('application/json')
+@login_required
 def list_todos():
     """
-    List todo items, with optional filters.
+    List todo items, with optional filters. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
