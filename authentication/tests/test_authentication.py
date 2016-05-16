@@ -884,3 +884,220 @@ class ListTodosTests(AuthenticationTests):
         """
         response = self.app.get('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+
+class UpdateTodoTests(AuthenticationTests):
+    """
+    Tests for updating a todo item at ``PATCH /todos/{id}.``.
+    """
+
+    @responses.activate
+    def test_change_content(self):
+        """
+        It is possible to change the content of a todo item.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        new_content = 'Book vacation'
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'content': new_content}),
+        )
+
+        expected = create.json
+        expected['content'] = new_content
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    @responses.activate
+    @freeze_time(datetime.datetime.fromtimestamp(5.0, tz=pytz.utc))
+    def test_flag_completed(self):
+        """
+        It is possible to flag a todo item as completed.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'completed': True}),
+        )
+
+        expected = create.json
+        expected['completed'] = True
+        # Timestamp set to now, the time it is first marked completed.
+        expected['completion_timestamp'] = 5.0
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    @responses.activate
+    def test_flag_not_completed(self):
+        """
+        It is possible to flag a todo item as not completed.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'completed': False}),
+        )
+
+        expected = create.json
+        expected['completed'] = False
+        # Marking an item as not completed removes the completion timestamp.
+        expected['completion_timestamp'] = None
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    @responses.activate
+    def test_change_content_and_flag(self):
+        """
+        It is possible to change the content of a todo item, as well as marking
+        the item as completed.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        new_content = 'Book vacation'
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'content': new_content, 'completed': False}),
+        )
+
+        expected = create.json
+        expected['content'] = new_content
+        expected['completed'] = False
+        expected['completion_timestamp'] = None
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    @responses.activate
+    def test_flag_completed_already_completed(self):
+        """
+        Flagging an already completed item as completed does not change the
+        completion timestamp.
+        """
+        create_time = datetime.datetime.fromtimestamp(5.0, tz=pytz.utc)
+        with freeze_time(create_time):
+            create = self.app.post(
+                '/todos',
+                content_type='application/json',
+                data=json.dumps(COMPLETED_TODO_DATA),
+            )
+
+        patch_time = datetime.datetime.fromtimestamp(6.0, tz=pytz.utc)
+        with freeze_time(patch_time):
+            patch = self.app.patch(
+                '/todos/{id}'.format(id=create.json['id']),
+                content_type='application/json',
+                data=json.dumps({'completed': True}),
+            )
+
+        expected = create.json
+        # Timestamp set to the time it is first marked completed.
+        expected['completion_timestamp'] = 5.0
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
+
+    @responses.activate
+    def test_remain_same(self):
+        """
+        Not requesting any changes keeps the item the same.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        self.assertEqual(create.json, patch.json)
+
+    @responses.activate
+    def test_non_existant(self):
+        """
+        If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
+        returned.
+        """
+        response = self.app.patch('/todos/1', content_type='application/json')
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        expected = {
+            'title': 'The requested todo does not exist.',
+            'detail': 'No todo exists with the id "1"',
+        }
+        self.assertEqual(response.json, expected)
+
+    def test_incorrect_content_type(self):
+        """
+        If a Content-Type header other than 'application/json' is given, an
+        UNSUPPORTED_MEDIA_TYPE status code is given.
+        """
+        response = self.app.patch('/todos/1', content_type='text/html')
+        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)

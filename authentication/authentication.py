@@ -327,7 +327,7 @@ def delete_todo(id):
 @consumes('application/json')
 def list_todos():
     """
-    List todo items.
+    List todo items, with optional filters.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -343,6 +343,52 @@ def list_todos():
         urljoin(STORAGE_URL, 'todos'),
         headers={'Content-Type': 'application/json'},
         data=request.data,
+    )
+    return jsonify(response.json()), response.status_code
+
+
+@app.route('/todos/<id>', methods=['PATCH'])
+@consumes('application/json')
+def update_todo(id):
+    """
+    Update a todo item. If an item is changed from not-completed to completed,
+    the ``completion_timestamp`` is set as now.
+
+    :reqheader Content-Type: application/json
+
+    :queryparameter number id: The id of the todo item.
+
+    :reqjson string content: The new of the item (optional).
+    :reqjson boolean completed: Whether the item is completed (optional).
+
+    :resheader Content-Type: application/json
+
+    :resjson string id: The id of the item.
+    :resjson string content: The content item.
+    :resjson boolean completed: Whether the item is completed.
+    :resjson number completion_timestamp: The completion UNIX timestamp (now),
+        or ``null`` if the item is not completed.
+
+    :status 200: An item with the given details has been created.
+    :status 404: There is no item with the given ``id``.
+    """
+    get_response, get_status_code = read_todo(id)
+
+    if not get_status_code == codes.OK:
+        return jsonify(get_response.json), get_status_code
+
+    already_completed = get_response.json['completed']
+    data = json.loads(request.data)
+    if data.get('completed') and not already_completed:
+        now = datetime.datetime.now(tz=pytz.utc)
+        data['completion_timestamp'] = now.timestamp()
+    elif data.get('completed') is False:
+        data['completion_timestamp'] = None
+
+    response = requests.patch(
+        urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps(data),
     )
     return jsonify(response.json()), response.status_code
 
