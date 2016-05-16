@@ -845,6 +845,29 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to change the content of a todo item.
         """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        item_id = json.loads(create.data.decode('utf8')).get('id')
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+        )
+
+        self.assertEqual(patch.status_code, codes.OK)
+        patch_data = json.loads(patch.data.decode('utf8'))
+        self.assertEqual(patch_data, 'SOMETHING')
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=item_id),
+            content_type='application/json',
+        )
+
+        read_data = json.loads(patch.data.decode('utf8'))
+        self.assertEqual(read_data, 'SOMETHING_ELSE')
 
     @responses.activate
     def test_flag_completed(self):
