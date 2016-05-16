@@ -827,38 +827,67 @@ class ListTodosTests(AuthenticationTests):
         self.assertEqual(list_todos_data['todos'], expected)
 
     @responses.activate
+    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
     def test_filter_completed(self):
         """
         It is possible to filter by only completed items.
         """
-        create = self.app.post(
+        self.app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'filter': {'completed': True}})
+            data=json.dumps({'filter': {'completed': True}}),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
         self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(list_todos_data['todos'], [])
+        expected = COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = 5.0
+        expected['id'] = 2
+        self.assertEqual(list_todos_data['todos'], [expected])
 
     @responses.activate
     def test_filter_not_completed(self):
         """
         It is possible to filter by only items which are not completed.
         """
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
 
-    @responses.activate
-    def test_invalid_filter(self):
-        """
-        An error is raised when an invalid filter is used.
-        """
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': False}}),
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = None
+        expected['id'] = 1
+        self.assertEqual(list_todos_data['todos'], [expected])
 
     def test_incorrect_content_type(self):
         """
