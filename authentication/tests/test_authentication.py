@@ -1066,10 +1066,14 @@ class UpdateTodoTests(AuthenticationTests):
 
         expected = create.json
         expected['completed'] = True
-        # Timestamp set to now, the time it is first marked completed.
         expected['completion_timestamp'] = TIMESTAMP
 
         self.assertEqual(patch.status_code, codes.OK)
+        self.assertAlmostEqual(
+            patch.json.pop('completion_timestamp'),
+            expected.pop('completion_timestamp'),
+            places=3,
+        )
         self.assertEqual(patch.json, expected)
 
         read = self.app.get(
@@ -1077,6 +1081,11 @@ class UpdateTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
+        self.assertAlmostEqual(
+            read.json.pop('completion_timestamp'),
+            TIMESTAMP,
+            places=3,
+        )
         self.assertEqual(read.json, expected)
 
     @responses.activate
