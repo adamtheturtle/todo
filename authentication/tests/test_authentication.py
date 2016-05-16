@@ -900,23 +900,26 @@ class UpdateTodoTests(AuthenticationTests):
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
-        item_id = json.loads(create.data.decode('utf8')).get('id')
+        new_content = 'Book vacation'
+
         patch = self.app.patch(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
+            data={'content': new_content},
         )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['content'] = new_content
 
         self.assertEqual(patch.status_code, codes.OK)
-        patch_data = json.loads(patch.data.decode('utf8'))
-        self.assertEqual(patch_data, 'SOMETHING')
+        self.assertEqual(patch.json, expected)
 
         read = self.app.get(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        read_data = json.loads(patch.data.decode('utf8'))
-        self.assertEqual(read_data, 'SOMETHING_ELSE')
+        self.assertEqual(read.json, expected)
 
     @responses.activate
     def test_flag_completed(self):
