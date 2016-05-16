@@ -347,7 +347,6 @@ def list_todos():
         todo_filter = {}
 
     data = {'filter': todo_filter}
-    import ipdb; ipdb.set_trace()
     response = requests.get(url, headers=headers, data=json.dumps(data))
     return jsonify(response.json()), response.status_code
 
