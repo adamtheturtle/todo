@@ -36,7 +36,7 @@ class CreateUserTests(InMemoryStorageTests):
             data=json.dumps(USER_DATA))
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(json.loads(response.data.decode('utf8')), USER_DATA)
+        self.assertEqual(response.json, USER_DATA)
 
     def test_missing_email(self):
         """
@@ -56,7 +56,7 @@ class CreateUserTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_password_hash(self):
         """
@@ -76,7 +76,7 @@ class CreateUserTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'password_hash' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_existing_user(self):
         """
@@ -100,7 +100,7 @@ class CreateUserTests(InMemoryStorageTests):
             'detail': 'A user already exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -129,7 +129,7 @@ class GetUserTests(InMemoryStorageTests):
             '/users/{email}'.format(email=USER_DATA['email']),
             content_type='application/json')
         self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(json.loads(response.data.decode('utf8')), USER_DATA)
+        self.assertEqual(response.json, USER_DATA)
 
     def test_non_existant_user(self):
         """
@@ -146,7 +146,7 @@ class GetUserTests(InMemoryStorageTests):
             'detail': 'No user exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -178,7 +178,7 @@ class GetUsersTests(InMemoryStorageTests):
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(json.loads(response.data.decode('utf8')), [])
+        self.assertEqual(response.json, [])
 
     def test_with_users(self):
         """
@@ -205,7 +205,7 @@ class GetUsersTests(InMemoryStorageTests):
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(json.loads(response.data.decode('utf8')), users)
+        self.assertEqual(response.json, users)
 
     def test_incorrect_content_type(self):
         """
@@ -237,7 +237,7 @@ class CreateTodoTests(InMemoryStorageTests):
         self.assertEqual(response.status_code, codes.CREATED)
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = 1
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_text(self):
         """
@@ -258,7 +258,7 @@ class CreateTodoTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'content' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_completed_flag(self):
         """
@@ -279,7 +279,7 @@ class CreateTodoTests(InMemoryStorageTests):
             'title': 'There was an error validating the given arguments.',
             'detail': "'completed' is a required property",
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_missing_completion_time(self):
         """
@@ -299,7 +299,7 @@ class CreateTodoTests(InMemoryStorageTests):
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = 1
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -326,8 +326,7 @@ class GetTodoTests(InMemoryStorageTests):
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
@@ -337,7 +336,7 @@ class GetTodoTests(InMemoryStorageTests):
         self.assertEqual(read.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = item_id
-        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+        self.assertEqual(read.json, expected)
 
     def test_timestamp_null(self):
         """
@@ -352,8 +351,7 @@ class GetTodoTests(InMemoryStorageTests):
             data=json.dumps(data),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
@@ -364,7 +362,7 @@ class GetTodoTests(InMemoryStorageTests):
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = item_id
-        self.assertEqual(json.loads(read.data.decode('utf8')), expected)
+        self.assertEqual(read.json, expected)
 
     def test_non_existant(self):
         """
@@ -382,7 +380,7 @@ class GetTodoTests(InMemoryStorageTests):
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(json.loads(response.data.decode('utf8')), expected)
+        self.assertEqual(response.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -408,8 +406,7 @@ class DeleteTodoTests(InMemoryStorageTests):
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         delete = self.storage_app.delete(
             '/todos/{id}'.format(id=item_id),
@@ -435,8 +432,7 @@ class DeleteTodoTests(InMemoryStorageTests):
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        create_data = json.loads(create.data.decode('utf8'))
-        item_id = create_data['id']
+        item_id = create.json['id']
 
         self.storage_app.delete(
             '/todos/{id}'.format(id=item_id),
@@ -453,7 +449,7 @@ class DeleteTodoTests(InMemoryStorageTests):
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(json.loads(delete.data.decode('utf8')), expected)
+        self.assertEqual(delete.json, expected)
 
     def test_incorrect_content_type(self):
         """
@@ -481,10 +477,8 @@ class ListTodosTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        list_todos_data = json.loads(list_todos.data.decode('utf8'))
-
         self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(list_todos_data['todos'], [])
+        self.assertEqual(list_todos.json['todos'], [])
 
     def test_list(self):
         """
@@ -501,9 +495,8 @@ class ListTodosTests(InMemoryStorageTests):
                 content_type='application/json',
                 data=json.dumps(data),
             )
-            create_data = json.loads(create.data.decode('utf8'))
             expected_data = data.copy()
-            expected_data['id'] = create_data['id']
+            expected_data['id'] = create.json['id']
             expected.append(expected_data)
 
         list_todos = self.storage_app.get(
@@ -512,8 +505,7 @@ class ListTodosTests(InMemoryStorageTests):
         )
 
         self.assertEqual(list_todos.status_code, codes.OK)
-        list_todos_data = json.loads(list_todos.data.decode('utf8'))
-        self.assertEqual(list_todos_data['todos'], expected)
+        self.assertEqual(list_todos.json['todos'], expected)
 
     def test_filter_completed(self):
         """
