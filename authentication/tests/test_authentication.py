@@ -29,7 +29,7 @@ from storage.tests.testtools import InMemoryStorageTests
 
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
-NOT_COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': False}
+NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
 
 
 class AuthenticationTests(InMemoryStorageTests):
