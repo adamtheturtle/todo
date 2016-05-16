@@ -373,10 +373,24 @@ def update_todo(id):
     """
     # If not exists, raise, else, if EXISTING, get whether it is completed, if not, calculate timestamp, pass that on. Document that there is a timestamp going in at the storage end.
 
+    get_response, get_status_code = read_todo(id)
+    if not get_status_code == codes.OK:
+        return get_response
+
+    already_completed = get_response.json['completed']
+    data = json.loads(request.data)
+    if request.data:
+        if data.get('completed'):
+            if not already_completed:
+                now = datetime.datetime.now(tz=pytz.utc)
+                data['completion_timestamp'] = now.timestamp()
+        if data.get('completed') is False:
+            data['completion_timestamp'] = None
+
     response = requests.patch(
         urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
         headers={'Content-Type': 'application/json'},
-        data=request.data,
+        data=json.dumps(data),
     )
     return jsonify(response.json()), response.status_code
 

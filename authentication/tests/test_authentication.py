@@ -912,6 +912,7 @@ class UpdateTodoTests(AuthenticationTests):
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['content'] = new_content
+        expected['completion_timestamp'] = None
         expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
@@ -925,6 +926,7 @@ class UpdateTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
+    @freeze_time(datetime.datetime.fromtimestamp(5.0, tz=pytz.utc))
     def test_flag_completed(self):
         """
         It is possible to flag a todo item as completed.
@@ -944,7 +946,7 @@ class UpdateTodoTests(AuthenticationTests):
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completed'] = True
         # Timestamp set to now, the time it is first marked completed.
-        expected['completion_timestamp'] = 100
+        expected['completion_timestamp'] = 5.0
         expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
