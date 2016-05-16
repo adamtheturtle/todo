@@ -831,6 +831,22 @@ class ListTodosTests(AuthenticationTests):
         """
         It is possible to filter by only completed items.
         """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': True}})
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        self.assertEqual(list_todos_data['todos'], [])
 
     @responses.activate
     def test_filter_not_completed(self):

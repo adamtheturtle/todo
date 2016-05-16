@@ -284,13 +284,14 @@ def list_todos():
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
+    :reqjson object filter: Mapping of keywords to values to filter by.
     :resjsonarr boolean completed: Whether the item is completed.
     :resjsonarr number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    filter_dict = {'completed': False}
+    filter_dict = request.json['filter']
     todos = Todo.query.filter_by(**filter_dict).all()
     return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
 

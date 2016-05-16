@@ -332,6 +332,8 @@ def list_todos():
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjsonarr boolean completed: Whether the item is completed.
+    :reqjson object filter: Mapping of keywords to values to filter by,
+        currently supported is ``completed`` and ``true`` or ``false``.
     :resjsonarr number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
@@ -339,7 +341,14 @@ def list_todos():
     """
     url = urljoin(STORAGE_URL, 'todos')
     headers = {'Content-Type': 'application/json'}
-    response = requests.get(url, headers=headers)
+    try:
+        todo_filter = request.json.get('filter', {})
+    except:
+        todo_filter = {}
+
+    data = {'filter': todo_filter}
+    import ipdb; ipdb.set_trace()
+    response = requests.get(url, headers=headers, data=json.dumps(data))
     return jsonify(response.json()), response.status_code
 
 if __name__ == '__main__':   # pragma: no cover
