@@ -327,7 +327,7 @@ def delete_todo(id):
 @consumes('application/json')
 def list_todos():
     """
-    List todo items.
+    List todo items, with optional filters.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -351,7 +351,8 @@ def list_todos():
 @consumes('application/json')
 def update_todo(id):
     """
-    Update a todo item.
+    Update a todo item. If an item is changed from not-completed to completed,
+    the ``completion_timestamp`` is set as now.
 
     :reqheader Content-Type: application/json
 
