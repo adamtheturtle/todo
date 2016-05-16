@@ -298,6 +298,7 @@ def list_todos():
     todos = Todo.query.filter_by(**todo_filter).all()
     return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
 
+
 @app.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
 def update_todo(id):
@@ -331,16 +332,14 @@ def update_todo(id):
             detail='No todo exists with the id "{id}"'.format(id=id),
         ), codes.NOT_FOUND
 
-    import ipdb; ipdb.set_trace()
-
     if 'content' in request.json:
         todo.content = request.json['content']
-    #
-    # if 'completed' in request.json:
-    #     todo.completed = request.json['completed']
-    #
-    # if 'completion_timestamp' in request.json:
-    #     todo.completed = request.json['completion_timestamp']
+
+    if 'completed' in request.json:
+        todo.completed = request.json['completed']
+
+    if 'completion_timestamp' in request.json:
+        todo.completed = request.json['completion_timestamp']
 
     db.session.commit()
     return jsonify(todo.as_dict()), codes.OK

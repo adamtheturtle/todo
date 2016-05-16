@@ -575,6 +575,7 @@ class ListTodosTests(InMemoryStorageTests):
         response = self.storage_app.get('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
 
+
 class UpdateTodoTests(InMemoryStorageTests):
     """
     Tests for updating a todo item at ``PATCH /todos/{id}.``.
@@ -600,6 +601,8 @@ class UpdateTodoTests(InMemoryStorageTests):
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['content'] = new_content
+        expected['completion_timestamp'] = None
+        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -712,7 +715,10 @@ class UpdateTodoTests(InMemoryStorageTests):
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
-        response = self.storage_app.patch('/todos/1', content_type='application/json')
+        response = self.storage_app.patch(
+            '/todos/1',
+            content_type='application/json',
+        )
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.NOT_FOUND)
