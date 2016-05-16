@@ -907,7 +907,7 @@ class UpdateTodoTests(AuthenticationTests):
         patch = self.app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data={'content': new_content},
+            data=json.dumps({'content': new_content}),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
@@ -937,7 +937,7 @@ class UpdateTodoTests(AuthenticationTests):
         patch = self.app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data={'completed': True},
+            data=json.dumps({'completed': True}),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
@@ -969,7 +969,7 @@ class UpdateTodoTests(AuthenticationTests):
         patch = self.app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data={'completed': False},
+            data=json.dumps({'completed': False}),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
@@ -1004,7 +1004,7 @@ class UpdateTodoTests(AuthenticationTests):
         patch = self.app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data={'content': new_content, 'completed': False},
+            data=json.dumps({'content': new_content, 'completed': False}),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
