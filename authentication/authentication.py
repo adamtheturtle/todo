@@ -379,10 +379,9 @@ def update_todo(id):
 
     already_completed = get_response.json['completed']
     data = json.loads(request.data)
-    if data.get('completed'):
-        if not already_completed:
-            now = datetime.datetime.now(tz=pytz.utc)
-            data['completion_timestamp'] = now.timestamp()
+    if data.get('completed') and not already_completed:
+        now = datetime.datetime.now(tz=pytz.utc)
+        data['completion_timestamp'] = now.timestamp()
     if data.get('completed') is False:
         data['completion_timestamp'] = None
 
