@@ -339,14 +339,10 @@ def list_todos():
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo_filter = {}
-    if request.data:
-        todo_filter = request.json['filter']
-
     response = requests.get(
         urljoin(STORAGE_URL, 'todos'),
         headers={'Content-Type': 'application/json'},
-        data=json.dumps({'filter': todo_filter}),
+        data=request.data,
     )
     return jsonify(response.json()), response.status_code
 
