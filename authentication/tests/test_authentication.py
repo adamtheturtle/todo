@@ -831,11 +831,15 @@ class DeleteTodoTests(AuthenticationTests):
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
+        self.log_in_as_new_user()
+
         create = self.app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
         )
+
+        self.app.post('/logout', content_type='application/json')
 
         delete = self.app.delete(
             '/todos/{id}'.format(id=create.json['id']),
@@ -991,6 +995,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to change the content of a todo item.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1019,11 +1024,34 @@ class UpdateTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        self.log_in_as_new_user()
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post('/logout', content_type='application/json')
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({'content': 'Book vacation'}),
+        )
+
+        self.assertEqual(patch.status_code, codes.UNAUTHORIZED)
+
+    @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_flag_completed(self):
         """
         It is possible to flag a todo item as completed.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1056,6 +1084,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to flag a todo item as not completed.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1089,6 +1118,7 @@ class UpdateTodoTests(AuthenticationTests):
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1124,6 +1154,7 @@ class UpdateTodoTests(AuthenticationTests):
         Flagging an already completed item as completed does not change the
         completion timestamp.
         """
+        self.log_in_as_new_user()
         create_time = datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc)
         with freeze_time(create_time):
             create = self.app.post(
@@ -1160,6 +1191,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         Not requesting any changes keeps the item the same.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1180,6 +1212,7 @@ class UpdateTodoTests(AuthenticationTests):
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
+        self.log_in_as_new_user()
         response = self.app.patch('/todos/1', content_type='application/json')
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')

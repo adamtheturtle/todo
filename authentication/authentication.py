@@ -353,10 +353,11 @@ def list_todos():
 
 @app.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
+@login_required
 def update_todo(id):
     """
     Update a todo item. If an item is changed from not-completed to completed,
-    the ``completion_timestamp`` is set as now.
+    the ``completion_timestamp`` is set as now. Requires log in.
 
     :reqheader Content-Type: application/json
 
