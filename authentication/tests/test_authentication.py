@@ -926,12 +926,64 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to flag a todo item as completed.
         """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data={'completed': True},
+        )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completed'] = True
+        # Timestamp set to now, the time it is first marked completed.
+        expected['completion_timestamp'] = 100
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
 
     @responses.activate
     def test_flag_not_completed(self):
         """
         It is possible to flag a todo item as not completed.
         """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data={'completed': False},
+        )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completed'] = False
+        # Marking an item as not completed removes the completion timestamp.
+        expected['completion_timestamp'] = None
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
 
     @responses.activate
     def test_change_content_and_flag(self):
