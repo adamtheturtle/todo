@@ -30,7 +30,7 @@ from storage.tests.testtools import InMemoryStorageTests
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
 NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
-
+TIMESTAMP = 1463437744.335567
 
 class AuthenticationTests(InMemoryStorageTests):
     """
@@ -529,7 +529,7 @@ class CreateTodoTests(AuthenticationTests):
         self.assertEqual(response.json, expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5.01, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_current_completion_time(self):
         """
         If the completed flag is set to ``true`` then the completed time is
@@ -547,7 +547,7 @@ class CreateTodoTests(AuthenticationTests):
         # some accuracy).
         self.assertAlmostEqual(
             response.json['completion_timestamp'],
-            5.01,
+            TIMESTAMP,
             places=3,
         )
 
@@ -631,7 +631,7 @@ class ReadTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_completed(self):
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
@@ -650,7 +650,7 @@ class ReadTodoTests(AuthenticationTests):
 
         self.assertEqual(read.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = 5
+        expected['completion_timestamp'] = TIMESTAMP
         expected['id'] = create.json['id']
         self.assertEqual(read.json, expected)
 
@@ -850,7 +850,7 @@ class ListTodosTests(AuthenticationTests):
         self.assertEqual(list_todos.json['todos'], expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_filter_completed(self):
         """
         It is possible to filter by only completed items.
@@ -877,7 +877,7 @@ class ListTodosTests(AuthenticationTests):
 
         self.assertEqual(list_todos.status_code, codes.OK)
         expected = COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = 5.0
+        expected['completion_timestamp'] = TIMESTAMP
         expected['id'] = 2
         self.assertEqual(list_todos_data['todos'], [expected])
 
@@ -960,7 +960,7 @@ class UpdateTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(5.0, tz=pytz.utc))
+    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_flag_completed(self):
         """
         It is possible to flag a todo item as completed.
@@ -980,7 +980,7 @@ class UpdateTodoTests(AuthenticationTests):
         expected = create.json
         expected['completed'] = True
         # Timestamp set to now, the time it is first marked completed.
-        expected['completion_timestamp'] = 5.0
+        expected['completion_timestamp'] = TIMESTAMP
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -1065,7 +1065,7 @@ class UpdateTodoTests(AuthenticationTests):
         Flagging an already completed item as completed does not change the
         completion timestamp.
         """
-        create_time = datetime.datetime.fromtimestamp(5.0, tz=pytz.utc)
+        create_time = datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc)
         with freeze_time(create_time):
             create = self.app.post(
                 '/todos',
@@ -1073,7 +1073,8 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps(COMPLETED_TODO_DATA),
             )
 
-        patch_time = datetime.datetime.fromtimestamp(6.0, tz=pytz.utc)
+        patch_time = datetime.datetime.fromtimestamp(
+            TIMESTAMP + 1, tz=pytz.utc)
         with freeze_time(patch_time):
             patch = self.app.patch(
                 '/todos/{id}'.format(id=create.json['id']),
@@ -1083,7 +1084,7 @@ class UpdateTodoTests(AuthenticationTests):
 
         expected = create.json
         # Timestamp set to the time it is first marked completed.
-        expected['completion_timestamp'] = 5.0
+        expected['completion_timestamp'] = TIMESTAMP
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
