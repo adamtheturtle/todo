@@ -961,7 +961,7 @@ class UpdateTodoTests(AuthenticationTests):
         create = self.app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
 
         patch = self.app.patch(
@@ -991,6 +991,34 @@ class UpdateTodoTests(AuthenticationTests):
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
         """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        new_content = 'Book vacation'
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data={'content': new_content, 'completed': False},
+        )
+
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['content'] = new_content
+        expected['completed'] = False
+        expected['completion_timestamp'] = None
+
+        self.assertEqual(patch.status_code, codes.OK)
+        self.assertEqual(patch.json, expected)
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.json, expected)
 
     def test_incorrect_content_type(self):
         """
