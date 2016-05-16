@@ -332,14 +332,22 @@ def list_todos():
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjsonarr boolean completed: Whether the item is completed.
+    :reqjson object filter: Mapping of keywords to values to filter by,
+        currently supported is ``completed`` and ``true`` or ``false``.
     :resjsonarr number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    url = urljoin(STORAGE_URL, 'todos')
-    headers = {'Content-Type': 'application/json'}
-    response = requests.get(url, headers=headers)
+    todo_filter = {}
+    if request.data:
+        todo_filter = request.json['filter']
+
+    response = requests.get(
+        urljoin(STORAGE_URL, 'todos'),
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps({'filter': todo_filter}),
+    )
     return jsonify(response.json()), response.status_code
 
 if __name__ == '__main__':   # pragma: no cover
