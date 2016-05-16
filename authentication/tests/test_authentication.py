@@ -1039,7 +1039,7 @@ class UpdateTodoTests(AuthenticationTests):
             create = self.app.post(
                 '/todos',
                 content_type='application/json',
-                data=json.dumps(NOT_COMPLETED_TODO_DATA),
+                data=json.dumps(COMPLETED_TODO_DATA),
             )
 
         patch_time = datetime.datetime.fromtimestamp(6.0, tz=pytz.utc)
@@ -1050,9 +1050,9 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps({'completed': True}),
             )
 
-        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['completed'] = True
-        # Timestamp set to now, the time it is first marked completed.
+        # Timestamp set to the time it is first marked completed.
         expected['completion_timestamp'] = 5.0
         expected['id'] = create.json['id']
 
