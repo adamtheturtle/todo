@@ -32,6 +32,7 @@ COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
 NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
 TIMESTAMP = 1463437744.335567
 
+
 class AuthenticationTests(InMemoryStorageTests):
     """
     Connect to an in memory fake of the storage service and create a verified
@@ -617,6 +618,7 @@ class CreateTodoTests(AuthenticationTests):
         )
 
         self.assertEqual(response.status_code, codes.UNAUTHORIZED)
+
 
 class ReadTodoTests(AuthenticationTests):
     """
