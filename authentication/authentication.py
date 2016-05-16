@@ -250,9 +250,10 @@ def signup():
 @app.route('/todos', methods=['POST'])
 @consumes('application/json')
 @jsonschema.validate('todos', 'create')
+@login_required
 def create_todo():
     """
-    Create a new todo item.
+    Create a new todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json

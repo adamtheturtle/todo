@@ -516,6 +516,7 @@ class CreateTodoTests(AuthenticationTests):
         returns a JSON response with the given data and a ``null``
         ``completion_timestamp``.
         """
+        self.log_in_as_new_user()
         response = self.app.post(
             '/todos',
             content_type='application/json',
@@ -535,6 +536,7 @@ class CreateTodoTests(AuthenticationTests):
         If the completed flag is set to ``true`` then the completed time is
         the number of seconds since the epoch.
         """
+        self.log_in_as_new_user()
         response = self.app.post(
             '/todos',
             content_type='application/json',
@@ -593,14 +595,28 @@ class CreateTodoTests(AuthenticationTests):
         }
         self.assertEqual(response.json, expected)
 
+    @responses.activate
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
+        self.log_in_as_new_user()
         response = self.app.post('/todos', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
 
+    @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        response = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.assertEqual(response.status_code, codes.UNAUTHORIZED)
 
 class ReadTodoTests(AuthenticationTests):
     """
