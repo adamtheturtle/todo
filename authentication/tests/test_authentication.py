@@ -826,6 +826,24 @@ class ListTodosTests(AuthenticationTests):
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
         self.assertEqual(list_todos_data['todos'], expected)
 
+    @responses.activate
+    def test_filter_completed(self):
+        """
+        It is possible to filter by only completed items.
+        """
+
+    @responses.activate
+    def test_filter_not_completed(self):
+        """
+        It is possible to filter by only items which are not completed.
+        """
+
+    @responses.activate
+    def test_invalid_filter(self):
+        """
+        An error is raised when an invalid filter is used.
+        """
+
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an
