@@ -629,6 +629,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -653,6 +654,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for an existing todo an OK status code and the todo's
         details, included the completion timestamp.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -675,6 +677,7 @@ class ReadTodoTests(AuthenticationTests):
         """
         A ``GET`` request gets the correct todo when there are multiple.
         """
+        self.log_in_as_new_user()
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -710,6 +713,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
         """
+        self.log_in_as_new_user()
         response = self.app.get('/todos/1', content_type='application/json')
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -727,6 +731,27 @@ class ReadTodoTests(AuthenticationTests):
         """
         response = self.app.get('/todos/1', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+    @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        self.log_in_as_new_user()
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post('/logout', content_type='application/json')
+
+        read = self.app.get(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(read.status_code, codes.UNAUTHORIZED)
 
 
 class DeleteTodoTests(AuthenticationTests):

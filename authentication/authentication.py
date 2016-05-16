@@ -288,9 +288,10 @@ def create_todo():
 
 @app.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
+@login_required
 def read_todo(id):
     """
-    Get information about a particular todo item.
+    Get information about a particular todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
