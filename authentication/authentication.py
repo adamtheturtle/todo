@@ -339,7 +339,6 @@ def list_todos():
     """
     url = urljoin(STORAGE_URL, 'todos')
     headers = {'Content-Type': 'application/json'}
-    # import ipdb; ipdb.set_trace()
     response = requests.get(url, headers=headers)
     return jsonify(response.json()), response.status_code
 
