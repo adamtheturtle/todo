@@ -17,7 +17,6 @@ COMPLETED_TODO_DATA = {
 NOT_COMPLETED_TODO_DATA = {
     'content': 'Get haircut',
     'completed': False,
-    'completion_timestamp': None,
 }
 
 
@@ -572,6 +571,8 @@ class ListTodosTests(InMemoryStorageTests):
 
         self.assertEqual(list_todos.status_code, codes.OK)
         expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['id'] = 1
+        expected['completion_timestamp'] = None
         self.assertEqual(list_todos_data['todos'], [expected])
 
     def test_incorrect_content_type(self):
