@@ -21,6 +21,8 @@ docker-compose up
 
 to start the API service.
 
+For password hashing to be secure, it is necessary to first set the environment variable `SECRET_KEY` to a secret value.
+
 ## Using the service
 
 Full API documentation is available [on ReadTheDocs](http://todoer.readthedocs.io/en/latest/).

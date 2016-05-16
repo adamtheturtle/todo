@@ -7,8 +7,8 @@ authenticate:
    # See http://flask.pocoo.org/docs/0.10/api/#flask.Flask.run
    - "5000:5000"
   environment:
-   # In production use the host environment variable instead of 'secret'
-   - SECRET_KEY=secret
+   # Set the environment variable SECRET_KEY else the secret will be insecure.
+   - SECRET_KEY
   command: python authentication/authentication.py
   links:
     - storage
