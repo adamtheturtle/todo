@@ -350,6 +350,26 @@ def list_todos():
     )
     return jsonify(response.json()), response.status_code
 
+
+@app.route('/todos/<id>', methods=['PATCH'])
+@consumes('application/json')
+def update_todo(id):
+    """
+    Update a todo item.
+
+    :reqheader Content-Type: application/json
+    :resheader Content-Type: application/json
+    :queryparameter number id: The id of the todo item.
+
+    XXX
+    """
+    response = requests.patch(
+        urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
+        headers={'Content-Type': 'application/json'},
+        data=request.data,
+    )
+    return jsonify(response.json()), response.status_code
+
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
