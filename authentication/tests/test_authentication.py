@@ -93,6 +93,19 @@ class AuthenticationTests(InMemoryStorageTests):
             {key: value for (key, value) in response.headers},
             response.data)
 
+    def log_in_as_new_user(self):
+        """
+        Create a user and log in as that user.
+        """
+        self.app.post(
+            '/signup',
+            content_type='application/json',
+            data=json.dumps(USER_DATA))
+        self.app.post(
+            '/login',
+            content_type='application/json',
+            data=json.dumps(USER_DATA))
+
 
 class SignupTests(AuthenticationTests):
     """
@@ -710,6 +723,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         It is possible to delete a todo item.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -735,6 +749,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
+        self.log_in_as_new_user()
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -758,13 +773,33 @@ class DeleteTodoTests(AuthenticationTests):
         }
         self.assertEqual(delete.json, expected)
 
+    @responses.activate
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
+        self.log_in_as_new_user()
         response = self.app.delete('/todos/1', content_type='text/html')
         self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+
+    @responses.activate
+    def test_not_logged_in(self):
+        """
+        When no user is logged in, an UNAUTHORIZED status code is returned.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        delete = self.app.delete(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+        )
+
+        self.assertEqual(delete.status_code, codes.UNAUTHORIZED)
 
 
 class ListTodosTests(AuthenticationTests):
@@ -877,6 +912,7 @@ class ListTodosTests(AuthenticationTests):
         expected['id'] = 1
         self.assertEqual(list_todos_data['todos'], [expected])
 
+    @responses.activate
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an

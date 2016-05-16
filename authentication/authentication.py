@@ -307,9 +307,10 @@ def read_todo(id):
 
 @app.route('/todos/<id>', methods=['DELETE'])
 @consumes('application/json')
+@login_required
 def delete_todo(id):
     """
-    Delete a particular todo item.
+    Delete a particular todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
