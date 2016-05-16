@@ -9,10 +9,14 @@ from requests import codes
 from .testtools import InMemoryStorageTests
 
 USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
-TODO_DATA = {
+COMPLETED_TODO_DATA = {
     'content': 'Buy milk',
     'completed': True,
-    'completion_timestamp': 1463237269,
+    'completion_timestamp': 1463237269.0,
+}
+NOT_COMPLETED_TODO_DATA = {
+    'content': 'Get haircut',
+    'completed': False,
 }
 
 
@@ -227,11 +231,11 @@ class CreateTodoTests(InMemoryStorageTests):
         response = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = 1
         self.assertEqual(response.json, expected)
 
@@ -240,7 +244,7 @@ class CreateTodoTests(InMemoryStorageTests):
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         data.pop('content')
 
         response = self.storage_app.post(
@@ -261,7 +265,7 @@ class CreateTodoTests(InMemoryStorageTests):
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         data.pop('completed')
 
         response = self.storage_app.post(
@@ -282,7 +286,7 @@ class CreateTodoTests(InMemoryStorageTests):
         A ``POST /todos`` request without a completion time creates an item
         with a ``null`` completion time.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         data.pop('completion_timestamp')
 
         response = self.storage_app.post(
@@ -292,7 +296,7 @@ class CreateTodoTests(InMemoryStorageTests):
         )
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = 1
         self.assertEqual(response.json, expected)
@@ -319,7 +323,7 @@ class GetTodoTests(InMemoryStorageTests):
         create = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
 
         item_id = create.json['id']
@@ -330,7 +334,7 @@ class GetTodoTests(InMemoryStorageTests):
         )
 
         self.assertEqual(read.status_code, codes.OK)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = item_id
         self.assertEqual(read.json, expected)
 
@@ -338,7 +342,7 @@ class GetTodoTests(InMemoryStorageTests):
         """
         If the timestamp is not given, the response includes a null timestamp.
         """
-        data = TODO_DATA.copy()
+        data = COMPLETED_TODO_DATA.copy()
         del data['completion_timestamp']
 
         create = self.storage_app.post(
@@ -355,7 +359,7 @@ class GetTodoTests(InMemoryStorageTests):
         )
 
         self.assertEqual(read.status_code, codes.OK)
-        expected = TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = item_id
         self.assertEqual(read.json, expected)
@@ -399,7 +403,7 @@ class DeleteTodoTests(InMemoryStorageTests):
         create = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
 
         item_id = create.json['id']
@@ -425,7 +429,7 @@ class DeleteTodoTests(InMemoryStorageTests):
         create = self.storage_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(TODO_DATA),
+            data=json.dumps(COMPLETED_TODO_DATA),
         )
 
         item_id = create.json['id']
@@ -480,10 +484,10 @@ class ListTodosTests(InMemoryStorageTests):
         """
         All todos are listed.
         """
-        other_todo = TODO_DATA.copy()
+        other_todo = COMPLETED_TODO_DATA.copy()
         other_todo['content'] = 'Get a haircut'
 
-        todos = [TODO_DATA, other_todo]
+        todos = [COMPLETED_TODO_DATA, other_todo]
         expected = []
         for index, data in enumerate(todos):
             create = self.storage_app.post(
@@ -502,6 +506,66 @@ class ListTodosTests(InMemoryStorageTests):
 
         self.assertEqual(list_todos.status_code, codes.OK)
         self.assertEqual(list_todos.json['todos'], expected)
+
+    def test_filter_completed(self):
+        """
+        It is possible to filter by only completed items.
+        """
+        self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        create_completed = self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.storage_app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': True}}),
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        expected = COMPLETED_TODO_DATA.copy()
+        item_id = json.loads(create_completed.data.decode('utf8')).get('id')
+        expected['id'] = item_id
+        self.assertEqual(list_todos_data['todos'], [expected])
+
+    def test_filter_not_completed(self):
+        """
+        It is possible to filter by only items which are not completed.
+        """
+        self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.storage_app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.storage_app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': False}}),
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['id'] = 1
+        expected['completion_timestamp'] = None
+        self.assertEqual(list_todos_data['todos'], [expected])
 
     def test_incorrect_content_type(self):
         """

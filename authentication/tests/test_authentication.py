@@ -29,7 +29,7 @@ from storage.tests.testtools import InMemoryStorageTests
 
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
-NOT_COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': False}
+NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
 
 
 class AuthenticationTests(InMemoryStorageTests):
@@ -811,6 +811,69 @@ class ListTodosTests(AuthenticationTests):
 
         self.assertEqual(list_todos.status_code, codes.OK)
         self.assertEqual(list_todos.json['todos'], expected)
+
+    @responses.activate
+    @freeze_time(datetime.datetime.fromtimestamp(5, tz=pytz.utc))
+    def test_filter_completed(self):
+        """
+        It is possible to filter by only completed items.
+        """
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': True}}),
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        expected = COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = 5.0
+        expected['id'] = 2
+        self.assertEqual(list_todos_data['todos'], [expected])
+
+    @responses.activate
+    def test_filter_not_completed(self):
+        """
+        It is possible to filter by only items which are not completed.
+        """
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+        )
+
+        self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        list_todos = self.app.get(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps({'filter': {'completed': False}}),
+        )
+
+        list_todos_data = json.loads(list_todos.data.decode('utf8'))
+
+        self.assertEqual(list_todos.status_code, codes.OK)
+        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected['completion_timestamp'] = None
+        expected['id'] = 1
+        self.assertEqual(list_todos_data['todos'], [expected])
 
     def test_incorrect_content_type(self):
         """
