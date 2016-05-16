@@ -382,7 +382,7 @@ def update_todo(id):
     if data.get('completed') and not already_completed:
         now = datetime.datetime.now(tz=pytz.utc)
         data['completion_timestamp'] = now.timestamp()
-    if data.get('completed') is False:
+    elif data.get('completed') is False:
         data['completion_timestamp'] = None
 
     response = requests.patch(

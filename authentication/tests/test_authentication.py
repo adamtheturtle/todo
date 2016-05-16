@@ -1067,6 +1067,39 @@ class UpdateTodoTests(AuthenticationTests):
         self.assertEqual(read.json, expected)
 
     @responses.activate
+    def test_remain_same(self):
+        """
+        Not requesting any changes keeps the item the same.
+        """
+        create = self.app.post(
+            '/todos',
+            content_type='application/json',
+            data=json.dumps(COMPLETED_TODO_DATA),
+        )
+
+        patch = self.app.patch(
+            '/todos/{id}'.format(id=create.json['id']),
+            content_type='application/json',
+            data=json.dumps({}),
+        )
+
+        # expected = COMPLETED_TODO_DATA.copy()
+        # expected['completed'] = True
+        # # Timestamp set to the time it is first marked completed.
+        # expected['completion_timestamp'] = 5.0
+        # expected['id'] = create.json['id']
+
+        # self.assertEqual(patch.status_code, codes.OK)
+        # self.assertEqual(patch.json, expected)
+        #
+        # read = self.app.get(
+        #     '/todos/{id}'.format(id=create.json['id']),
+        #     content_type='application/json',
+        # )
+
+        self.assertEqual(create.json, patch.json)
+
+    @responses.activate
     def test_non_existant(self):
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
