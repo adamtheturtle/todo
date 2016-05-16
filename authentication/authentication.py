@@ -357,8 +357,8 @@ def update_todo(id):
 
     :queryparameter number id: The id of the todo item.
 
-    :reqjson string content: The new of the item.
-    :reqjson boolean completed: Whether the item is completed.
+    :reqjson string content: The new of the item (optional).
+    :reqjson boolean completed: Whether the item is completed (optional).
 
     :resheader Content-Type: application/json
 
