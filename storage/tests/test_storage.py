@@ -627,13 +627,13 @@ class UpdateTodoTests(InMemoryStorageTests):
         patch = self.storage_app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data=json.dumps({'completed': True}),
+            data=json.dumps({'completed': True, 'completion_timestamp': 2.0}),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completed'] = True
-        # Timestamp set to now, the time it is first marked completed.
-        expected['completion_timestamp'] = 100
+        expected['completion_timestamp'] = 2
+        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -658,13 +658,14 @@ class UpdateTodoTests(InMemoryStorageTests):
         patch = self.storage_app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data=json.dumps({'completed': False}),
+            data=json.dumps(
+                {'completed': False, 'completion_timestamp': None}),
         )
 
-        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected = COMPLETED_TODO_DATA.copy()
         expected['completed'] = False
-        # Marking an item as not completed removes the completion timestamp.
         expected['completion_timestamp'] = None
+        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)
@@ -699,6 +700,7 @@ class UpdateTodoTests(InMemoryStorageTests):
         expected['content'] = new_content
         expected['completed'] = False
         expected['completion_timestamp'] = None
+        expected['id'] = create.json['id']
 
         self.assertEqual(patch.status_code, codes.OK)
         self.assertEqual(patch.json, expected)

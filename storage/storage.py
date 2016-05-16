@@ -339,7 +339,7 @@ def update_todo(id):
         todo.completed = request.json['completed']
 
     if 'completion_timestamp' in request.json:
-        todo.completed = request.json['completion_timestamp']
+        todo.completion_timestamp = request.json['completion_timestamp']
 
     db.session.commit()
     return jsonify(todo.as_dict()), codes.OK
