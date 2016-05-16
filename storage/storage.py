@@ -311,7 +311,8 @@ def update_todo(id):
 
     :reqjson string content: The new of the item.
     :reqjson boolean completed: Whether the item is completed.
-    :reqjson number completion_timestamp: The completion UNIX timestamp.
+    :reqjson number completion_timestamp: The completion UNIX timestamp, or
+        ``null``.
 
     :resheader Content-Type: application/json
 

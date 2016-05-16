@@ -376,7 +376,6 @@ def update_todo(id):
     if not get_status_code == codes.OK:
         return jsonify(get_response.json), get_status_code
 
-
     already_completed = get_response.json['completed']
     data = json.loads(request.data)
     if request.data:
