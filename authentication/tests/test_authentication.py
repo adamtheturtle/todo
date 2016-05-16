@@ -1022,6 +1022,22 @@ class UpdateTodoTests(AuthenticationTests):
 
         self.assertEqual(read.json, expected)
 
+    @responses.activate
+    def test_non_existant(self):
+        """
+        If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
+        returned.
+        """
+        response = self.app.get('/todos/1', content_type='application/json')
+
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        expected = {
+            'title': 'The requested todo does not exist.',
+            'detail': 'No todo exists with the id "1"',
+        }
+        self.assertEqual(response.json, expected)
+
     def test_incorrect_content_type(self):
         """
         If a Content-Type header other than 'application/json' is given, an

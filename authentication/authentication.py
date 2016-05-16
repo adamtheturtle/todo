@@ -369,6 +369,7 @@ def update_todo(id):
         or ``null`` if the item is not completed.
 
     :status 200: An item with the given details has been created.
+    :status 404: There is no item with the given ``id``.
     """
     response = requests.patch(
         urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
