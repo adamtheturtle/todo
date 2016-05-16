@@ -595,7 +595,7 @@ class UpdateTodoTests(InMemoryStorageTests):
         patch = self.storage_app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data={'content': new_content},
+            data=json.dumps({'content': new_content}),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
