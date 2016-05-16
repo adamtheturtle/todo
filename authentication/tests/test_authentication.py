@@ -529,6 +529,8 @@ class CreateTodoTests(AuthenticationTests):
 
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, codes.CREATED)
+        # On some platforms (in particular Travis CI, float conversion loses
+        # some accuracy).
         self.assertAlmostEqual(response_timestamp, 5.01, places=3)
 
     def test_missing_text(self):
