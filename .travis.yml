@@ -12,7 +12,7 @@ script:
   # Build documentation HTML.
   - sphinx-build -W -b html -d build/doctrees docs/source build/html
   # Run all discoverable tests, but set the source directories so that the coverage tool knows not to include coverage for all dependencies.
-  - "coverage run --branch --source=authentication,storage -m unittest discover"
+  - "coverage run --branch --source=todoer,storage -m unittest discover"
 after_success:
   # Sends the coverage report to coveralls.io which can report to Pull Requests
   # and track test coverage over time.

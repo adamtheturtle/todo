@@ -1,5 +1,5 @@
 ``todoer`` API Documentation
 ============================
 
-.. autoflask:: authentication.authentication:app
+.. autoflask:: todoer.todoer:app
    :undoc-static:
