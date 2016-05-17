@@ -259,7 +259,7 @@ def create_todo():
     :resheader Content-Type: application/json
     :reqjson string content: The content of the new item.
     :reqjson boolean completed: Whether the item is completed.
-    :resjson string id: The id of the todo item.
+    :resjson number id: The id of the todo item.
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp (now),
@@ -368,7 +368,7 @@ def update_todo(id):
 
     :resheader Content-Type: application/json
 
-    :resjson string id: The id of the item.
+    :resjson number id: The id of the item.
     :resjson string content: The content item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp (now),
@@ -377,12 +377,15 @@ def update_todo(id):
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    get_response, get_status_code = read_todo(id)
+    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    headers = {'Content-Type': 'application/json'}
+    response = requests.get(url, headers=headers)
 
-    if not get_status_code == codes.OK:
-        return jsonify(get_response.json), get_status_code
+    if not response.status_code == codes.OK:
+        return jsonify(response.json()), response.status_code
 
-    already_completed = get_response.json['completed']
+    already_completed = response.json().get('completed')
+
     data = json.loads(request.data)
     if data.get('completed') and not already_completed:
         now = datetime.datetime.now(tz=pytz.utc)

@@ -203,7 +203,7 @@ def todos_post():
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :resjson string id: The id of the todo item.
+    :resjson number id: The id of the todo item.
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp, or
@@ -233,14 +233,14 @@ def specific_todo_get(id):
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :resjson string id: The id of the todo item.
+    :resjson number id: The id of the todo item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_time: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=id).first()
+    todo = Todo.query.filter_by(id=int(id)).first()
 
     if todo is None:
         return jsonify(
@@ -262,7 +262,7 @@ def delete_todo(id):
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=id).first()
+    todo = Todo.query.filter_by(id=int(id)).first()
 
     if todo is None:
         return jsonify(
@@ -316,7 +316,7 @@ def update_todo(id):
 
     :resheader Content-Type: application/json
 
-    :resjson string id: The id of the item.
+    :resjson number id: The id of the item.
     :resjson string content: The content item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp (now),
@@ -325,7 +325,7 @@ def update_todo(id):
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=id).first()
+    todo = Todo.query.filter_by(id=int(id)).first()
 
     if todo is None:
         return jsonify(
