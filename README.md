@@ -31,22 +31,180 @@ Some examples of running commands against the API with ``cURL``:
 
   ```
   # Create a user.
-  $ curl -X POST \
-    -H "Content-Type: application/json" \
-    -g '127.0.0.1:5000/signup' \
-    -d '{"email": "user@example.com","password":"secret"}'
+  $ curl --request POST \
+    --header "Content-Type: application/json" \
+    --data '{"email": "user@example.com", "password":"secret"}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/signup'
+
+  {
+    "email": "user@example.com",
+    "password": "secret"
+  }
+
   # Log in as the new user.
-  $ curl -X POST \
-    -H "Content-Type: application/json" \
-    -g '127.0.0.1:5000/login' \
-    -d '{"email": "user@example.com","password":"secret"}' \
-    --cookie-jar ~/Desktop/my_cookie
+  $ curl --request POST \
+    --header "Content-Type: application/json" \
+    --data '{"email": "user@example.com", "password":"secret"}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/login'
+  
+  {
+    "email": "user@example.com",
+    "password": "secret"
+  }
+
+  # Create a completed TODO.
+  $ curl --request POST \
+    --header "Content-Type: application/json" \
+    --data '{"content": "Buy milk", "completed": true}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos'
+
+  {
+    "completed": true,
+    "completion_timestamp": 1463489583.645764,
+    "content": "Buy milk",
+    "id": 1
+  }
+
+  # Create a TODO which is not completed.
+  $ curl --request POST \
+    --header "Content-Type: application/json" \
+    --data '{"content": "Get a haircut", "completed": false}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos'
+
+  {
+    "completed": false,
+    "completion_timestamp": null,
+    "content": "Get a haircut",
+    "id": 2
+  }
+
+  # Create another TODO which is not completed.
+  $ curl --request POST \
+    --header "Content-Type: application/json" \
+    --data '{"content": "Clean the bathroom", "completed": false}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos'
+
+  {
+    "completed": false,
+    "completion_timestamp": null,
+    "content": "Clean the bathroom",
+    "id": 3
+  }
+
+  # Read information about a TODO.
+  $ curl --request GET \
+    --header "Content-Type: application/json" \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos/3'
+
+  {
+    "completed": false,
+    "completion_timestamp": null,
+    "content": "Clean the bathroom",
+    "id": 3
+  }
+
+  # Mark one of the not completed TODOs as completed.
+  $ curl --request PATCH \
+    --header "Content-Type: application/json" \
+    --data '{"completed": true}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos/3'
+
+  {
+    "completed": true,
+    "completion_timestamp": 1463496102.602174,
+    "content": "Clean the bathroom",
+    "id": 3
+  }
+
+  # Create a completed TODO.
+  $ curl --request POST \
+    --header "Content-Type: application/json" \
+    --data '{"content": "Email Alice", "completed": true}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos'
+
+  {
+    "completed": true,
+    "completion_timestamp": 1463496579.173706,
+    "content": "Email Alice",
+    "id": 4
+  }
+
+  # Delete latest completed TODO.
+  $ curl --request DELETE \
+    --header "Content-Type: application/json" \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos/3'
+
+  {}
+
+  # List all completed TODOs.
+  $ curl --request GET \
+    --header "Content-Type: application/json" \
+    --data '{"filter": {"completed": true}}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos'
+
+  {
+    "todos": [
+      {
+        "completed": true,
+        "completion_timestamp": 1463489583.645764,
+        "content": "Buy milk",
+        "id": 1
+      },
+      {
+        "completed": true,
+        "completion_timestamp": 1463496579.173706,
+        "content": "Email Alice",
+        "id": 4
+      }
+    ]
+  }
+
   # Log out.
-  $ curl -X POST \
-    -H "Content-Type: application/json" \
-    -g '127.0.0.1:5000/logout' \
-    --cookie ~/Desktop/my_cookie
+  $ curl --request POST \
+    --header "Content-Type: application/json" \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/logout'
+
+  {}
+
+  # Listing TODOs is protected, so does not work for a logged out user.
+  curl --request GET \
+    --header "Content-Type: application/json" \
+    --data '{"filter": {"completed": true}}' \
+    --cookie ~/Desktop/my_cookie \
+    --cookie-jar ~/Desktop/my_cookie \
+    '127.0.0.1:5000/todos'
+
+  <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+  <title>401 Unauthorized</title>
+  <h1>Unauthorized</h1>
+  <p>The server could not verify that you are authorized to access the URL requested.  You either supplied the wrong credentials (e.g. a bad password), or your browser doesn't understand how to supply the credentials required.</p>
   ```
+
+There is also error handling for various cases, for example when trying to:
+* Create a user when one exists already with the given email address.
+* Modify a todo which does not exist.
 
 The above assumes that the service is running on `127.0.0.1`.
 
