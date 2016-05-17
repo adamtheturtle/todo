@@ -1,4 +1,4 @@
-authenticate:
+todoer:
   build: .
   ports:
    # HOST:CONTAINER
@@ -9,7 +9,7 @@ authenticate:
   environment:
    # Set the environment variable SECRET_KEY else the secret will be insecure.
    - SECRET_KEY
-  command: python authentication/authentication.py
+  command: python todoer/todoer.py
   links:
     - storage
 storage:
@@ -22,7 +22,7 @@ storage:
    # See http://flask.pocoo.org/docs/0.10/api/#flask.Flask.run
    - "5001:5001"
   volumes:
-   - /tmp/authentication:/data
+   - /tmp/todoer:/data
   environment:
-   - SQLALCHEMY_DATABASE_URI=sqlite:////data/authentication.db
+   - SQLALCHEMY_DATABASE_URI=sqlite:////data/todoer.db
   command: python storage/storage.py

@@ -1,5 +1,5 @@
 """
-An authentication service.
+An authentication service with todo capabilities.
 """
 
 import datetime

@@ -1,5 +1,5 @@
 """
-Tests for authentication.authentication.
+Tests for todoer.todoer.
 """
 
 import datetime
@@ -16,7 +16,7 @@ from requests import codes
 from urllib.parse import urljoin
 from werkzeug.http import parse_cookie
 
-from authentication.authentication import (
+from todoer.todoer import (
     app,
     bcrypt,
     load_user_from_id,
@@ -674,7 +674,7 @@ class ReadTodoTests(AuthenticationTests):
         self.assertAlmostEqual(
             read.json.pop('completion_timestamp'),
             TIMESTAMP,
-            places=3
+            places=3,
         )
         self.assertEqual(read.json, expected)
 
