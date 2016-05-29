@@ -2,7 +2,7 @@
 Test tools for the storage service.
 """
 
-from flask.ext.testing import TestCase
+from flask_testing import TestCase
 
 from storage.storage import app, db
 

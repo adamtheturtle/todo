@@ -6,7 +6,7 @@ import os
 
 from flask import Flask, json, jsonify, request, make_response
 
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from flask_jsonschema import JsonSchema, ValidationError
 from flask_negotiate import consumes
 

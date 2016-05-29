@@ -8,8 +8,8 @@ import os
 from urllib.parse import urljoin
 
 from flask import Flask, jsonify, request, json
-from flask.ext.bcrypt import Bcrypt
-from flask.ext.login import (
+from flask_bcrypt import Bcrypt
+from flask_login import (
     LoginManager,
     login_required,
     login_user,
@@ -87,7 +87,7 @@ def load_user_from_id(user_id):
     user_loader stores the returned ``User`` object in ``current_user`` during
     every flask request.
 
-    See https://flask-login.readthedocs.org/en/latest/#flask.ext.login.LoginManager.user_loader.  # noqa
+    See https://flask-login.readthedocs.org/en/latest/#flask_login.LoginManager.user_loader.  # noqa
 
     :param user_id: The ID of the user Flask is trying to load.
     :type user_id: string
@@ -111,7 +111,7 @@ def load_user_from_token(auth_token):
     """
     Flask-Login token-loader callback.
 
-    See https://flask-login.readthedocs.org/en/latest/#flask.ext.login.LoginManager.token_loader  # noqa
+    See https://flask-login.readthedocs.org/en/latest/#flask_login.LoginManager.token_loader  # noqa
 
     :param auth_token: The authentication token of the user Flask is trying to
         load.
