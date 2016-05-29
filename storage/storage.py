@@ -170,8 +170,8 @@ def users_post():
         created.
     :status 409: There already exists a user with the given ``email``.
     """
-    email = request.json['email']
-    password_hash = request.json['password_hash']
+    email = request.get_json()['email']
+    password_hash = request.get_json()['password_hash']
 
     if load_user_from_id(email) is not None:
         return jsonify(
@@ -210,9 +210,9 @@ def todos_post():
         ``null`` if there is none.
     :status 200: An item with the given details has been created.
     """
-    content = request.json['content']
-    completed = request.json['completed']
-    completion_timestamp = request.json.get('completion_timestamp')
+    content = request.get_json()['content']
+    completed = request.get_json()['completed']
+    completion_timestamp = request.get_json().get('completion_timestamp')
 
     todo = Todo(
         content=content,
@@ -293,7 +293,7 @@ def list_todos():
     """
     todo_filter = {}
     if request.data:
-        todo_filter = request.json['filter']
+        todo_filter = request.get_json()['filter']
 
     todos = Todo.query.filter_by(**todo_filter).all()
     return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
@@ -333,14 +333,14 @@ def update_todo(id):
             detail='No todo exists with the id "{id}"'.format(id=id),
         ), codes.NOT_FOUND
 
-    if 'content' in request.json:
-        todo.content = request.json['content']
+    if 'content' in request.get_json():
+        todo.content = request.get_json()['content']
 
-    if 'completed' in request.json:
-        todo.completed = request.json['completed']
+    if 'completed' in request.get_json():
+        todo.completed = request.get_json()['completed']
 
-    if 'completion_timestamp' in request.json:
-        todo.completion_timestamp = request.json['completion_timestamp']
+    if 'completion_timestamp' in request.get_json():
+        todo.completion_timestamp = request.get_json()['completion_timestamp']
 
     db.session.commit()
     return jsonify(todo.as_dict()), codes.OK

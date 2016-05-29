@@ -167,8 +167,8 @@ def login():
     :status 404: No user can be found with the given ``email``.
     :status 401: The given ``password`` is incorrect.
     """
-    email = request.json['email']
-    password = request.json['password']
+    email = request.get_json()['email']
+    password = request.get_json()['password']
 
     user = load_user_from_id(user_id=email)
     if user is None:
@@ -222,8 +222,8 @@ def signup():
         created.
     :status 409: There already exists a user with the given ``email``.
     """
-    email = request.json['email']
-    password = request.json['password']
+    email = request.get_json()['email']
+    password = request.get_json()['password']
 
     if load_user_from_id(email) is not None:
         return jsonify(
@@ -266,10 +266,10 @@ def create_todo():
         or ``null`` if the item is not completed.
     :status 200: An item with the given details has been created.
     """
-    completed = request.json['completed']
+    completed = request.get_json()['completed']
 
     data = {
-        'content': request.json['content'],
+        'content': request.get_json()['content'],
         'completed': completed,
     }
 
