@@ -8,8 +8,8 @@ import os
 from urllib.parse import urljoin
 
 from flask import Flask, jsonify, request, json
-from flask.ext.bcrypt import Bcrypt
-from flask.ext.login import (
+from flask_bcrypt import Bcrypt
+from flask_login import (
     LoginManager,
     login_required,
     login_user,
@@ -87,7 +87,7 @@ def load_user_from_id(user_id):
     user_loader stores the returned ``User`` object in ``current_user`` during
     every flask request.
 
-    See https://flask-login.readthedocs.org/en/latest/#flask.ext.login.LoginManager.user_loader.  # noqa
+    See https://flask-login.readthedocs.org/en/latest/#flask_login.LoginManager.user_loader.  # noqa
 
     :param user_id: The ID of the user Flask is trying to load.
     :type user_id: string
@@ -111,7 +111,7 @@ def load_user_from_token(auth_token):
     """
     Flask-Login token-loader callback.
 
-    See https://flask-login.readthedocs.org/en/latest/#flask.ext.login.LoginManager.token_loader  # noqa
+    See https://flask-login.readthedocs.org/en/latest/#flask_login.LoginManager.token_loader  # noqa
 
     :param auth_token: The authentication token of the user Flask is trying to
         load.
@@ -167,8 +167,8 @@ def login():
     :status 404: No user can be found with the given ``email``.
     :status 401: The given ``password`` is incorrect.
     """
-    email = request.json['email']
-    password = request.json['password']
+    email = request.get_json()['email']
+    password = request.get_json()['password']
 
     user = load_user_from_id(user_id=email)
     if user is None:
@@ -222,8 +222,8 @@ def signup():
         created.
     :status 409: There already exists a user with the given ``email``.
     """
-    email = request.json['email']
-    password = request.json['password']
+    email = request.get_json()['email']
+    password = request.get_json()['password']
 
     if load_user_from_id(email) is not None:
         return jsonify(
@@ -266,10 +266,10 @@ def create_todo():
         or ``null`` if the item is not completed.
     :status 200: An item with the given details has been created.
     """
-    completed = request.json['completed']
+    completed = request.get_json()['completed']
 
     data = {
-        'content': request.json['content'],
+        'content': request.get_json()['content'],
         'completed': completed,
     }
 

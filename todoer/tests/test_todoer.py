@@ -10,7 +10,7 @@ import unittest
 import pytz
 import responses
 
-from flask.ext.login import make_secure_token
+from flask_login import make_secure_token
 from freezegun import freeze_time
 from requests import codes
 from urllib.parse import urljoin
