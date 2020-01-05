@@ -49,20 +49,20 @@ class User(UserMixin):  # type: ignore
         return self.email
 
 
-FLASK_APP = Flask(__name__)
-FLASK_APP.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret')
-FLASK_BCRYPT = Bcrypt(FLASK_APP)
+TODOER_FLASK_APP = Flask(__name__)
+TODOER_FLASK_APP.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret')
+FLASK_BCRYPT = Bcrypt(TODOER_FLASK_APP)
 LOGIN_MANAGER = LoginManager()
-LOGIN_MANAGER.init_app(FLASK_APP)
+LOGIN_MANAGER.init_app(TODOER_FLASK_APP)
 
 # Inputs can be validated using JSON schema.
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
-FLASK_APP.config['JSONSCHEMA_DIR'] = os.path.join(
-    str(FLASK_APP.root_path),
+TODOER_FLASK_APP.config['JSONSCHEMA_DIR'] = os.path.join(
+    str(TODOER_FLASK_APP.root_path),
     'schemas',
 )
-JsonSchema(FLASK_APP)
+JsonSchema(TODOER_FLASK_APP)
 
 STORAGE_URL = 'http://storage:5001'
 
@@ -95,7 +95,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     return None
 
 
-@FLASK_APP.errorhandler(ValidationError)
+@TODOER_FLASK_APP.errorhandler(ValidationError)
 def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     """
     :resjson string title: An explanation that there was a validation error.
@@ -108,7 +108,7 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     ), codes.BAD_REQUEST
 
 
-@FLASK_APP.route('/login', methods=['POST'])
+@TODOER_FLASK_APP.route('/login', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'get')
 def login() -> Tuple[Response, int]:
@@ -152,7 +152,7 @@ def login() -> Tuple[Response, int]:
     return jsonify(email=email, password=password), codes.OK
 
 
-@FLASK_APP.route('/logout', methods=['POST'])
+@TODOER_FLASK_APP.route('/logout', methods=['POST'])
 @consumes('application/json')
 @login_required
 def logout() -> Tuple[Response, int]:
@@ -166,7 +166,7 @@ def logout() -> Tuple[Response, int]:
     return jsonify({}), codes.OK
 
 
-@FLASK_APP.route('/signup', methods=['POST'])
+@TODOER_FLASK_APP.route('/signup', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'create')
 def signup() -> Tuple[Response, int]:
@@ -210,7 +210,7 @@ def signup() -> Tuple[Response, int]:
     return jsonify(email=email, password=password), codes.CREATED
 
 
-@FLASK_APP.route('/todos', methods=['POST'])
+@TODOER_FLASK_APP.route('/todos', methods=['POST'])
 @consumes('application/json')
 @validate('todos', 'create')
 @login_required
@@ -249,7 +249,7 @@ def create_todo() -> Tuple[Response, int]:
     return jsonify(create.json()), create.status_code
 
 
-@FLASK_APP.route('/todos/<id>', methods=['GET'])
+@TODOER_FLASK_APP.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
 @login_required
 def read_todo(id: str) -> Tuple[Response, int]:
@@ -270,7 +270,7 @@ def read_todo(id: str) -> Tuple[Response, int]:
     return jsonify(response.json()), response.status_code
 
 
-@FLASK_APP.route('/todos/<id>', methods=['DELETE'])
+@TODOER_FLASK_APP.route('/todos/<id>', methods=['DELETE'])
 @consumes('application/json')
 @login_required
 def delete_todo(id: str) -> Tuple[Response, int]:
@@ -289,7 +289,7 @@ def delete_todo(id: str) -> Tuple[Response, int]:
     return jsonify(response.json()), response.status_code
 
 
-@FLASK_APP.route('/todos', methods=['GET'])
+@TODOER_FLASK_APP.route('/todos', methods=['GET'])
 @consumes('application/json')
 @login_required
 def list_todos() -> Tuple[Response, int]:
@@ -314,7 +314,7 @@ def list_todos() -> Tuple[Response, int]:
     return jsonify(response.json()), response.status_code
 
 
-@FLASK_APP.route('/todos/<id>', methods=['PATCH'])
+@TODOER_FLASK_APP.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
 @login_required
 def update_todo(id: str) -> Tuple[Response, int]:
@@ -368,4 +368,4 @@ if __name__ == '__main__':  # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
     # See http://flask.pocoo.org/docs/0.10/quickstart/#a-minimal-application
-    app.run(host='0.0.0.0')
+    TODOER_FLASK_APP.run(host='0.0.0.0')
