@@ -5,6 +5,7 @@ Tests for todoer.todoer.
 import datetime
 import json
 import re
+import unittest
 
 import pytz
 import responses
@@ -21,7 +22,8 @@ from todoer.todoer import (
     STORAGE_URL,
 )
 
-from storage.tests.testtools import InMemoryStorageTests
+from storage.storage import app as storage_app
+from storage.storage import db as storage_db
 
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
@@ -29,7 +31,7 @@ NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
 TIMESTAMP = 1463437744.335567
 
 
-class AuthenticationTests(InMemoryStorageTests):
+class AuthenticationTests(unittest.TestCase):
     """
     Connect to an in memory fake of the storage service and create a verified
     fake for ``requests`` to connect to.
@@ -40,12 +42,12 @@ class AuthenticationTests(InMemoryStorageTests):
         Create an environment with a fake storage app available and mocked for
         ``requests``.
         """
-        # This sets up variables to use as a fake storage service.
-        super(AuthenticationTests, self).setUp()
+        with storage_app.app_context():
+            storage_db.create_all()
 
         self.app = app.test_client()
 
-        for rule in self.storage_app.url_map.iter_rules():
+        for rule in storage_app.url_map.iter_rules():
             # We assume here that everything is in the style:
             # "{uri}/{method}/<{id}>" or "{uri}/{method}" when this is
             # not necessarily the case.
@@ -64,6 +66,11 @@ class AuthenticationTests(InMemoryStorageTests):
                     content_type='application/json',
                 )
 
+    def tearDown(self):
+        with storage_app.app_context():
+            storage_db.session.remove()
+            storage_db.drop_all()
+
     def request_callback(self, request):
         """
         Given a request to the storage service, send an equivalent request to
@@ -76,7 +83,7 @@ class AuthenticationTests(InMemoryStorageTests):
         """
         # The storage application is a ``werkzeug.test.Client`` and therefore
         # has methods like 'head', 'get' and 'post'.
-        response = getattr(self.storage_app, request.method.lower())(
+        response = getattr(storage_app.test_client(), request.method.lower())(
             request.path_url,
             content_type=request.headers['Content-Type'],
             data=request.body)
