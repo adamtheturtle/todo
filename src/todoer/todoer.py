@@ -45,7 +45,6 @@ class User(UserMixin):  # type: ignore
 
         :return: the email address to satify Flask-Login's requirements. This
             is used in conjunction with ``load_user`` for session management.
-        :rtype: string
         """
         return self.email
 
@@ -80,7 +79,6 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     :type user_id: string
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
-    :rtype: ``User`` or ``None``.
     """
     url = urljoin(STORAGE_URL, 'users/{email}').format(email=user_id)
     response = requests.get(url, headers={'Content-Type': 'application/json'})
