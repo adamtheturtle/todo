@@ -18,7 +18,6 @@ from todoer.todoer import (
     app,
     bcrypt,
     load_user_from_id,
-    User,
     STORAGE_URL,
 )
 
