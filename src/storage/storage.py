@@ -86,7 +86,7 @@ STORAGE_FLASK_APP.config['JSONSCHEMA_DIR'] = os.path.join(
     str(STORAGE_FLASK_APP.root_path),
     'schemas',
 )
-jsonschema = JsonSchema(STORAGE_FLASK_APP)
+JsonSchema(STORAGE_FLASK_APP)
 
 
 def load_user_from_id(user_id: str) -> Optional[User]:
@@ -305,9 +305,9 @@ def list_todos() -> Tuple[Response, int]:
     return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
 
 
-@STORAGE_FLASK_APP.route('/todos/<id>', methods=['PATCH'])
+@STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['PATCH'])
 @consumes('application/json')
-def update_todo(id: str) -> Tuple[Response, int]:
+def update_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Update a todo item.
 
@@ -331,12 +331,12 @@ def update_todo(id: str) -> Tuple[Response, int]:
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=int(id)).first()
+    todo = Todo.query.filter_by(id=todo_id).first()
 
     if todo is None:
         return jsonify(
             title='The requested todo does not exist.',
-            detail='No todo exists with the id "{id}"'.format(id=id),
+            detail=f'No todo exists with the id "{todo_id}"',
         ), codes.NOT_FOUND
 
     if 'content' in request.get_json():

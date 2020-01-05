@@ -15,8 +15,7 @@ from freezegun import freeze_time
 from requests import PreparedRequest, codes
 from werkzeug.http import parse_cookie
 
-from storage.storage import app as storage_app
-from storage.storage import STORAGE_SQLALCHEMY_DB
+from storage.storage import STORAGE_FLASK_APP, STORAGE_SQLALCHEMY_DB
 from todoer.todoer import (
     FLASK_BCRYPT,
     STORAGE_URL,
@@ -41,12 +40,12 @@ class AuthenticationTests(unittest.TestCase):
         Create an environment with a fake storage app available and mocked for
         ``requests``.
         """
-        with storage_app.app_context():  # type: ignore
+        with STORAGE_FLASK_APP.app_context():  # type: ignore
             STORAGE_SQLALCHEMY_DB.create_all()
 
         self.app = TODOER_FLASK_APP.test_client()
 
-        for rule in storage_app.url_map.iter_rules():
+        for rule in STORAGE_FLASK_APP.url_map.iter_rules():
             # We assume here that everything is in the style:
             # "{uri}/{method}/<{id}>" or "{uri}/{method}" when this is
             # not necessarily the case.
@@ -66,7 +65,7 @@ class AuthenticationTests(unittest.TestCase):
                 )
 
     def tearDown(self) -> None:
-        with storage_app.app_context():  # type: ignore
+        with STORAGE_FLASK_APP.app_context():  # type: ignore
             STORAGE_SQLALCHEMY_DB.session.remove()
             STORAGE_SQLALCHEMY_DB.drop_all()
 
@@ -86,7 +85,11 @@ class AuthenticationTests(unittest.TestCase):
         # The storage application is a ``werkzeug.test.Client`` and therefore
         # has methods like 'head', 'get' and 'post'.
         lower_request_method = str(request.method).lower()
-        response = getattr(storage_app.test_client(), lower_request_method)(
+        test_client_method = getattr(
+            STORAGE_FLASK_APP.test_client(),
+            lower_request_method,
+        )
+        response = test_client_method(
             request.path_url,
             content_type=request.headers['Content-Type'],
             data=request.body,
