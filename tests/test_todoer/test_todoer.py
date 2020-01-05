@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 
 import pytz
 import responses
+from flask.testing import FlaskClient
 from freezegun import freeze_time
 from requests import PreparedRequest, codes
 from werkzeug.http import parse_cookie
@@ -98,20 +99,21 @@ class AuthenticationTests(unittest.TestCase):
         result = (response.status_code, dict(response.headers), response.data)
         return result
 
-    def log_in_as_new_user(self) -> None:
-        """
-        Create a user and log in as that user.
-        """
-        self.app.post(
-            '/signup',
-            content_type='application/json',
-            data=json.dumps(USER_DATA),
-        )
-        self.app.post(
-            '/login',
-            content_type='application/json',
-            data=json.dumps(USER_DATA),
-        )
+
+def log_in_as_new_user(flask_app: FlaskClient) -> None:
+    """
+    Create a user and log in as that user.
+    """
+    flask_app.post(
+        '/signup',
+        content_type='application/json',
+        data=json.dumps(USER_DATA),
+    )
+    flask_app.post(
+        '/login',
+        content_type='application/json',
+        data=json.dumps(USER_DATA),
+    )
 
 
 class SignupTests(AuthenticationTests):
@@ -467,7 +469,7 @@ class CreateTodoTests(AuthenticationTests):
         returns a JSON response with the given data and a ``null``
         ``completion_timestamp``.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         response = self.app.post(
             '/todos',
             content_type='application/json',
@@ -487,7 +489,7 @@ class CreateTodoTests(AuthenticationTests):
         If the completed flag is set to ``true`` then the completed time is
         the number of seconds since the epoch.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         response = self.app.post(
             '/todos',
             content_type='application/json',
@@ -551,7 +553,7 @@ class CreateTodoTests(AuthenticationTests):
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         response = self.app.post('/todos', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
@@ -580,7 +582,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -605,7 +607,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for an existing todo an OK status code and the todo's
         details, included the completion timestamp.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -633,7 +635,7 @@ class ReadTodoTests(AuthenticationTests):
         """
         A ``GET`` request gets the correct todo when there are multiple.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -669,7 +671,7 @@ class ReadTodoTests(AuthenticationTests):
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         response = self.app.get('/todos/1', content_type='application/json')
 
         assert response.headers['Content-Type'] == 'application/json'
@@ -693,7 +695,7 @@ class ReadTodoTests(AuthenticationTests):
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -720,7 +722,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         It is possible to delete a todo item.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -746,7 +748,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -776,7 +778,7 @@ class DeleteTodoTests(AuthenticationTests):
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         response = self.app.delete('/todos/1', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
@@ -785,7 +787,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
 
         create = self.app.post(
             '/todos',
@@ -813,7 +815,7 @@ class ListTodosTests(AuthenticationTests):
         """
         When there are no todos, an empty array is returned.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
@@ -839,7 +841,7 @@ class ListTodosTests(AuthenticationTests):
         """
         All todos are listed.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         other_todo = NOT_COMPLETED_TODO_DATA.copy()
         other_todo['content'] = 'Get a haircut'
 
@@ -870,7 +872,7 @@ class ListTodosTests(AuthenticationTests):
         """
         It is possible to filter by only completed items.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -907,7 +909,7 @@ class ListTodosTests(AuthenticationTests):
         """
         It is possible to filter by only items which are not completed.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         self.app.post(
             '/todos',
             content_type='application/json',
@@ -958,7 +960,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to change the content of a todo item.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -991,7 +993,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1014,7 +1016,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to flag a todo item as completed.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1059,7 +1061,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         It is possible to flag a todo item as not completed.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1093,7 +1095,7 @@ class UpdateTodoTests(AuthenticationTests):
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1132,7 +1134,7 @@ class UpdateTodoTests(AuthenticationTests):
         Flagging an already completed item as completed does not change the
         completion timestamp.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create_time = datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc)
         with freeze_time(create_time):
             create = self.app.post(
@@ -1178,7 +1180,7 @@ class UpdateTodoTests(AuthenticationTests):
         """
         Not requesting any changes keeps the item the same.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         create = self.app.post(
             '/todos',
             content_type='application/json',
@@ -1199,7 +1201,7 @@ class UpdateTodoTests(AuthenticationTests):
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
-        self.log_in_as_new_user()
+        log_in_as_new_user(flask_app=self.app)
         response = self.app.patch('/todos/1', content_type='application/json')
 
         assert response.headers['Content-Type'] == 'application/json'
