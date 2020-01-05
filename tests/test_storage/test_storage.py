@@ -43,7 +43,6 @@ class TestCreateUser:
         A ``POST /users`` request without an email address returns a
         BAD_REQUEST status code and an error message.
         """
-        import pdb; pdb.set_trace()
         data = USER_DATA.copy()
         data.pop('email')
 

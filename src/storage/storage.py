@@ -3,9 +3,9 @@ A storage service for use by a todoer authentication service.
 """
 
 import os
-from typing import Optional
+from typing import Dict, Optional, Union, Tuple
 
-from flask import Flask, json, jsonify, make_response, request
+from flask import Flask, json, jsonify, make_response, request, Response
 from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
 from flask_sqlalchemy import SQLAlchemy
@@ -32,26 +32,26 @@ class Todo(db.Model):
     completed = db.Column(db.Boolean)
     completion_timestamp = db.Column(db.Float)
 
-    def as_dict(self):
+    def as_dict(self) -> Dict[str, Union[int, bool, float]]:
         """
         Return a representation of a todo item suitable for JSON responses.
         """
-        return dict(
+        representation = dict(
             id=self.id,
             content=self.content,
             completed=self.completed,
             completion_timestamp=self.completion_timestamp,
         )
+        return representation
 
 
-def create_app(database_uri):
+def create_app(database_uri: str) -> Flask:
     """
     Create an application with a database in a given location.
 
     :param database_uri: The location of the database for the application.
     :type database_uri: string
     :return: An application instance.
-    :rtype: ``Flask``
     """
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
@@ -88,7 +88,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
 
 
 @app.errorhandler(ValidationError)
-def on_validation_error(error):
+def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     """
     :resjson string title: An explanation that there was a validation error.
     :resjson string message: The precise validation error.
@@ -229,7 +229,7 @@ def todos_post():
 
 @app.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
-def specific_todo_get(id):
+def specific_todo_get(id: str) -> Tuple[Response, int]:
     """
     Get information about particular todo item.
 
@@ -250,12 +250,13 @@ def specific_todo_get(id):
             detail='No todo exists with the id "{id}"'.format(id=id),
         ), codes.NOT_FOUND
 
-    return jsonify(todo.as_dict()), codes.OK
+    result = jsonify(todo.as_dict()), codes.OK
+    return result
 
 
 @app.route('/todos/<id>', methods=['DELETE'])
 @consumes('application/json')
-def delete_todo(id):
+def delete_todo(id: str) -> Tuple[Response, int]:
     """
     Delete a particular todo item.
 
@@ -280,7 +281,7 @@ def delete_todo(id):
 
 @app.route('/todos', methods=['GET'])
 @consumes('application/json')
-def list_todos():
+def list_todos() -> Tuple[Response, int]:
     """
     List todo items.
 
@@ -303,7 +304,7 @@ def list_todos():
 
 @app.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
-def update_todo(id):
+def update_todo(id: str) -> Tuple[Response, int]:
     """
     Update a todo item.
 
