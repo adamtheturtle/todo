@@ -5,6 +5,7 @@ Tests for todoer.todoer.
 import datetime
 import json
 
+import pytest
 import pytz
 import responses
 from flask.testing import FlaskClient
@@ -369,7 +370,8 @@ class TestLoadUser:
             USER_DATA['email']
 
     @responses.activate
-    def test_user_does_not_exist(self, todoer_app: FlaskClient) -> None:
+    @pytest.mark.usefixtures('todoer_app')
+    def test_user_does_not_exist(self) -> None:
         """
         If no user exists with the email given as the user ID to
         ``load_user_from_id``, ``None`` is returned.
