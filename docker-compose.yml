@@ -9,7 +9,7 @@ todoer:
   environment:
    # Set the environment variable SECRET_KEY else the secret will be insecure.
    - SECRET_KEY
-  command: python todoer/todoer.py
+  command: python src/todoer/todoer.py
   links:
     - storage
 storage:
@@ -25,4 +25,4 @@ storage:
    - /tmp/todoer:/data
   environment:
    - SQLALCHEMY_DATABASE_URI=sqlite:////data/todoer.db
-  command: python storage/storage.py
+  command: python src/storage/storage.py
