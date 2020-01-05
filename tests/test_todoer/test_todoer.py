@@ -7,11 +7,12 @@ import json
 import re
 import unittest
 from urllib.parse import urljoin
+from typing import Dict, Tuple
 
 import pytz
 import responses
 from freezegun import freeze_time
-from requests import codes
+from requests import codes, PreparedRequest
 from werkzeug.http import parse_cookie
 
 from storage.storage import app as storage_app
@@ -64,7 +65,7 @@ class AuthenticationTests(unittest.TestCase):
             storage_db.session.remove()
             storage_db.drop_all()
 
-    def request_callback(self, request):
+    def request_callback(self, request: PreparedRequest) -> Tuple[int, Dict[str, str], bytes]:
         """
         Given a request to the storage service, send an equivalent request to
         an in memory fake of the storage service and return some key details
@@ -76,19 +77,21 @@ class AuthenticationTests(unittest.TestCase):
         """
         # The storage application is a ``werkzeug.test.Client`` and therefore
         # has methods like 'head', 'get' and 'post'.
-        response = getattr(storage_app.test_client(), request.method.lower())(
+        lower_request_method = str(request.method).lower()
+        response = getattr(storage_app.test_client(), lower_request_method)(
             request.path_url,
             content_type=request.headers['Content-Type'],
             data=request.body,
         )
 
-        return (
+        result = (
             response.status_code,
             {
                 key: value
                 for (key, value) in response.headers
             }, response.data,
         )
+        return result
 
     def log_in_as_new_user(self) -> None:
         """

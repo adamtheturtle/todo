@@ -59,7 +59,7 @@ login_manager.init_app(app)
 # Inputs can be validated using JSON schema.
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
-app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
+app.config['JSONSCHEMA_DIR'] = os.path.join(str(app.root_path), 'schemas')
 jsonschema = JsonSchema(app)
 
 STORAGE_URL = 'http://storage:5001'
@@ -110,7 +110,7 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
 @app.route('/login', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'get')
-def login():
+def login() -> Tuple[Response, int]:
     """
     Log in a given user.
 
@@ -154,7 +154,7 @@ def login():
 @app.route('/logout', methods=['POST'])
 @consumes('application/json')
 @login_required
-def logout():
+def logout() -> Tuple[Response, int]:
     """
     Log the current user out.
 
@@ -168,7 +168,7 @@ def logout():
 @app.route('/signup', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'create')
-def signup():
+def signup() -> Tuple[Response, int]:
     """
     Sign up a new user.
 
@@ -213,7 +213,7 @@ def signup():
 @consumes('application/json')
 @validate('todos', 'create')
 @login_required
-def create_todo():
+def create_todo() -> Tuple[Response, int]:
     """
     Create a new todo item. Requires log in.
 
@@ -251,7 +251,7 @@ def create_todo():
 @app.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
 @login_required
-def read_todo(id):
+def read_todo(id: str) -> Tuple[Response, int]:
     """
     Get information about a particular todo item. Requires log in.
 
@@ -272,7 +272,7 @@ def read_todo(id):
 @app.route('/todos/<id>', methods=['DELETE'])
 @consumes('application/json')
 @login_required
-def delete_todo(id):
+def delete_todo(id: str) -> Tuple[Response, int]:
     """
     Delete a particular todo item. Requires log in.
 
@@ -291,7 +291,7 @@ def delete_todo(id):
 @app.route('/todos', methods=['GET'])
 @consumes('application/json')
 @login_required
-def list_todos():
+def list_todos() -> Tuple[Response, int]:
     """
     List todo items, with optional filters. Requires log in.
 
