@@ -400,6 +400,7 @@ def update_todo(id):
     )
     return jsonify(response.json()), response.status_code
 
+
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
