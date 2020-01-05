@@ -64,6 +64,7 @@ def create_app(database_uri):
 
     return app
 
+
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     'SQLALCHEMY_DATABASE_URI',
     'sqlite:///:memory:',
@@ -344,6 +345,7 @@ def update_todo(id):
 
     db.session.commit()
     return jsonify(todo.as_dict()), codes.OK
+
 
 if __name__ == '__main__':   # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
