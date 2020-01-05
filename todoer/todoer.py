@@ -16,7 +16,7 @@ from flask_login import (
     logout_user,
     UserMixin,
 )
-from flask_jsonschema import JsonSchema, ValidationError, validate
+from flask_jsonschema import ValidationError, validate
 from flask_negotiate import consumes
 
 import pytz
@@ -62,7 +62,6 @@ login_manager.init_app(app)
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
 app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
-jsonschema = JsonSchema(app)
 
 STORAGE_URL = 'http://storage:5001'
 
