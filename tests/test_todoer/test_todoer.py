@@ -16,7 +16,7 @@ from requests import PreparedRequest, codes
 from werkzeug.http import parse_cookie
 
 from storage.storage import app as storage_app
-from storage.storage import db as storage_db
+from storage.storage import STORAGE_SQLALCHEMY_DB
 from todoer.todoer import (
     FLASK_BCRYPT,
     STORAGE_URL,
@@ -42,7 +42,7 @@ class AuthenticationTests(unittest.TestCase):
         ``requests``.
         """
         with storage_app.app_context():  # type: ignore
-            storage_db.create_all()
+            STORAGE_SQLALCHEMY_DB.create_all()
 
         self.app = TODOER_FLASK_APP.test_client()
 
@@ -67,8 +67,8 @@ class AuthenticationTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         with storage_app.app_context():  # type: ignore
-            storage_db.session.remove()
-            storage_db.drop_all()
+            STORAGE_SQLALCHEMY_DB.session.remove()
+            STORAGE_SQLALCHEMY_DB.drop_all()
 
     def request_callback(
         self,

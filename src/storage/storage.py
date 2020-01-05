@@ -61,15 +61,15 @@ def create_app(database_uri: str) -> Flask:
     :type database_uri: string
     :return: An application instance.
     """
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-    STORAGE_SQLALCHEMY_DB.init_app(app)
+    flask_app = Flask(__name__)
+    flask_app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
+    flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    STORAGE_SQLALCHEMY_DB.init_app(flask_app)
 
-    with app.app_context():  # type: ignore
+    with flask_app.app_context():  # type: ignore
         STORAGE_SQLALCHEMY_DB.create_all()
 
-    return app
+    return flask_app
 
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
@@ -77,13 +77,16 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
     'sqlite:///:memory:',
 )
 
-app = create_app(database_uri=SQLALCHEMY_DATABASE_URI)
+STORAGE_FLASK_APP = create_app(database_uri=SQLALCHEMY_DATABASE_URI)
 
 # Inputs can be validated using JSON schema.
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
-app.config['JSONSCHEMA_DIR'] = os.path.join(str(app.root_path), 'schemas')
-jsonschema = JsonSchema(app)
+STORAGE_FLASK_APP.config['JSONSCHEMA_DIR'] = os.path.join(
+    str(STORAGE_FLASK_APP.root_path),
+    'schemas',
+)
+jsonschema = JsonSchema(STORAGE_FLASK_APP)
 
 
 def load_user_from_id(user_id: str) -> Optional[User]:
@@ -96,7 +99,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     return result
 
 
-@app.errorhandler(ValidationError)
+@STORAGE_FLASK_APP.errorhandler(ValidationError)
 def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     """
     :resjson string title: An explanation that there was a validation error.
@@ -109,7 +112,7 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     ), codes.BAD_REQUEST
 
 
-@app.route('/users/<email>', methods=['GET'])
+@STORAGE_FLASK_APP.route('/users/<email>', methods=['GET'])
 @consumes('application/json')
 def specific_user_get(email: str) -> Tuple[Response, int]:
     """
@@ -136,7 +139,7 @@ def specific_user_get(email: str) -> Tuple[Response, int]:
     return return_data, codes.OK
 
 
-@app.route('/users', methods=['GET'])
+@STORAGE_FLASK_APP.route('/users', methods=['GET'])
 @consumes('application/json')
 def users_get() -> Response:
     """
@@ -163,7 +166,7 @@ def users_get() -> Response:
     return result
 
 
-@app.route('/users', methods=['POST'])
+@STORAGE_FLASK_APP.route('/users', methods=['POST'])
 @consumes('application/json')
 @validate('users', 'create')
 def users_post() -> Tuple[Response, int]:
@@ -196,7 +199,7 @@ def users_post() -> Tuple[Response, int]:
     return jsonify(email=email, password_hash=password_hash), codes.CREATED
 
 
-@app.route('/todos', methods=['POST'])
+@STORAGE_FLASK_APP.route('/todos', methods=['POST'])
 @consumes('application/json')
 @validate('todos', 'create')
 def todos_post() -> Tuple[Response, int]:
@@ -227,9 +230,9 @@ def todos_post() -> Tuple[Response, int]:
     return jsonify(todo.as_dict()), codes.CREATED
 
 
-@app.route('/todos/<id>', methods=['GET'])
+@STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['GET'])
 @consumes('application/json')
-def specific_todo_get(id: str) -> Tuple[Response, int]:
+def specific_todo_get(todo_id: int) -> Tuple[Response, int]:
     """
     Get information about particular todo item.
 
@@ -242,7 +245,7 @@ def specific_todo_get(id: str) -> Tuple[Response, int]:
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=int(id)).first()
+    todo = Todo.query.filter_by(id=todo_id).first()
 
     if todo is None:
         return jsonify(
@@ -254,9 +257,9 @@ def specific_todo_get(id: str) -> Tuple[Response, int]:
     return result
 
 
-@app.route('/todos/<id>', methods=['DELETE'])
+@STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['DELETE'])
 @consumes('application/json')
-def delete_todo(id: str) -> Tuple[Response, int]:
+def delete_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Delete a particular todo item.
 
@@ -265,12 +268,12 @@ def delete_todo(id: str) -> Tuple[Response, int]:
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=int(id)).first()
+    todo = Todo.query.filter_by(id=todo_id).first()
 
     if todo is None:
         return jsonify(
             title='The requested todo does not exist.',
-            detail='No todo exists with the id "{id}"'.format(id=id),
+            detail=f'No todo exists with the id "{todo_id}"',
         ), codes.NOT_FOUND
 
     STORAGE_SQLALCHEMY_DB.session.delete(todo)
@@ -279,7 +282,7 @@ def delete_todo(id: str) -> Tuple[Response, int]:
     return jsonify(), codes.OK
 
 
-@app.route('/todos', methods=['GET'])
+@STORAGE_FLASK_APP.route('/todos', methods=['GET'])
 @consumes('application/json')
 def list_todos() -> Tuple[Response, int]:
     """
@@ -302,7 +305,7 @@ def list_todos() -> Tuple[Response, int]:
     return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
 
 
-@app.route('/todos/<id>', methods=['PATCH'])
+@STORAGE_FLASK_APP.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
 def update_todo(id: str) -> Tuple[Response, int]:
     """
@@ -353,4 +356,4 @@ if __name__ == '__main__':  # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
     # See http://flask.pocoo.org/docs/0.10/quickstart/#a-minimal-application
-    app.run(host='0.0.0.0', port=5001)
+    STORAGE_FLASK_APP.run(host='0.0.0.0', port=5001)
