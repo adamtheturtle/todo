@@ -1,17 +1,3 @@
-todoer:
-  build: .
-  ports:
-   # HOST:CONTAINER
-
-   # Flask defaults to listening on port 5000 but this is configurable.
-   # See http://flask.pocoo.org/docs/0.10/api/#flask.Flask.run
-   - "5000:5000"
-  environment:
-   # Set the environment variable SECRET_KEY else the secret will be insecure.
-   - SECRET_KEY
-  command: python src/todoer/todoer.py
-  links:
-    - storage
 storage:
   build: .
   ports:
@@ -26,3 +12,17 @@ storage:
   environment:
    - SQLALCHEMY_DATABASE_URI=sqlite:////data/todoer.db
   command: python src/storage/storage.py
+todoer:
+  build: .
+  ports:
+   # HOST:CONTAINER
+
+   # Flask defaults to listening on port 5000 but this is configurable.
+   # See http://flask.pocoo.org/docs/0.10/api/#flask.Flask.run
+   - "5000:5000"
+  environment:
+   # Set the environment variable SECRET_KEY else the secret will be insecure.
+   - SECRET_KEY
+  command: python src/todoer/todoer.py
+  links:
+    - storage
