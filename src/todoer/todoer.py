@@ -5,6 +5,7 @@ An authentication service with todo capabilities.
 import datetime
 import os
 from urllib.parse import urljoin
+from typing import Optional
 
 import pytz
 import requests
@@ -27,7 +28,7 @@ class User(UserMixin):
     A user has an email address and a password hash.
     """
 
-    def __init__(self, email, password_hash):
+    def __init__(self, email: str, password_hash: str) -> None:
         """
         :param str email: A user's email.
         :param str password_hash: The hash of a user's password.
@@ -38,7 +39,7 @@ class User(UserMixin):
         self.email = email
         self.password_hash = password_hash
 
-    def get_id(self):
+    def get_id(self) -> str:
         """
         See https://flask-login.readthedocs.org/en/latest/#your-user-class
 
@@ -65,7 +66,7 @@ STORAGE_URL = 'http://storage:5001'
 
 
 @login_manager.user_loader
-def load_user_from_id(user_id):
+def load_user_from_id(user_id: str) -> Optional[User]:
     """
     Flask-Login ``user_loader`` callback.
 
@@ -90,6 +91,7 @@ def load_user_from_id(user_id):
             email=details['email'],
             password_hash=details['password_hash'],
         )
+    return None
 
 
 @app.errorhandler(ValidationError)

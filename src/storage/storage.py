@@ -77,10 +77,9 @@ app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
 jsonschema = JsonSchema(app)
 
 
-def load_user_from_id(user_id):
+def load_user_from_id(user_id: str) -> User:
     """
     :param user_id: The ID of the user Flask is trying to load.
-    :type user_id: string
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
     :rtype: ``User`` or ``None``.
