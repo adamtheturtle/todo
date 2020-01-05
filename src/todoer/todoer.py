@@ -5,11 +5,11 @@ An authentication service with todo capabilities.
 import datetime
 import os
 from urllib.parse import urljoin
-from typing import Optional
+from typing import Optional, Tuple
 
 import pytz
 import requests
-from flask import Flask, json, jsonify, request
+from flask import Flask, json, jsonify, request, Response
 from flask_bcrypt import Bcrypt
 from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_login import (
@@ -95,7 +95,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
 
 
 @app.errorhandler(ValidationError)
-def on_validation_error(error):
+def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     """
     :resjson string title: An explanation that there was a validation error.
     :resjson string message: The precise validation error.
