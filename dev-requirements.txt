@@ -1,7 +1,7 @@
-coverage # Allows us to measure code coverage
-coveralls # Allows us to upload coverage data
+Flask-Testing # Tools for testing Flask applications
 doc8 # Style check documentation
 flake8 # Code analysis tool with linting
-Flask-Testing # Tools for testing Flask applications
 freezegun # Freeze clock for unit tests
+pytest-cov==2.8.1  # Measure code coverage
+pytest==5.3.2
 responses==0.10.9 # Add mocks for requests
