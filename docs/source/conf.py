@@ -1,4 +1,6 @@
 # -*- CODING: UTF-8 -*-
+
+# pylint: disable=invalid-name
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
