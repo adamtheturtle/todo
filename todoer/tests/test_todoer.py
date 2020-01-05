@@ -115,9 +115,9 @@ class SignupTests(AuthenticationTests):
             '/signup',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(response.json, USER_DATA)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CREATED
+        assert response.json == USER_DATA
 
     @responses.activate
     def test_passwords_hashed(self):
@@ -129,8 +129,8 @@ class SignupTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps(USER_DATA))
         user = load_user_from_id(user_id=USER_DATA['email'])
-        self.assertTrue(bcrypt.check_password_hash(user.password_hash,
-                                                   USER_DATA['password']))
+        assert bcrypt.check_password_hash(user.password_hash,
+                                                   USER_DATA['password'])
 
     def test_missing_email(self):
         """
@@ -141,13 +141,13 @@ class SignupTests(AuthenticationTests):
             '/signup',
             content_type='application/json',
             data=json.dumps({'password': USER_DATA['password']}))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_missing_password(self):
         """
@@ -158,13 +158,13 @@ class SignupTests(AuthenticationTests):
             '/signup',
             content_type='application/json',
             data=json.dumps({'email': USER_DATA['email']}))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'password' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     @responses.activate
     def test_existing_user(self):
@@ -182,14 +182,14 @@ class SignupTests(AuthenticationTests):
             '/signup',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CONFLICT)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CONFLICT
         expected = {
             'title': 'There is already a user with the given email address.',
             'detail': 'A user already exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -197,7 +197,7 @@ class SignupTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.post('/signup', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class LoginTests(AuthenticationTests):
@@ -219,7 +219,7 @@ class LoginTests(AuthenticationTests):
             '/login',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        self.assertEqual(response.status_code, codes.OK)
+        assert response.status_code == codes.OK
 
     @responses.activate
     def test_non_existant_user(self):
@@ -231,14 +231,14 @@ class LoginTests(AuthenticationTests):
             '/login',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested user does not exist.',
             'detail': 'No user exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     @responses.activate
     def test_wrong_password(self):
@@ -256,14 +256,14 @@ class LoginTests(AuthenticationTests):
             '/login',
             content_type='application/json',
             data=json.dumps(data))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.UNAUTHORIZED)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.UNAUTHORIZED
         expected = {
             'title': 'An incorrect password was provided.',
             'detail': 'The password for the user "{email}" does not match the '
                       'password provided.'.format(email=USER_DATA['email']),
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     @responses.activate
     def test_remember_me_cookie_set(self):
@@ -293,13 +293,13 @@ class LoginTests(AuthenticationTests):
             '/login',
             content_type='application/json',
             data=json.dumps({'password': USER_DATA['password']}))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_missing_password(self):
         """
@@ -310,13 +310,13 @@ class LoginTests(AuthenticationTests):
             '/login',
             content_type='application/json',
             data=json.dumps({'email': USER_DATA['email']}))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'password' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -324,7 +324,7 @@ class LoginTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.post('/login', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class LogoutTests(AuthenticationTests):
@@ -347,7 +347,7 @@ class LogoutTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps(USER_DATA))
         response = self.app.post('/logout', content_type='application/json')
-        self.assertEqual(response.status_code, codes.OK)
+        assert response.status_code == codes.OK
 
     def test_not_logged_in(self):
         """
@@ -355,7 +355,7 @@ class LogoutTests(AuthenticationTests):
         UNAUTHORIZED status code.
         """
         response = self.app.post('/logout', content_type='application/json')
-        self.assertEqual(response.status_code, codes.UNAUTHORIZED)
+        assert response.status_code == codes.UNAUTHORIZED
 
     @responses.activate
     def test_logout_twice(self):
@@ -373,7 +373,7 @@ class LogoutTests(AuthenticationTests):
             data=json.dumps(USER_DATA))
         self.app.post('/logout', content_type='application/json')
         response = self.app.post('/logout', content_type='application/json')
-        self.assertEqual(response.status_code, codes.UNAUTHORIZED)
+        assert response.status_code == codes.UNAUTHORIZED
 
     def test_incorrect_content_type(self):
         """
@@ -381,7 +381,7 @@ class LogoutTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.post('/logout')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class LoadUserTests(AuthenticationTests):
@@ -400,10 +400,8 @@ class LoadUserTests(AuthenticationTests):
             '/signup',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        self.assertEqual(
-            load_user_from_id(user_id=USER_DATA['email']).email,
-            USER_DATA['email'],
-        )
+        assert load_user_from_id(user_id=USER_DATA['email']).email == \
+            USER_DATA['email']
 
     @responses.activate
     def test_user_does_not_exist(self):
@@ -411,7 +409,7 @@ class LoadUserTests(AuthenticationTests):
         If no user exists with the email given as the user ID to
         ``load_user_from_id``, ``None`` is returned.
         """
-        self.assertIsNone(load_user_from_id(user_id='email'))
+        assert load_user_from_id(user_id='email') is None
 
 
 class CreateTodoTests(AuthenticationTests):
@@ -432,12 +430,12 @@ class CreateTodoTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CREATED)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CREATED
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = 1
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
@@ -453,15 +451,11 @@ class CreateTodoTests(AuthenticationTests):
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CREATED)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CREATED
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
-        self.assertAlmostEqual(
-            response.json['completion_timestamp'],
-            TIMESTAMP,
-            places=3,
-        )
+        assert round(abs(response.json['completion_timestamp']-TIMESTAMP), 3) == 0
 
     def test_missing_text(self):
         """
@@ -476,13 +470,13 @@ class CreateTodoTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps(data),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'content' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_missing_completed_flag(self):
         """
@@ -497,13 +491,13 @@ class CreateTodoTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps(data),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'completed' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     @responses.activate
     def test_incorrect_content_type(self):
@@ -513,7 +507,7 @@ class CreateTodoTests(AuthenticationTests):
         """
         self.log_in_as_new_user()
         response = self.app.post('/todos', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
     def test_not_logged_in(self):
@@ -526,7 +520,7 @@ class CreateTodoTests(AuthenticationTests):
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
-        self.assertEqual(response.status_code, codes.UNAUTHORIZED)
+        assert response.status_code == codes.UNAUTHORIZED
 
 
 class ReadTodoTests(AuthenticationTests):
@@ -552,11 +546,11 @@ class ReadTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.OK)
+        assert read.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = create.json['id']
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
@@ -577,15 +571,11 @@ class ReadTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.OK)
+        assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = create.json['id']
-        self.assertAlmostEqual(
-            read.json.pop('completion_timestamp'),
-            TIMESTAMP,
-            places=3,
-        )
-        self.assertEqual(read.json, expected)
+        assert round(abs(read.json.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        assert read.json == expected
 
     @responses.activate
     def test_multiple_todos(self):
@@ -616,11 +606,11 @@ class ReadTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.OK)
+        assert read.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = create.json['id']
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     @responses.activate
     def test_non_existant(self):
@@ -631,13 +621,13 @@ class ReadTodoTests(AuthenticationTests):
         self.log_in_as_new_user()
         response = self.app.get('/todos/1', content_type='application/json')
 
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -645,7 +635,7 @@ class ReadTodoTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.get('/todos/1', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
     def test_not_logged_in(self):
@@ -666,7 +656,7 @@ class ReadTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.UNAUTHORIZED)
+        assert read.status_code == codes.UNAUTHORIZED
 
 
 class DeleteTodoTests(AuthenticationTests):
@@ -691,14 +681,14 @@ class DeleteTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(delete.status_code, codes.OK)
+        assert delete.status_code == codes.OK
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.NOT_FOUND)
+        assert read.status_code == codes.NOT_FOUND
 
     @responses.activate
     def test_delete_twice(self):
@@ -722,12 +712,12 @@ class DeleteTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(delete.status_code, codes.NOT_FOUND)
+        assert delete.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(delete.json, expected)
+        assert delete.json == expected
 
     @responses.activate
     def test_incorrect_content_type(self):
@@ -737,7 +727,7 @@ class DeleteTodoTests(AuthenticationTests):
         """
         self.log_in_as_new_user()
         response = self.app.delete('/todos/1', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
     def test_not_logged_in(self):
@@ -759,7 +749,7 @@ class DeleteTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(delete.status_code, codes.UNAUTHORIZED)
+        assert delete.status_code == codes.UNAUTHORIZED
 
 
 class ListTodosTests(AuthenticationTests):
@@ -778,8 +768,8 @@ class ListTodosTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(list_todos.json['todos'], [])
+        assert list_todos.status_code == codes.OK
+        assert list_todos.json['todos'] == []
 
     @responses.activate
     def test_not_logged_in(self):
@@ -791,7 +781,7 @@ class ListTodosTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(list_todos.status_code, codes.UNAUTHORIZED)
+        assert list_todos.status_code == codes.UNAUTHORIZED
 
     @responses.activate
     def test_list(self):
@@ -820,8 +810,8 @@ class ListTodosTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(list_todos.json['todos'], expected)
+        assert list_todos.status_code == codes.OK
+        assert list_todos.json['todos'] == expected
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
@@ -850,16 +840,12 @@ class ListTodosTests(AuthenticationTests):
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        self.assertEqual(list_todos.status_code, codes.OK)
+        assert list_todos.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = 2
         [todo] = list_todos_data['todos']
-        self.assertAlmostEqual(
-            todo.pop('completion_timestamp'),
-            TIMESTAMP,
-            places=3,
-        )
-        self.assertEqual(todo, expected)
+        assert round(abs(todo.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        assert todo == expected
 
     @responses.activate
     def test_filter_not_completed(self):
@@ -887,11 +873,11 @@ class ListTodosTests(AuthenticationTests):
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        self.assertEqual(list_todos.status_code, codes.OK)
+        assert list_todos.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = 1
-        self.assertEqual(list_todos_data['todos'], [expected])
+        assert list_todos_data['todos'] == [expected]
 
     @responses.activate
     def test_incorrect_content_type(self):
@@ -900,7 +886,7 @@ class ListTodosTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.get('/todos', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class UpdateTodoTests(AuthenticationTests):
@@ -931,15 +917,15 @@ class UpdateTodoTests(AuthenticationTests):
         expected = create.json
         expected['content'] = new_content
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert patch.json == expected
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     @responses.activate
     def test_not_logged_in(self):
@@ -961,7 +947,7 @@ class UpdateTodoTests(AuthenticationTests):
             data=json.dumps({'content': 'Book vacation'}),
         )
 
-        self.assertEqual(patch.status_code, codes.UNAUTHORIZED)
+        assert patch.status_code == codes.UNAUTHORIZED
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
@@ -986,25 +972,17 @@ class UpdateTodoTests(AuthenticationTests):
         expected['completed'] = True
         expected['completion_timestamp'] = TIMESTAMP
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertAlmostEqual(
-            patch.json.pop('completion_timestamp'),
-            expected.pop('completion_timestamp'),
-            places=3,
-        )
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert round(abs(patch.json.pop('completion_timestamp')-expected.pop('completion_timestamp')), 3) == 0
+        assert patch.json == expected
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertAlmostEqual(
-            read.json.pop('completion_timestamp'),
-            TIMESTAMP,
-            places=3,
-        )
-        self.assertEqual(read.json, expected)
+        assert round(abs(read.json.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        assert read.json == expected
 
     @responses.activate
     def test_flag_not_completed(self):
@@ -1029,15 +1007,15 @@ class UpdateTodoTests(AuthenticationTests):
         # Marking an item as not completed removes the completion timestamp.
         expected['completion_timestamp'] = None
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert patch.json == expected
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     @responses.activate
     def test_change_content_and_flag(self):
@@ -1065,15 +1043,15 @@ class UpdateTodoTests(AuthenticationTests):
         expected['completed'] = False
         expected['completion_timestamp'] = None
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert patch.json == expected
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     @responses.activate
     def test_flag_completed_already_completed(self):
@@ -1099,27 +1077,17 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps({'completed': True}),
             )
 
-        self.assertAlmostEqual(
-            patch.json.pop('completion_timestamp'),
-            # Timestamp set to the time it is first marked completed.
-            create.json.pop('completion_timestamp'),
-            places=3,
-        )
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, create.json)
+        assert round(abs(patch.json.pop('completion_timestamp')-create.json.pop('completion_timestamp')), 3) == 0
+        assert patch.status_code == codes.OK
+        assert patch.json == create.json
 
         read = self.app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertAlmostEqual(
-            read.json.pop('completion_timestamp'),
-            # Timestamp set to the time it is first marked completed.
-            TIMESTAMP,
-            places=3,
-        )
-        self.assertEqual(read.json, create.json)
+        assert round(abs(read.json.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        assert read.json == create.json
 
     @responses.activate
     def test_remain_same(self):
@@ -1139,7 +1107,7 @@ class UpdateTodoTests(AuthenticationTests):
             data=json.dumps({}),
         )
 
-        self.assertEqual(create.json, patch.json)
+        assert create.json == patch.json
 
     @responses.activate
     def test_non_existant(self):
@@ -1150,13 +1118,13 @@ class UpdateTodoTests(AuthenticationTests):
         self.log_in_as_new_user()
         response = self.app.patch('/todos/1', content_type='application/json')
 
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -1164,4 +1132,4 @@ class UpdateTodoTests(AuthenticationTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.app.patch('/todos/1', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE

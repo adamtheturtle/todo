@@ -34,9 +34,9 @@ class CreateUserTests(InMemoryStorageTests):
             '/users',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CREATED)
-        self.assertEqual(response.json, USER_DATA)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CREATED
+        assert response.json == USER_DATA
 
     def test_missing_email(self):
         """
@@ -50,13 +50,13 @@ class CreateUserTests(InMemoryStorageTests):
             '/users',
             content_type='application/json',
             data=json.dumps(data))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_missing_password_hash(self):
         """
@@ -70,13 +70,13 @@ class CreateUserTests(InMemoryStorageTests):
             '/users',
             content_type='application/json',
             data=json.dumps({'email': USER_DATA['email']}))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'password_hash' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_existing_user(self):
         """
@@ -93,14 +93,14 @@ class CreateUserTests(InMemoryStorageTests):
             '/users',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CONFLICT)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CONFLICT
         expected = {
             'title': 'There is already a user with the given email address.',
             'detail': 'A user already exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -108,7 +108,7 @@ class CreateUserTests(InMemoryStorageTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.storage_app.post('/users', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class GetUserTests(InMemoryStorageTests):
@@ -128,8 +128,8 @@ class GetUserTests(InMemoryStorageTests):
         response = self.storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
             content_type='application/json')
-        self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(response.json, USER_DATA)
+        assert response.status_code == codes.OK
+        assert response.json == USER_DATA
 
     def test_non_existant_user(self):
         """
@@ -139,14 +139,14 @@ class GetUserTests(InMemoryStorageTests):
         response = self.storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
             content_type='application/json')
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested user does not exist.',
             'detail': 'No user exists with the email "{email}"'.format(
                 email=USER_DATA['email']),
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -158,7 +158,7 @@ class GetUserTests(InMemoryStorageTests):
             content_type='text/html',
         )
 
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class GetUsersTests(InMemoryStorageTests):
@@ -176,9 +176,9 @@ class GetUsersTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(response.json, [])
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.OK
+        assert response.json == []
 
     def test_with_users(self):
         """
@@ -203,9 +203,9 @@ class GetUsersTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.OK)
-        self.assertEqual(response.json, users)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.OK
+        assert response.json == users
 
     def test_incorrect_content_type(self):
         """
@@ -213,7 +213,7 @@ class GetUsersTests(InMemoryStorageTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.storage_app.get('/users', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class CreateTodoTests(InMemoryStorageTests):
@@ -233,11 +233,11 @@ class CreateTodoTests(InMemoryStorageTests):
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CREATED)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CREATED
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = 1
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_missing_text(self):
         """
@@ -252,13 +252,13 @@ class CreateTodoTests(InMemoryStorageTests):
             content_type='application/json',
             data=json.dumps(data),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'content' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_missing_completed_flag(self):
         """
@@ -273,13 +273,13 @@ class CreateTodoTests(InMemoryStorageTests):
             content_type='application/json',
             data=json.dumps(data),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.BAD_REQUEST)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'completed' is a required property",
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_missing_completion_time(self):
         """
@@ -294,12 +294,12 @@ class CreateTodoTests(InMemoryStorageTests):
             content_type='application/json',
             data=json.dumps(data),
         )
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.CREATED)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.CREATED
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = 1
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -307,7 +307,7 @@ class CreateTodoTests(InMemoryStorageTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.storage_app.post('/todos', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class GetTodoTests(InMemoryStorageTests):
@@ -333,10 +333,10 @@ class GetTodoTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.OK)
+        assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = item_id
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     def test_timestamp_null(self):
         """
@@ -358,11 +358,11 @@ class GetTodoTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.OK)
+        assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
         expected['id'] = item_id
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     def test_non_existant(self):
         """
@@ -374,13 +374,13 @@ class GetTodoTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -388,7 +388,7 @@ class GetTodoTests(InMemoryStorageTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.storage_app.get('/todos/1', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class DeleteTodoTests(InMemoryStorageTests):
@@ -413,14 +413,14 @@ class DeleteTodoTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(delete.status_code, codes.OK)
+        assert delete.status_code == codes.OK
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
         )
 
-        self.assertEqual(read.status_code, codes.NOT_FOUND)
+        assert read.status_code == codes.NOT_FOUND
 
     def test_delete_twice(self):
         """
@@ -444,12 +444,12 @@ class DeleteTodoTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(delete.status_code, codes.NOT_FOUND)
+        assert delete.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(delete.json, expected)
+        assert delete.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -460,7 +460,7 @@ class DeleteTodoTests(InMemoryStorageTests):
             '/todos/1',
             content_type='text/html',
         )
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class ListTodosTests(InMemoryStorageTests):
@@ -477,8 +477,8 @@ class ListTodosTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(list_todos.json['todos'], [])
+        assert list_todos.status_code == codes.OK
+        assert list_todos.json['todos'] == []
 
     def test_list(self):
         """
@@ -504,8 +504,8 @@ class ListTodosTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(list_todos.status_code, codes.OK)
-        self.assertEqual(list_todos.json['todos'], expected)
+        assert list_todos.status_code == codes.OK
+        assert list_todos.json['todos'] == expected
 
     def test_filter_completed(self):
         """
@@ -531,11 +531,11 @@ class ListTodosTests(InMemoryStorageTests):
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        self.assertEqual(list_todos.status_code, codes.OK)
+        assert list_todos.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         item_id = json.loads(create_completed.data.decode('utf8')).get('id')
         expected['id'] = item_id
-        self.assertEqual(list_todos_data['todos'], [expected])
+        assert list_todos_data['todos'] == [expected]
 
     def test_filter_not_completed(self):
         """
@@ -561,11 +561,11 @@ class ListTodosTests(InMemoryStorageTests):
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        self.assertEqual(list_todos.status_code, codes.OK)
+        assert list_todos.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['id'] = 1
         expected['completion_timestamp'] = None
-        self.assertEqual(list_todos_data['todos'], [expected])
+        assert list_todos_data['todos'] == [expected]
 
     def test_incorrect_content_type(self):
         """
@@ -573,7 +573,7 @@ class ListTodosTests(InMemoryStorageTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.storage_app.get('/todos', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
 class UpdateTodoTests(InMemoryStorageTests):
@@ -604,15 +604,15 @@ class UpdateTodoTests(InMemoryStorageTests):
         expected['completion_timestamp'] = None
         expected['id'] = create.json['id']
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert patch.json == expected
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     def test_flag_completed(self):
         """
@@ -635,15 +635,15 @@ class UpdateTodoTests(InMemoryStorageTests):
         expected['completion_timestamp'] = 2
         expected['id'] = create.json['id']
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert patch.json == expected
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     def test_flag_not_completed(self):
         """
@@ -667,15 +667,15 @@ class UpdateTodoTests(InMemoryStorageTests):
         expected['completion_timestamp'] = None
         expected['id'] = create.json['id']
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert patch.json == expected
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     def test_change_content_and_flag(self):
         """
@@ -702,15 +702,15 @@ class UpdateTodoTests(InMemoryStorageTests):
         expected['completion_timestamp'] = None
         expected['id'] = create.json['id']
 
-        self.assertEqual(patch.status_code, codes.OK)
-        self.assertEqual(patch.json, expected)
+        assert patch.status_code == codes.OK
+        assert patch.json == expected
 
         read = self.storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
-        self.assertEqual(read.json, expected)
+        assert read.json == expected
 
     def test_non_existant(self):
         """
@@ -722,13 +722,13 @@ class UpdateTodoTests(InMemoryStorageTests):
             content_type='application/json',
         )
 
-        self.assertEqual(response.headers['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, codes.NOT_FOUND)
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == codes.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
         }
-        self.assertEqual(response.json, expected)
+        assert response.json == expected
 
     def test_incorrect_content_type(self):
         """
@@ -736,4 +736,4 @@ class UpdateTodoTests(InMemoryStorageTests):
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = self.storage_app.patch('/todos/1', content_type='text/html')
-        self.assertEqual(response.status_code, codes.UNSUPPORTED_MEDIA_TYPE)
+        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
