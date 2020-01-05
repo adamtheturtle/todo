@@ -14,7 +14,7 @@ from requests import codes
 db = SQLAlchemy()
 
 
-class User(db.Model):
+class User(db.Model):  # type: ignore
     """
     A user has an email address and a password hash.
     """
@@ -22,7 +22,7 @@ class User(db.Model):
     password_hash = db.Column(db.String)
 
 
-class Todo(db.Model):
+class Todo(db.Model):  # type: ignore
     """
     A todo has text content, a completed flag and a timestamp of when it was
     completed.
@@ -58,7 +58,7 @@ def create_app(database_uri: str) -> Flask:
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     db.init_app(app)
 
-    with app.app_context():
+    with app.app_context():  # type: ignore
         db.create_all()
 
     return app

@@ -36,7 +36,7 @@ class AuthenticationTests(unittest.TestCase):
         Create an environment with a fake storage app available and mocked for
         ``requests``.
         """
-        with storage_app.app_context():
+        with storage_app.app_context():  # type: ignore
             storage_db.create_all()
 
         self.app = app.test_client()
@@ -61,7 +61,7 @@ class AuthenticationTests(unittest.TestCase):
                 )
 
     def tearDown(self) -> None:
-        with storage_app.app_context():
+        with storage_app.app_context():  # type: ignore
             storage_db.session.remove()
             storage_db.drop_all()
 

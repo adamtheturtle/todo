@@ -23,7 +23,7 @@ from flask_negotiate import consumes
 from requests import codes
 
 
-class User(UserMixin):
+class User(UserMixin):  # type: ignore
     """
     A user has an email address and a password hash.
     """
