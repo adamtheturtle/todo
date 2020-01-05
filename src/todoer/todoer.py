@@ -316,7 +316,7 @@ def list_todos() -> Tuple[Response, int]:
 @app.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
 @login_required
-def update_todo(id):
+def update_todo(id: str) -> Tuple[Response, int]:
     """
     Update a todo item. If an item is changed from not-completed to completed,
     the ``completion_timestamp`` is set as now. Requires log in.
