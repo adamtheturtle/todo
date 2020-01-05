@@ -30,11 +30,11 @@ class User(UserMixin):  # type: ignore
 
     def __init__(self, email: str, password_hash: str) -> None:
         """
-        :param str email: A user's email.
-        :param str password_hash: The hash of a user's password.
+        :param email: A user's email.
+        :param password_hash: The hash of a user's password.
 
-        :ivar str email: A user's email.
-        :ivar str password_hash: The hash of a user's password.
+        :ivar email: A user's email.
+        :ivar password_hash: The hash of a user's password.
         """
         self.email = email
         self.password_hash = password_hash
@@ -43,7 +43,7 @@ class User(UserMixin):  # type: ignore
         """
         See https://flask-login.readthedocs.org/en/latest/#your-user-class
 
-        :return: the email address to satify Flask-Login's requirements. This
+        :return: the email address to satisfy Flask-Login's requirements. This
             is used in conjunction with ``load_user`` for session management.
         """
         return self.email
