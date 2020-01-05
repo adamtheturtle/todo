@@ -148,7 +148,7 @@ def login() -> Tuple[Response, int]:
 
     login_user(user, remember=True)
 
-    return jsonify(email=email, password=password)
+    return jsonify(email=email, password=password), codes.OK
 
 
 @app.route('/logout', methods=['POST'])
