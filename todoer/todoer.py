@@ -16,7 +16,7 @@ from flask_login import (
     logout_user,
     UserMixin,
 )
-from flask_jsonschema import JsonSchema, ValidationError
+from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
 
 import pytz
@@ -110,7 +110,7 @@ def on_validation_error(error):
 
 @app.route('/login', methods=['POST'])
 @consumes('application/json')
-@jsonschema.validate('user', 'get')
+@validate('user', 'get')
 def login():
     """
     Log in a given user.
@@ -167,7 +167,7 @@ def logout():
 
 @app.route('/signup', methods=['POST'])
 @consumes('application/json')
-@jsonschema.validate('user', 'create')
+@validate('user', 'create')
 def signup():
     """
     Sign up a new user.
@@ -210,7 +210,7 @@ def signup():
 
 @app.route('/todos', methods=['POST'])
 @consumes('application/json')
-@jsonschema.validate('todos', 'create')
+@validate('todos', 'create')
 @login_required
 def create_todo():
     """

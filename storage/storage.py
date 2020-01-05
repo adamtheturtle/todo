@@ -7,7 +7,7 @@ import os
 from flask import Flask, json, jsonify, request, make_response
 
 from flask_sqlalchemy import SQLAlchemy
-from flask_jsonschema import JsonSchema, ValidationError
+from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
 
 from requests import codes
@@ -153,7 +153,7 @@ def users_get():
 
 @app.route('/users', methods=['POST'])
 @consumes('application/json')
-@jsonschema.validate('users', 'create')
+@validate('users', 'create')
 def users_post():
     """
     Create a new user.
@@ -190,7 +190,7 @@ def users_post():
 
 @app.route('/todos', methods=['POST'])
 @consumes('application/json')
-@jsonschema.validate('todos', 'create')
+@validate('todos', 'create')
 def todos_post():
     """
     Create a new todo item.
