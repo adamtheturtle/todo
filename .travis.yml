@@ -1,13 +1,16 @@
 language: python
-python:
-  - "3.7"
+python: 3.8
+services:
+  - docker
+addons:
+  apt:
+    packages:
+    - enchant
+before_install:
+- travis_retry pip install --upgrade pip setuptools
 install:
-  - "pip install -e .[dev]"
-before_script:
-  - "flake8 ."
-  - "doc8 docs/"
+- travis_retry pip install --upgrade --editable .[dev]
+cache: pip
 script:
-  - "sphinx-build -W -b html -d build/doctrees docs/source build/html"
-  - "pytest -vvv --exitfirst --cov-fail-under 100 --cov todoer --cov storage"
-cache:
-  - pip
+- make lint
+- pytest -vvv --exitfirst tests/ --cov-fail-under 100 --cov src --cov tests
