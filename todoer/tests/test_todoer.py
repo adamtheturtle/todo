@@ -129,8 +129,10 @@ class SignupTests(AuthenticationTests):
             content_type='application/json',
             data=json.dumps(USER_DATA))
         user = load_user_from_id(user_id=USER_DATA['email'])
-        assert bcrypt.check_password_hash(user.password_hash,
-                                                   USER_DATA['password'])
+        assert bcrypt.check_password_hash(
+            pw_hash=user.password_hash,
+            password=USER_DATA['password'],
+        )
 
     def test_missing_email(self):
         """
@@ -455,7 +457,10 @@ class CreateTodoTests(AuthenticationTests):
         assert response.status_code == codes.CREATED
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
-        assert round(abs(response.json['completion_timestamp']-TIMESTAMP), 3) == 0
+        assert round(
+            number=abs(response.json['completion_timestamp'] - TIMESTAMP),
+            ndigits=3,
+        ) == 0
 
     def test_missing_text(self):
         """
@@ -574,7 +579,12 @@ class ReadTodoTests(AuthenticationTests):
         assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = create.json['id']
-        assert round(abs(read.json.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        # On some platforms (in particular Travis CI, float conversion loses
+        # some accuracy).
+        assert round(
+            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            ndigits=3,
+        ) == 0
         assert read.json == expected
 
     @responses.activate
@@ -973,7 +983,14 @@ class UpdateTodoTests(AuthenticationTests):
         expected['completion_timestamp'] = TIMESTAMP
 
         assert patch.status_code == codes.OK
-        assert round(abs(patch.json.pop('completion_timestamp')-expected.pop('completion_timestamp')), 3) == 0
+        # On some platforms (in particular Travis CI, float conversion loses
+        # some accuracy).
+        assert round(
+            number=abs(
+                patch.json.pop('completion_timestamp') -
+                expected.pop('completion_timestamp')),
+            ndigits=3,
+        ) == 0
         assert patch.json == expected
 
         read = self.app.get(
@@ -981,7 +998,10 @@ class UpdateTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        assert round(abs(read.json.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        assert round(
+            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            ndigits=3,
+        ) == 0
         assert read.json == expected
 
     @responses.activate
@@ -1077,7 +1097,12 @@ class UpdateTodoTests(AuthenticationTests):
                 data=json.dumps({'completed': True}),
             )
 
-        assert round(abs(patch.json.pop('completion_timestamp')-create.json.pop('completion_timestamp')), 3) == 0
+        assert round(
+            number=abs(
+                patch.json.pop('completion_timestamp') -
+                create.json.pop('completion_timestamp')),
+            ndigits=3,
+        ) == 0
         assert patch.status_code == codes.OK
         assert patch.json == create.json
 
@@ -1086,7 +1111,10 @@ class UpdateTodoTests(AuthenticationTests):
             content_type='application/json',
         )
 
-        assert round(abs(read.json.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        assert round(
+            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            ndigits=3,
+        ) == 0
         assert read.json == create.json
 
     @responses.activate
