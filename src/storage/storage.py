@@ -18,6 +18,7 @@ class User(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
     """
     A user has an email address and a password hash.
     """
+
     email = STORAGE_SQLALCHEMY_DB.Column(
         STORAGE_SQLALCHEMY_DB.String,
         primary_key=True,
@@ -30,6 +31,7 @@ class Todo(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
     A todo has text content, a completed flag and a timestamp of when it was
     completed.
     """
+
     todo_id = STORAGE_SQLALCHEMY_DB.Column(
         STORAGE_SQLALCHEMY_DB.Integer,
         primary_key=True,
