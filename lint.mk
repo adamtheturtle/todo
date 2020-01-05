@@ -68,7 +68,8 @@ spelling:
 
 .PHONY: shellcheck
 shellcheck:
-	shellcheck --exclude SC2164,SC1091 */*.sh
+	# At the time of writing, there are no shell files.
+	# shellcheck --exclude SC2164,SC1091 */*.sh
 
 .PHONY: autoflake
 autoflake:

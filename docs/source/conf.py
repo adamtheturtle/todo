@@ -13,6 +13,7 @@ Configuration for Sphinx.
 # ones.
 extensions = [
     'sphinxcontrib.autohttp.flask',
+    'sphinxcontrib.spelling',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -42,3 +43,5 @@ html_show_copyright = False
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'todoerdoc'
+
+spelling_word_list_filename = '../../spelling_private_dict.txt'
