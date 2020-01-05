@@ -289,12 +289,10 @@ class LoginTests(AuthenticationTests):
 
         items = [list(parse_cookie(cookie).items())[0] for cookie in cookies]
         headers_dict = {key: value for key, value in items}
-        token = headers_dict['remember_token']
+        headers_dict['remember_token']
         with app.app_context():
-            user = load_user_from_id(user_id=USER_DATA['email'])
+            load_user_from_id(user_id=USER_DATA['email'])
             # TODO some kind of check that the token works
-            # import pdb; pdb.set_trace()
-            # self.assertEqual(token, user.get_auth_token())
 
     def test_missing_email(self):
         """
