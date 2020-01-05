@@ -24,6 +24,7 @@ persistent=yes
 # usually to register additional checkers.
 load-plugins=
     pylint.extensions.docparams,
+    pylint_flask_sqlalchemy,
 
 # Use multiple processes to speed up Pylint.
 jobs=1
