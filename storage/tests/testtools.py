@@ -2,20 +2,15 @@
 Test tools for the storage service.
 """
 
-from flask_testing import TestCase
+import unittest
 
 from storage.storage import app, db
 
 
-class InMemoryStorageTests(TestCase):
+class InMemoryStorageTests(unittest.TestCase):
     """
     Set up and tear down an application with an in memory database for testing.
     """
-
-    def create_app(self):
-        app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        return app
 
     def setUp(self):
         with app.app_context():

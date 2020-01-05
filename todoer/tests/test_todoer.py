@@ -5,7 +5,6 @@ Tests for todoer.todoer.
 import datetime
 import json
 import re
-import unittest
 
 import pytz
 import responses
@@ -19,7 +18,6 @@ from todoer.todoer import (
     app,
     bcrypt,
     load_user_from_id,
-    User,
     STORAGE_URL,
 )
 
@@ -36,10 +34,6 @@ class AuthenticationTests(InMemoryStorageTests):
     Connect to an in memory fake of the storage service and create a verified
     fake for ``requests`` to connect to.
     """
-
-    def create_app(self):
-        app.config['TESTING'] = True
-        return app
 
     def setUp(self):
         """
@@ -418,20 +412,6 @@ class LoadUserTests(AuthenticationTests):
         ``load_user_from_id``, ``None`` is returned.
         """
         self.assertIsNone(load_user_from_id(user_id='email'))
-
-
-class UserTests(unittest.TestCase):
-    """
-    Tests for the ``User`` model.
-    """
-
-    def test_get_id(self):
-        """
-        ``User.get_id`` returns the email of a ``User``. This is required by
-        Flask-Login as a unique identifier.
-        """
-        user = User(email='email', password_hash='password_hash')
-        self.assertEqual(user.get_id(), 'email')
 
 
 class CreateTodoTests(AuthenticationTests):
