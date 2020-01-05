@@ -1,0 +1,4 @@
+include storage/schemas/*.json
+include todoer/schemas/*.json
+include Dockerfile
+include docker-compose.yml

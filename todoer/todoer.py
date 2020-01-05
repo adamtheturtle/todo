@@ -4,24 +4,21 @@ An authentication service with todo capabilities.
 
 import datetime
 import os
-
 from urllib.parse import urljoin
 
-from flask import Flask, jsonify, request, json
+import pytz
+import requests
+from flask import Flask, json, jsonify, request
 from flask_bcrypt import Bcrypt
+from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_login import (
     LoginManager,
+    UserMixin,
     login_required,
     login_user,
     logout_user,
-    UserMixin,
 )
-from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
-
-import pytz
-
-import requests
 from requests import codes
 
 
@@ -136,14 +133,15 @@ def login():
         return jsonify(
             title='The requested user does not exist.',
             detail='No user exists with the email "{email}"'.format(
-                email=email),
+                email=email
+            ),
         ), codes.NOT_FOUND
 
     if not bcrypt.check_password_hash(user.password_hash, password):
         return jsonify(
             title='An incorrect password was provided.',
             detail='The password for the user "{email}" does not match the '
-                   'password provided.'.format(email=email),
+            'password provided.'.format(email=email),
         ), codes.UNAUTHORIZED
 
     login_user(user, remember=True)
@@ -190,13 +188,14 @@ def signup():
         return jsonify(
             title='There is already a user with the given email address.',
             detail='A user already exists with the email "{email}"'.format(
-                email=email),
+                email=email
+            ),
         ), codes.CONFLICT
 
     data = {
         'email': email,
-        'password_hash': bcrypt.generate_password_hash(password).decode(
-            'utf8'),
+        'password_hash':
+        bcrypt.generate_password_hash(password).decode('utf8'),
     }
 
     requests.post(
@@ -362,7 +361,7 @@ def update_todo(id):
     return jsonify(response.json()), response.status_code
 
 
-if __name__ == '__main__':   # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
     # See http://flask.pocoo.org/docs/0.10/quickstart/#a-minimal-application

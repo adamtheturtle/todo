@@ -6,6 +6,3 @@ flask_jsonschema==0.1.1
 Flask-Negotiate==0.1.0
 pytz==2019.3
 requests==2.22.0
-Sphinx # Build documentation
-sphinx_rtd_theme # Theme for documentation
-sphinxcontrib-httpdomain # Describe RESTful HTTP APIs in Sphinx

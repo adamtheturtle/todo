@@ -6,24 +6,17 @@ import datetime
 import json
 import re
 import unittest
+from urllib.parse import urljoin
 
 import pytz
 import responses
-
 from freezegun import freeze_time
 from requests import codes
-from urllib.parse import urljoin
 from werkzeug.http import parse_cookie
-
-from todoer.todoer import (
-    app,
-    bcrypt,
-    load_user_from_id,
-    STORAGE_URL,
-)
 
 from storage.storage import app as storage_app
 from storage.storage import db as storage_db
+from todoer.todoer import STORAGE_URL, app, bcrypt, load_user_from_id
 
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
@@ -86,12 +79,14 @@ class AuthenticationTests(unittest.TestCase):
         response = getattr(storage_app.test_client(), request.method.lower())(
             request.path_url,
             content_type=request.headers['Content-Type'],
-            data=request.body)
+            data=request.body
+        )
 
         return (
             response.status_code,
-            {key: value for (key, value) in response.headers},
-            response.data)
+            {key: value
+             for (key, value) in response.headers}, response.data
+        )
 
     def log_in_as_new_user(self):
         """
@@ -100,11 +95,13 @@ class AuthenticationTests(unittest.TestCase):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
 
 
 class SignupTests(AuthenticationTests):
@@ -121,7 +118,8 @@ class SignupTests(AuthenticationTests):
         response = self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
         assert response.json == USER_DATA
@@ -134,7 +132,8 @@ class SignupTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         user = load_user_from_id(user_id=USER_DATA['email'])
         assert bcrypt.check_password_hash(
             pw_hash=user.password_hash,
@@ -149,7 +148,8 @@ class SignupTests(AuthenticationTests):
         response = self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps({'password': USER_DATA['password']}))
+            data=json.dumps({'password': USER_DATA['password']})
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
         expected = {
@@ -166,7 +166,8 @@ class SignupTests(AuthenticationTests):
         response = self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']}))
+            data=json.dumps({'email': USER_DATA['email']})
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
         expected = {
@@ -184,19 +185,24 @@ class SignupTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         data = USER_DATA.copy()
         data['password'] = 'different'
         response = self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CONFLICT
         expected = {
-            'title': 'There is already a user with the given email address.',
-            'detail': 'A user already exists with the email "{email}"'.format(
-                email=USER_DATA['email']),
+            'title':
+            'There is already a user with the given email address.',
+            'detail':
+            'A user already exists with the email "{email}"'.format(
+                email=USER_DATA['email']
+            ),
         }
         assert response.json == expected
 
@@ -223,11 +229,13 @@ class LoginTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         response = self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         assert response.status_code == codes.OK
 
     @responses.activate
@@ -239,13 +247,17 @@ class LoginTests(AuthenticationTests):
         response = self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.NOT_FOUND
         expected = {
-            'title': 'The requested user does not exist.',
-            'detail': 'No user exists with the email "{email}"'.format(
-                email=USER_DATA['email']),
+            'title':
+            'The requested user does not exist.',
+            'detail':
+            'No user exists with the email "{email}"'.format(
+                email=USER_DATA['email']
+            ),
         }
         assert response.json == expected
 
@@ -258,19 +270,21 @@ class LoginTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         data = USER_DATA.copy()
         data['password'] = 'incorrect'
         response = self.app.post(
-            '/login',
-            content_type='application/json',
-            data=json.dumps(data))
+            '/login', content_type='application/json', data=json.dumps(data)
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.UNAUTHORIZED
         expected = {
-            'title': 'An incorrect password was provided.',
-            'detail': 'The password for the user "{email}" does not match the '
-                      'password provided.'.format(email=USER_DATA['email']),
+            'title':
+            'An incorrect password was provided.',
+            'detail':
+            'The password for the user "{email}" does not match the '
+            'password provided.'.format(email=USER_DATA['email']),
         }
         assert response.json == expected
 
@@ -282,11 +296,13 @@ class LoginTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         response = self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         cookies = response.headers.getlist('Set-Cookie')
 
         items = [list(parse_cookie(cookie).items())[0] for cookie in cookies]
@@ -301,7 +317,8 @@ class LoginTests(AuthenticationTests):
         response = self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps({'password': USER_DATA['password']}))
+            data=json.dumps({'password': USER_DATA['password']})
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
         expected = {
@@ -318,7 +335,8 @@ class LoginTests(AuthenticationTests):
         response = self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']}))
+            data=json.dumps({'email': USER_DATA['email']})
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
         expected = {
@@ -350,11 +368,13 @@ class LogoutTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         response = self.app.post('/logout', content_type='application/json')
         assert response.status_code == codes.OK
 
@@ -375,11 +395,13 @@ class LogoutTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         self.app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         self.app.post('/logout', content_type='application/json')
         response = self.app.post('/logout', content_type='application/json')
         assert response.status_code == codes.UNAUTHORIZED
@@ -408,7 +430,8 @@ class LoadUserTests(AuthenticationTests):
         self.app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA)
+        )
         assert load_user_from_id(user_id=USER_DATA['email']).email == \
             USER_DATA['email']
 
@@ -852,7 +875,9 @@ class ListTodosTests(AuthenticationTests):
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'filter': {'completed': True}}),
+            data=json.dumps({'filter': {
+                'completed': True
+            }}),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -861,7 +886,7 @@ class ListTodosTests(AuthenticationTests):
         expected = COMPLETED_TODO_DATA.copy()
         expected['id'] = 2
         [todo] = list_todos_data['todos']
-        assert round(abs(todo.pop('completion_timestamp')-TIMESTAMP), 3) == 0
+        assert round(abs(todo.pop('completion_timestamp') - TIMESTAMP), 3) == 0
         assert todo == expected
 
     @responses.activate
@@ -885,7 +910,9 @@ class ListTodosTests(AuthenticationTests):
         list_todos = self.app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'filter': {'completed': False}}),
+            data=json.dumps({'filter': {
+                'completed': False
+            }}),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -995,7 +1022,8 @@ class UpdateTodoTests(AuthenticationTests):
         assert round(
             number=abs(
                 patch.json.pop('completion_timestamp') -
-                expected.pop('completion_timestamp')),
+                expected.pop('completion_timestamp')
+            ),
             ndigits=3,
         ) == 0
         assert patch.json == expected
@@ -1062,7 +1090,10 @@ class UpdateTodoTests(AuthenticationTests):
         patch = self.app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
-            data=json.dumps({'content': new_content, 'completed': False}),
+            data=json.dumps({
+                'content': new_content,
+                'completed': False
+            }),
         )
 
         expected = create.json
@@ -1096,7 +1127,8 @@ class UpdateTodoTests(AuthenticationTests):
             )
 
         patch_time = datetime.datetime.fromtimestamp(
-            TIMESTAMP + 1, tz=pytz.utc)
+            TIMESTAMP + 1, tz=pytz.utc
+        )
         with freeze_time(patch_time):
             patch = self.app.patch(
                 '/todos/{id}'.format(id=create.json['id']),
@@ -1107,7 +1139,8 @@ class UpdateTodoTests(AuthenticationTests):
         assert round(
             number=abs(
                 patch.json.pop('completion_timestamp') -
-                create.json.pop('completion_timestamp')),
+                create.json.pop('completion_timestamp')
+            ),
             ndigits=3,
         ) == 0
         assert patch.status_code == codes.OK

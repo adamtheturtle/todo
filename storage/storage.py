@@ -4,12 +4,10 @@ A storage service for use by a todoer authentication service.
 
 import os
 
-from flask import Flask, json, jsonify, request, make_response
-
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, json, jsonify, make_response, request
 from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
-
+from flask_sqlalchemy import SQLAlchemy
 from requests import codes
 
 db = SQLAlchemy()
@@ -122,7 +120,8 @@ def specific_user_get(email):
         return jsonify(
             title='The requested user does not exist.',
             detail='No user exists with the email "{email}"'.format(
-                email=email),
+                email=email
+            ),
         ), codes.NOT_FOUND
 
     return_data = jsonify(email=user.email, password_hash=user.password_hash)
@@ -142,13 +141,15 @@ def users_get():
     :status 200: Information about all users is returned.
     """
     details = [
-        {'email': user.email, 'password_hash': user.password_hash} for user
-        in User.query.all()]
+        {
+            'email': user.email,
+            'password_hash': user.password_hash
+        } for user in User.query.all()
+    ]
 
     return make_response(
-        json.dumps(details),
-        codes.OK,
-        {'Content-Type': 'application/json'})
+        json.dumps(details), codes.OK, {'Content-Type': 'application/json'}
+    )
 
 
 @app.route('/users', methods=['POST'])
@@ -178,7 +179,8 @@ def users_post():
         return jsonify(
             title='There is already a user with the given email address.',
             detail='A user already exists with the email "{email}"'.format(
-                email=email),
+                email=email
+            ),
         ), codes.CONFLICT
 
     user = User(email=email, password_hash=password_hash)
@@ -347,7 +349,7 @@ def update_todo(id):
     return jsonify(todo.as_dict()), codes.OK
 
 
-if __name__ == '__main__':   # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
     # See http://flask.pocoo.org/docs/0.10/quickstart/#a-minimal-application
