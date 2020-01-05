@@ -1050,7 +1050,8 @@ class TestUpdateTodo:
 
     @responses.activate
     def test_flag_completed_already_completed(
-        self, todoer_app: FlaskClient
+        self,
+        todoer_app: FlaskClient,
     ) -> None:
         """
         Flagging an already completed item as completed does not change the
@@ -1124,7 +1125,10 @@ class TestUpdateTodo:
         returned.
         """
         log_in_as_new_user(flask_app=todoer_app)
-        response = todoer_app.patch('/todos/1', content_type='application/json')
+        response = todoer_app.patch(
+            '/todos/1',
+            content_type='application/json',
+        )
 
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.NOT_FOUND
