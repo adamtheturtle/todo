@@ -6,8 +6,6 @@ import json
 
 from requests import codes
 
-from .testtools import InMemoryStorageTests
-
 USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
 COMPLETED_TODO_DATA = {
     'content': 'Buy milk',
@@ -20,17 +18,17 @@ NOT_COMPLETED_TODO_DATA = {
 }
 
 
-class CreateUserTests(InMemoryStorageTests):
+class TestCreateUser:
     """
     Tests for the user creation endpoint at ``POST /users``.
     """
 
-    def test_success_response(self):
+    def test_success_response(self, storage_app):
         """
         A ``POST /users`` request with an email address and password hash
         returns a JSON response with user details and a CREATED status.
         """
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/users',
             content_type='application/json',
             data=json.dumps(USER_DATA))
@@ -38,7 +36,7 @@ class CreateUserTests(InMemoryStorageTests):
         assert response.status_code == codes.CREATED
         assert response.json == USER_DATA
 
-    def test_missing_email(self):
+    def test_missing_email(self, storage_app):
         """
         A ``POST /users`` request without an email address returns a
         BAD_REQUEST status code and an error message.
@@ -46,7 +44,7 @@ class CreateUserTests(InMemoryStorageTests):
         data = USER_DATA.copy()
         data.pop('email')
 
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/users',
             content_type='application/json',
             data=json.dumps(data))
@@ -58,7 +56,7 @@ class CreateUserTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_missing_password_hash(self):
+    def test_missing_password_hash(self, storage_app):
         """
         A ``POST /users`` request without a password hash returns a BAD_REQUEST
         status code and an error message.
@@ -66,7 +64,7 @@ class CreateUserTests(InMemoryStorageTests):
         data = USER_DATA.copy()
         data.pop('password_hash')
 
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/users',
             content_type='application/json',
             data=json.dumps({'email': USER_DATA['email']}))
@@ -78,18 +76,18 @@ class CreateUserTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_existing_user(self):
+    def test_existing_user(self, storage_app):
         """
         A ``POST /users`` request for an email address which already exists
         returns a CONFLICT status code and error details.
         """
-        self.storage_app.post(
+        storage_app.post(
             '/users',
             content_type='application/json',
             data=json.dumps(USER_DATA))
         data = USER_DATA.copy()
         data['password'] = 'different'
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/users',
             content_type='application/json',
             data=json.dumps(USER_DATA))
@@ -102,41 +100,41 @@ class CreateUserTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.post('/users', content_type='text/html')
+        response = storage_app.post('/users', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
-class GetUserTests(InMemoryStorageTests):
+class TestGetUser:
     """
     Tests for getting a user at ``GET /users/{email}``.
     """
 
-    def test_success(self):
+    def test_success(self, storage_app):
         """
         A ``GET`` request for an existing user returns an OK status code and
         the user's details.
         """
-        self.storage_app.post(
+        storage_app.post(
             '/users',
             content_type='application/json',
             data=json.dumps(USER_DATA))
-        response = self.storage_app.get(
+        response = storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
             content_type='application/json')
         assert response.status_code == codes.OK
         assert response.json == USER_DATA
 
-    def test_non_existant_user(self):
+    def test_non_existant_user(self, storage_app):
         """
         A ``GET`` request for a user which does not exist returns a NOT_FOUND
         status code and error details.
         """
-        response = self.storage_app.get(
+        response = storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
             content_type='application/json')
         assert response.headers['Content-Type'] == 'application/json'
@@ -148,12 +146,12 @@ class GetUserTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.get(
+        response = storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
             content_type='text/html',
         )
@@ -161,17 +159,17 @@ class GetUserTests(InMemoryStorageTests):
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
-class GetUsersTests(InMemoryStorageTests):
+class TestGetUsers:
     """
     Tests for getting information about all users at ``GET /users/``.
     """
 
-    def test_no_users(self):
+    def test_no_users(self, storage_app):
         """
         A ``GET`` request for information about all users returns an OK status
         code and an empty array when there are no users.
         """
-        response = self.storage_app.get(
+        response = storage_app.get(
             '/users',
             content_type='application/json',
         )
@@ -180,7 +178,7 @@ class GetUsersTests(InMemoryStorageTests):
         assert response.status_code == codes.OK
         assert response.json == []
 
-    def test_with_users(self):
+    def test_with_users(self, storage_app):
         """
         A ``GET`` request for information about all users returns an OK status
         code and an array of user information.
@@ -193,12 +191,12 @@ class GetUsersTests(InMemoryStorageTests):
         ]
 
         for user in users:
-            self.storage_app.post(
+            storage_app.post(
                 '/users',
                 content_type='application/json',
                 data=json.dumps(user))
 
-        response = self.storage_app.get(
+        response = storage_app.get(
             '/users',
             content_type='application/json',
         )
@@ -207,28 +205,28 @@ class GetUsersTests(InMemoryStorageTests):
         assert response.status_code == codes.OK
         assert response.json == users
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.get('/users', content_type='text/html')
+        response = storage_app.get('/users', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
-class CreateTodoTests(InMemoryStorageTests):
+class TestCreateTodo:
     """
     Tests for the user creation endpoint at ``POST /todos``.
     """
 
-    def test_success_response(self):
+    def test_success_response(self, storage_app):
         """
         A ``POST /todos`` request with the item's text content, a flag
         describing it as completed and a completion time returns a JSON
         response with a CREATED status, and this includes the given details as
         well as an identifier.
         """
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
@@ -239,7 +237,7 @@ class CreateTodoTests(InMemoryStorageTests):
         expected['id'] = 1
         assert response.json == expected
 
-    def test_missing_text(self):
+    def test_missing_text(self, storage_app):
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
@@ -247,7 +245,7 @@ class CreateTodoTests(InMemoryStorageTests):
         data = COMPLETED_TODO_DATA.copy()
         data.pop('content')
 
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(data),
@@ -260,7 +258,7 @@ class CreateTodoTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_missing_completed_flag(self):
+    def test_missing_completed_flag(self, storage_app):
         """
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
@@ -268,7 +266,7 @@ class CreateTodoTests(InMemoryStorageTests):
         data = COMPLETED_TODO_DATA.copy()
         data.pop('completed')
 
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(data),
@@ -281,7 +279,7 @@ class CreateTodoTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_missing_completion_time(self):
+    def test_missing_completion_time(self, storage_app):
         """
         A ``POST /todos`` request without a completion time creates an item
         with a ``null`` completion time.
@@ -289,7 +287,7 @@ class CreateTodoTests(InMemoryStorageTests):
         data = COMPLETED_TODO_DATA.copy()
         data.pop('completion_timestamp')
 
-        response = self.storage_app.post(
+        response = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(data),
@@ -301,26 +299,26 @@ class CreateTodoTests(InMemoryStorageTests):
         expected['id'] = 1
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.post('/todos', content_type='text/html')
+        response = storage_app.post('/todos', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
-class GetTodoTests(InMemoryStorageTests):
+class TestGetTodo:
     """
     Tests for getting a todo item at ``GET /todos/{id}.``.
     """
 
-    def test_success(self):
+    def test_success(self, storage_app):
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
         """
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
@@ -328,7 +326,7 @@ class GetTodoTests(InMemoryStorageTests):
 
         item_id = create.json['id']
 
-        read = self.storage_app.get(
+        read = storage_app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
         )
@@ -338,14 +336,14 @@ class GetTodoTests(InMemoryStorageTests):
         expected['id'] = item_id
         assert read.json == expected
 
-    def test_timestamp_null(self):
+    def test_timestamp_null(self, storage_app):
         """
         If the timestamp is not given, the response includes a null timestamp.
         """
         data = COMPLETED_TODO_DATA.copy()
         del data['completion_timestamp']
 
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(data),
@@ -353,7 +351,7 @@ class GetTodoTests(InMemoryStorageTests):
 
         item_id = create.json['id']
 
-        read = self.storage_app.get(
+        read = storage_app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
         )
@@ -364,12 +362,12 @@ class GetTodoTests(InMemoryStorageTests):
         expected['id'] = item_id
         assert read.json == expected
 
-    def test_non_existant(self):
+    def test_non_existant(self, storage_app):
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
         """
-        response = self.storage_app.get(
+        response = storage_app.get(
             '/todos/1',
             content_type='application/json',
         )
@@ -382,25 +380,25 @@ class GetTodoTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.get('/todos/1', content_type='text/html')
+        response = storage_app.get('/todos/1', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
-class DeleteTodoTests(InMemoryStorageTests):
+class TestDeleteTodo:
     """
     Tests for deleting a todo item at ``DELETE /todos/{id}.``.
     """
 
-    def test_success(self):
+    def test_success(self, storage_app):
         """
         It is possible to delete a todo item.
         """
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
@@ -408,25 +406,25 @@ class DeleteTodoTests(InMemoryStorageTests):
 
         item_id = create.json['id']
 
-        delete = self.storage_app.delete(
+        delete = storage_app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
         )
 
         assert delete.status_code == codes.OK
 
-        read = self.storage_app.get(
+        read = storage_app.get(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
         )
 
         assert read.status_code == codes.NOT_FOUND
 
-    def test_delete_twice(self):
+    def test_delete_twice(self, storage_app):
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
@@ -434,12 +432,12 @@ class DeleteTodoTests(InMemoryStorageTests):
 
         item_id = create.json['id']
 
-        self.storage_app.delete(
+        storage_app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
         )
 
-        delete = self.storage_app.delete(
+        delete = storage_app.delete(
             '/todos/{id}'.format(id=item_id),
             content_type='application/json',
         )
@@ -451,28 +449,28 @@ class DeleteTodoTests(InMemoryStorageTests):
         }
         assert delete.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.delete(
+        response = storage_app.delete(
             '/todos/1',
             content_type='text/html',
         )
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
-class ListTodosTests(InMemoryStorageTests):
+class TestListTodos:
     """
     Tests for listing todo items at ``GET /todos``.
     """
 
-    def test_no_todos(self):
+    def test_no_todos(self, storage_app):
         """
         When there are no todos, an empty array is returned.
         """
-        list_todos = self.storage_app.get(
+        list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
         )
@@ -480,7 +478,7 @@ class ListTodosTests(InMemoryStorageTests):
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == []
 
-    def test_list(self):
+    def test_list(self, storage_app):
         """
         All todos are listed.
         """
@@ -490,7 +488,7 @@ class ListTodosTests(InMemoryStorageTests):
         todos = [COMPLETED_TODO_DATA, other_todo]
         expected = []
         for index, data in enumerate(todos):
-            create = self.storage_app.post(
+            create = storage_app.post(
                 '/todos',
                 content_type='application/json',
                 data=json.dumps(data),
@@ -499,7 +497,7 @@ class ListTodosTests(InMemoryStorageTests):
             expected_data['id'] = create.json['id']
             expected.append(expected_data)
 
-        list_todos = self.storage_app.get(
+        list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
         )
@@ -507,23 +505,23 @@ class ListTodosTests(InMemoryStorageTests):
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == expected
 
-    def test_filter_completed(self):
+    def test_filter_completed(self, storage_app):
         """
         It is possible to filter by only completed items.
         """
-        self.storage_app.post(
+        storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
-        create_completed = self.storage_app.post(
+        create_completed = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        list_todos = self.storage_app.get(
+        list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
             data=json.dumps({'filter': {'completed': True}}),
@@ -537,23 +535,23 @@ class ListTodosTests(InMemoryStorageTests):
         expected['id'] = item_id
         assert list_todos_data['todos'] == [expected]
 
-    def test_filter_not_completed(self):
+    def test_filter_not_completed(self, storage_app):
         """
         It is possible to filter by only items which are not completed.
         """
-        self.storage_app.post(
+        storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
-        self.storage_app.post(
+        storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        list_todos = self.storage_app.get(
+        list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
             data=json.dumps({'filter': {'completed': False}}),
@@ -567,25 +565,25 @@ class ListTodosTests(InMemoryStorageTests):
         expected['completion_timestamp'] = None
         assert list_todos_data['todos'] == [expected]
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.get('/todos', content_type='text/html')
+        response = storage_app.get('/todos', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
-class UpdateTodoTests(InMemoryStorageTests):
+class TestUpdateTodo:
     """
     Tests for updating a todo item at ``PATCH /todos/{id}.``.
     """
 
-    def test_change_content(self):
+    def test_change_content(self, storage_app):
         """
         It is possible to change the content of a todo item.
         """
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
@@ -593,7 +591,7 @@ class UpdateTodoTests(InMemoryStorageTests):
 
         new_content = 'Book vacation'
 
-        patch = self.storage_app.patch(
+        patch = storage_app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
             data=json.dumps({'content': new_content}),
@@ -607,24 +605,24 @@ class UpdateTodoTests(InMemoryStorageTests):
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
-        read = self.storage_app.get(
+        read = storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_flag_completed(self):
+    def test_flag_completed(self, storage_app):
         """
         It is possible to flag a todo item as completed.
         """
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
-        patch = self.storage_app.patch(
+        patch = storage_app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
             data=json.dumps({'completed': True, 'completion_timestamp': 2.0}),
@@ -638,24 +636,24 @@ class UpdateTodoTests(InMemoryStorageTests):
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
-        read = self.storage_app.get(
+        read = storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_flag_not_completed(self):
+    def test_flag_not_completed(self, storage_app):
         """
         It is possible to flag a todo item as not completed.
         """
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        patch = self.storage_app.patch(
+        patch = storage_app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
             data=json.dumps(
@@ -670,19 +668,19 @@ class UpdateTodoTests(InMemoryStorageTests):
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
-        read = self.storage_app.get(
+        read = storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_change_content_and_flag(self):
+    def test_change_content_and_flag(self, storage_app):
         """
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
         """
-        create = self.storage_app.post(
+        create = storage_app.post(
             '/todos',
             content_type='application/json',
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
@@ -690,7 +688,7 @@ class UpdateTodoTests(InMemoryStorageTests):
 
         new_content = 'Book vacation'
 
-        patch = self.storage_app.patch(
+        patch = storage_app.patch(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
             data=json.dumps({'content': new_content, 'completed': False}),
@@ -705,19 +703,19 @@ class UpdateTodoTests(InMemoryStorageTests):
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
-        read = self.storage_app.get(
+        read = storage_app.get(
             '/todos/{id}'.format(id=create.json['id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_non_existant(self):
+    def test_non_existant(self, storage_app):
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
-        response = self.storage_app.patch(
+        response = storage_app.patch(
             '/todos/1',
             content_type='application/json',
         )
@@ -730,10 +728,10 @@ class UpdateTodoTests(InMemoryStorageTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self, storage_app):
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = self.storage_app.patch('/todos/1', content_type='text/html')
+        response = storage_app.patch('/todos/1', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
