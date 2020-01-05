@@ -1,8 +1,10 @@
-# -*- CODING: UTF-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Configuration for Sphinx.
+"""
 
 # pylint: disable=invalid-name
-
-import sphinx_rtd_theme
 
 # -- General configuration ------------------------------------------------
 
@@ -31,9 +33,6 @@ release = '0.1'
 todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
-
-html_theme = 'sphinx_rtd_theme'
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False

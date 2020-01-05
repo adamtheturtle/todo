@@ -250,10 +250,10 @@ def create_todo() -> Tuple[Response, int]:
     return jsonify(create.json()), create.status_code
 
 
-@TODOER_FLASK_APP.route('/todos/<id>', methods=['GET'])
+@TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['GET'])
 @consumes('application/json')
 @login_required
-def read_todo(id: str) -> Tuple[Response, int]:
+def read_todo(todo_id: str) -> Tuple[Response, int]:
     """
     Get information about a particular todo item. Requires log in.
 
