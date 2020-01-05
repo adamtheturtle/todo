@@ -102,7 +102,7 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
 
 @app.route('/users/<email>', methods=['GET'])
 @consumes('application/json')
-def specific_user_get(email):
+def specific_user_get(email: str) -> Tuple[Response, int]:
     """
     Get information about particular user.
 
@@ -129,7 +129,7 @@ def specific_user_get(email):
 
 @app.route('/users', methods=['GET'])
 @consumes('application/json')
-def users_get():
+def users_get() -> Response:
     """
     Get information about all users.
 
@@ -146,15 +146,16 @@ def users_get():
         } for user in User.query.all()
     ]
 
-    return make_response(
+    result = make_response(
         json.dumps(details), codes.OK, {'Content-Type': 'application/json'},
     )
+    return result
 
 
 @app.route('/users', methods=['POST'])
 @consumes('application/json')
 @validate('users', 'create')
-def users_post():
+def users_post() -> Tuple[Response, int]:
     """
     Create a new user.
 
@@ -192,7 +193,7 @@ def users_post():
 @app.route('/todos', methods=['POST'])
 @consumes('application/json')
 @validate('todos', 'create')
-def todos_post():
+def todos_post() -> Tuple[Response, int]:
     """
     Create a new todo item.
 
