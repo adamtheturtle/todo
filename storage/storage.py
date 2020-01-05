@@ -7,7 +7,7 @@ import os
 from flask import Flask, json, jsonify, request, make_response
 
 from flask_sqlalchemy import SQLAlchemy
-from flask_jsonschema import ValidationError, validate
+from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
 
 from requests import codes
@@ -76,6 +76,7 @@ app = create_app(database_uri=SQLALCHEMY_DATABASE_URI)
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
 app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
+jsonschema = JsonSchema(app)
 
 
 def load_user_from_id(user_id):
