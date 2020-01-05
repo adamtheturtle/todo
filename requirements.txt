@@ -1,11 +1,11 @@
-flask==0.11
+flask==1.1.1
 Flask-Bcrypt==0.7.1
-Flask-Login==0.3.2
-Flask-SQLAlchemy==2.1
+Flask-Login==0.4.1
+Flask-SQLAlchemy==2.4.1
 flask_jsonschema==0.1.1
 Flask-Negotiate==0.1.0
-pytz==2016.4
-requests==2.10.0
+pytz==2019.3
+requests==2.22.0
 Sphinx # Build documentation
 sphinx_rtd_theme # Theme for documentation
 sphinxcontrib-httpdomain # Describe RESTful HTTP APIs in Sphinx
