@@ -74,7 +74,7 @@ app = create_app(database_uri=SQLALCHEMY_DATABASE_URI)
 # Inputs can be validated using JSON schema.
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
-app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
+app.config['JSONSCHEMA_DIR'] = os.path.join(str(app.root_path), 'schemas')
 jsonschema = JsonSchema(app)
 
 
