@@ -274,8 +274,7 @@ class LoginTests(AuthenticationTests):
     @responses.activate
     def test_remember_me_cookie_set(self):
         """
-        A "Remember Me" token is in the response header of a successful login
-        with the value of ``User.get_auth_token`` for the logged in user.
+        A "Remember Me" token is in the response header of a successful login.
         """
         self.app.post(
             '/signup',
@@ -289,10 +288,7 @@ class LoginTests(AuthenticationTests):
 
         items = [list(parse_cookie(cookie).items())[0] for cookie in cookies]
         headers_dict = {key: value for key, value in items}
-        headers_dict['remember_token']
-        with app.app_context():
-            load_user_from_id(user_id=USER_DATA['email'])
-            # TODO some kind of check that the token works
+        assert 'remember_token' in headers_dict
 
     def test_missing_email(self):
         """
