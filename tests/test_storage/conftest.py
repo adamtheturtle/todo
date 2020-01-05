@@ -18,10 +18,7 @@ def storage_app() -> Iterator[FlaskClient]:
     with app.app_context():
         db.create_all()
 
-    storage_app = app.test_client()
-    # This is useful for knowing about the available methods.
-    storage_app.url_map = app.url_map
-    yield storage_app
+    yield app.test_client()
 
     with app.app_context():
         db.session.remove()

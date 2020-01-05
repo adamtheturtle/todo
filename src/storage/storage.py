@@ -147,7 +147,7 @@ def users_get() -> Response:
         } for user in User.query.all()
     ]
 
-    result = make_response(
+    result: Response = make_response(
         json.dumps(details), codes.OK, {'Content-Type': 'application/json'},
     )
     return result
