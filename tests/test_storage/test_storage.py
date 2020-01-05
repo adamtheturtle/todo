@@ -512,13 +512,13 @@ class TestListTodos:
 
         todos = [COMPLETED_TODO_DATA, other_todo]
         expected = []
-        for index, data in enumerate(todos):
+        for todo in enumerate(todos):
             create = storage_app.post(
                 '/todos',
                 content_type='application/json',
-                data=json.dumps(data),
+                data=json.dumps(todo),
             )
-            expected_data = data.copy()
+            expected_data = todo.copy()
             expected_data['id'] = create.json['id']
             expected.append(expected_data)
 
