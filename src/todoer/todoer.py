@@ -4,12 +4,12 @@ An authentication service with todo capabilities.
 
 import datetime
 import os
-from urllib.parse import urljoin
 from typing import Optional, Tuple
+from urllib.parse import urljoin
 
 import pytz
 import requests
-from flask import Flask, json, jsonify, request, Response
+from flask import Flask, Response, json, jsonify, request
 from flask_bcrypt import Bcrypt
 from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_login import (
@@ -196,7 +196,8 @@ def signup() -> Tuple[Response, int]:
         ), codes.CONFLICT
 
     data = {
-        'email': email,
+        'email':
+        email,
         'password_hash':
         FLASK_BCRYPT.generate_password_hash(password).decode('utf8'),
     }
@@ -314,24 +315,24 @@ def list_todos() -> Tuple[Response, int]:
     return jsonify(response.json()), response.status_code
 
 
-@TODOER_FLASK_APP.route('/todos/<id>', methods=['PATCH'])
+@TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['PATCH'])
 @consumes('application/json')
 @login_required
-def update_todo(id: str) -> Tuple[Response, int]:
+def update_todo(todo_id: str) -> Tuple[Response, int]:
     """
     Update a todo item. If an item is changed from not-completed to completed,
     the ``completion_timestamp`` is set as now. Requires log in.
 
     :reqheader Content-Type: application/json
 
-    :queryparameter number id: The id of the todo item.
+    :queryparameter number todo_id: The id of the todo item.
 
     :reqjson string content: The new of the item (optional).
     :reqjson boolean completed: Whether the item is completed (optional).
 
     :resheader Content-Type: application/json
 
-    :resjson number id: The id of the item.
+    :resjson number todo_id: The id of the item.
     :resjson string content: The content item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp (now),
@@ -340,7 +341,7 @@ def update_todo(id: str) -> Tuple[Response, int]:
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     headers = {'Content-Type': 'application/json'}
     response = requests.get(url, headers=headers)
 
@@ -357,7 +358,7 @@ def update_todo(id: str) -> Tuple[Response, int]:
         data['completion_timestamp'] = None
 
     response = requests.patch(
-        urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
+        urljoin(STORAGE_URL, f'todos/{todo_id}'),
         headers={'Content-Type': 'application/json'},
         data=json.dumps(data),
     )

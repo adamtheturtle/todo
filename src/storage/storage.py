@@ -3,9 +3,9 @@ A storage service for use by a todoer authentication service.
 """
 
 import os
-from typing import Dict, Optional, Union, Tuple
+from typing import Dict, Optional, Tuple, Union
 
-from flask import Flask, json, jsonify, make_response, request, Response
+from flask import Flask, Response, json, jsonify, make_response, request
 from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
 from flask_sqlalchemy import SQLAlchemy
@@ -148,7 +148,9 @@ def users_get() -> Response:
     ]
 
     result: Response = make_response(
-        json.dumps(details), codes.OK, {'Content-Type': 'application/json'},
+        json.dumps(details),
+        codes.OK,
+        {'Content-Type': 'application/json'},
     )
     return result
 

@@ -47,7 +47,9 @@ class TestCreateUser:
         data.pop('email')
 
         response = storage_app.post(
-            '/users', content_type='application/json', data=json.dumps(data),
+            '/users',
+            content_type='application/json',
+            data=json.dumps(data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -350,7 +352,7 @@ class TestGetTodo:
         item_id = create.json['id']
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
@@ -375,7 +377,7 @@ class TestGetTodo:
         item_id = create.json['id']
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
@@ -430,14 +432,14 @@ class TestDeleteTodo:
         item_id = create.json['id']
 
         delete = storage_app.delete(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
         assert delete.status_code == codes.OK
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
@@ -456,12 +458,12 @@ class TestDeleteTodo:
         item_id = create.json['id']
 
         storage_app.delete(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
         delete = storage_app.delete(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
@@ -623,7 +625,7 @@ class TestUpdateTodo:
         new_content = 'Book vacation'
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
             data=json.dumps({'content': new_content}),
         )
@@ -637,7 +639,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
         )
 
@@ -654,12 +656,14 @@ class TestUpdateTodo:
         )
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
-            data=json.dumps({
-                'completed': True,
-                'completion_timestamp': 2.0,
-            }),
+            data=json.dumps(
+                {
+                    'completed': True,
+                    'completion_timestamp': 2.0,
+                },
+            ),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
@@ -671,7 +675,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
         )
 
@@ -688,7 +692,7 @@ class TestUpdateTodo:
         )
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
             data=json.dumps(
                 {
@@ -707,7 +711,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
         )
 
@@ -727,7 +731,7 @@ class TestUpdateTodo:
         new_content = 'Book vacation'
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
             data=json.dumps({
                 'content': new_content,
@@ -745,7 +749,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['id']),
             content_type='application/json',
         )
 

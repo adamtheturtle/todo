@@ -6,18 +6,23 @@ import datetime
 import json
 import re
 import unittest
-from urllib.parse import urljoin
 from typing import Dict, Tuple
+from urllib.parse import urljoin
 
 import pytz
 import responses
 from freezegun import freeze_time
-from requests import codes, PreparedRequest
+from requests import PreparedRequest, codes
 from werkzeug.http import parse_cookie
 
 from storage.storage import app as storage_app
 from storage.storage import db as storage_db
-from todoer.todoer import STORAGE_URL, TODOER_FLASK_APP, FLASK_BCRYPT, load_user_from_id
+from todoer.todoer import (
+    FLASK_BCRYPT,
+    STORAGE_URL,
+    TODOER_FLASK_APP,
+    load_user_from_id,
+)
 
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
@@ -65,7 +70,10 @@ class AuthenticationTests(unittest.TestCase):
             storage_db.session.remove()
             storage_db.drop_all()
 
-    def request_callback(self, request: PreparedRequest) -> Tuple[int, Dict[str, str], bytes]:
+    def request_callback(
+        self,
+        request: PreparedRequest,
+    ) -> Tuple[int, Dict[str, str], bytes]:
         """
         Given a request to the storage service, send an equivalent request to
         an in memory fake of the storage service and return some key details
@@ -274,7 +282,9 @@ class LoginTests(AuthenticationTests):
         data = USER_DATA.copy()
         data['password'] = 'incorrect'
         response = self.app.post(
-            '/login', content_type='application/json', data=json.dumps(data),
+            '/login',
+            content_type='application/json',
+            data=json.dumps(data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.UNAUTHORIZED
@@ -1129,7 +1139,8 @@ class UpdateTodoTests(AuthenticationTests):
             )
 
         patch_time = datetime.datetime.fromtimestamp(
-            TIMESTAMP + 1, tz=pytz.utc,
+            TIMESTAMP + 1,
+            tz=pytz.utc,
         )
         with freeze_time(patch_time):
             patch = self.app.patch(
