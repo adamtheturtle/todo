@@ -160,11 +160,6 @@ def users_post() -> Tuple[Response, int]:
     """
     Create a new user.
 
-    :param email: The email address of the new user.
-    :type email: string
-    :param password_hash: A password hash to associate with the given ``email``
-        address.
-    :type password_hash: string
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjson string email: The email address of the new user.
@@ -197,13 +192,6 @@ def users_post() -> Tuple[Response, int]:
 def todos_post() -> Tuple[Response, int]:
     """
     Create a new todo item.
-
-    :param content: The content of the new item.
-    :type content: string
-    :param completed: Whether the item is completed.
-    :type completed: boolean
-    :param completion_timestamp: The completion UNIX timestamp (optional).
-    :type completion_timestamp: number
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
