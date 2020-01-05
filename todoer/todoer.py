@@ -14,7 +14,6 @@ from flask_login import (
     login_required,
     login_user,
     logout_user,
-    make_secure_token,
     UserMixin,
 )
 from flask_jsonschema import JsonSchema, ValidationError
@@ -41,16 +40,6 @@ class User(UserMixin):
         """
         self.email = email
         self.password_hash = password_hash
-
-    def get_auth_token(self):
-        """
-        See https://flask-login.readthedocs.org/en/latest/#alternative-tokens
-
-        :return: A secure token unique to this ``User`` with the current
-            ``password_hash``.
-        :rtype: string
-        """
-        return make_secure_token(self.email, self.password_hash)
 
     def get_id(self):
         """
@@ -104,34 +93,6 @@ def load_user_from_id(user_id):
             email=details['email'],
             password_hash=details['password_hash'],
         )
-
-
-@login_manager.token_loader
-def load_user_from_token(auth_token):
-    """
-    Flask-Login token-loader callback.
-
-    See https://flask-login.readthedocs.org/en/latest/#flask_login.LoginManager.token_loader  # noqa
-
-    :param auth_token: The authentication token of the user Flask is trying to
-        load.
-    :type user_id: string
-    :return: The user which has the given authentication token or ``None`` if
-        there is no such user.
-    :rtype: ``User`` or ``None``.
-    """
-    response = requests.get(
-        urljoin(STORAGE_URL, '/users'),
-        headers={'Content-Type': 'application/json'},
-    )
-
-    for details in json.loads(response.text):
-        user = User(
-            email=details['email'],
-            password_hash=details['password_hash'],
-        )
-        if user.get_auth_token() == auth_token:
-            return user
 
 
 @app.errorhandler(ValidationError)

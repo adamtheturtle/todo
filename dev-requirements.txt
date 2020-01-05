@@ -4,4 +4,4 @@ doc8 # Style check documentation
 flake8 # Code analysis tool with linting
 Flask-Testing # Tools for testing Flask applications
 freezegun # Freeze clock for unit tests
-responses==0.5.0 # Add mocks for requests
+responses==0.10.9 # Add mocks for requests
