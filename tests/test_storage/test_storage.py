@@ -560,7 +560,8 @@ class TestListTodos:
 
         assert list_todos.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
-        item_id = json.loads(create_completed.data.decode('utf8')).get('todo_id')
+        loaded_data = json.loads(create_completed.data.decode('utf8'))
+        item_id = loaded_data.get('todo_id')
         expected['todo_id'] = item_id
         assert list_todos_data['todos'] == [expected]
 

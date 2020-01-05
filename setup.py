@@ -27,6 +27,8 @@ DEV_REQUIRES = _get_dependencies(
 )
 
 setup(
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     install_requires=INSTALL_REQUIRES,
     extras_require={'dev': DEV_REQUIRES},
 )
