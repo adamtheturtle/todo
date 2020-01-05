@@ -84,7 +84,8 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
     """
-    return User.query.filter_by(email=user_id).first()
+    result: Optional[User] = User.query.filter_by(email=user_id).first()
+    return result
 
 
 @app.errorhandler(ValidationError)
