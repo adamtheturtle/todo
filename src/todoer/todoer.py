@@ -49,22 +49,25 @@ class User(UserMixin):  # type: ignore
         return self.email
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret')
-bcrypt = Bcrypt(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
+FLASK_APP = Flask(__name__)
+FLASK_APP.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret')
+FLASK_BCRYPT = Bcrypt(FLASK_APP)
+LOGIN_MANAGER = LoginManager()
+LOGIN_MANAGER.init_app(FLASK_APP)
 
 # Inputs can be validated using JSON schema.
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
-app.config['JSONSCHEMA_DIR'] = os.path.join(str(app.root_path), 'schemas')
-jsonschema = JsonSchema(app)
+FLASK_APP.config['JSONSCHEMA_DIR'] = os.path.join(
+    str(FLASK_APP.root_path),
+    'schemas',
+)
+JsonSchema(FLASK_APP)
 
 STORAGE_URL = 'http://storage:5001'
 
 
-@login_manager.user_loader
+@LOGIN_MANAGER.user_loader
 def load_user_from_id(user_id: str) -> Optional[User]:
     """
     Flask-Login ``user_loader`` callback.
@@ -92,7 +95,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     return None
 
 
-@app.errorhandler(ValidationError)
+@FLASK_APP.errorhandler(ValidationError)
 def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     """
     :resjson string title: An explanation that there was a validation error.
@@ -105,7 +108,7 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     ), codes.BAD_REQUEST
 
 
-@app.route('/login', methods=['POST'])
+@FLASK_APP.route('/login', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'get')
 def login() -> Tuple[Response, int]:
@@ -137,7 +140,7 @@ def login() -> Tuple[Response, int]:
             ),
         ), codes.NOT_FOUND
 
-    if not bcrypt.check_password_hash(user.password_hash, password):
+    if not FLASK_BCRYPT.check_password_hash(user.password_hash, password):
         return jsonify(
             title='An incorrect password was provided.',
             detail='The password for the user "{email}" does not match the '
@@ -149,7 +152,7 @@ def login() -> Tuple[Response, int]:
     return jsonify(email=email, password=password), codes.OK
 
 
-@app.route('/logout', methods=['POST'])
+@FLASK_APP.route('/logout', methods=['POST'])
 @consumes('application/json')
 @login_required
 def logout() -> Tuple[Response, int]:
@@ -163,7 +166,7 @@ def logout() -> Tuple[Response, int]:
     return jsonify({}), codes.OK
 
 
-@app.route('/signup', methods=['POST'])
+@FLASK_APP.route('/signup', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'create')
 def signup() -> Tuple[Response, int]:
@@ -195,7 +198,7 @@ def signup() -> Tuple[Response, int]:
     data = {
         'email': email,
         'password_hash':
-        bcrypt.generate_password_hash(password).decode('utf8'),
+        FLASK_BCRYPT.generate_password_hash(password).decode('utf8'),
     }
 
     requests.post(
@@ -207,7 +210,7 @@ def signup() -> Tuple[Response, int]:
     return jsonify(email=email, password=password), codes.CREATED
 
 
-@app.route('/todos', methods=['POST'])
+@FLASK_APP.route('/todos', methods=['POST'])
 @consumes('application/json')
 @validate('todos', 'create')
 @login_required
@@ -246,7 +249,7 @@ def create_todo() -> Tuple[Response, int]:
     return jsonify(create.json()), create.status_code
 
 
-@app.route('/todos/<id>', methods=['GET'])
+@FLASK_APP.route('/todos/<id>', methods=['GET'])
 @consumes('application/json')
 @login_required
 def read_todo(id: str) -> Tuple[Response, int]:
@@ -267,7 +270,7 @@ def read_todo(id: str) -> Tuple[Response, int]:
     return jsonify(response.json()), response.status_code
 
 
-@app.route('/todos/<id>', methods=['DELETE'])
+@FLASK_APP.route('/todos/<id>', methods=['DELETE'])
 @consumes('application/json')
 @login_required
 def delete_todo(id: str) -> Tuple[Response, int]:
@@ -286,7 +289,7 @@ def delete_todo(id: str) -> Tuple[Response, int]:
     return jsonify(response.json()), response.status_code
 
 
-@app.route('/todos', methods=['GET'])
+@FLASK_APP.route('/todos', methods=['GET'])
 @consumes('application/json')
 @login_required
 def list_todos() -> Tuple[Response, int]:
@@ -311,7 +314,7 @@ def list_todos() -> Tuple[Response, int]:
     return jsonify(response.json()), response.status_code
 
 
-@app.route('/todos/<id>', methods=['PATCH'])
+@FLASK_APP.route('/todos/<id>', methods=['PATCH'])
 @consumes('application/json')
 @login_required
 def update_todo(id: str) -> Tuple[Response, int]:

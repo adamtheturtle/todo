@@ -17,7 +17,7 @@ from werkzeug.http import parse_cookie
 
 from storage.storage import app as storage_app
 from storage.storage import db as storage_db
-from todoer.todoer import STORAGE_URL, app, bcrypt, load_user_from_id
+from todoer.todoer import STORAGE_URL, FLASK_APP, FLASK_BCRYPT, load_user_from_id
 
 USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
@@ -39,7 +39,7 @@ class AuthenticationTests(unittest.TestCase):
         with storage_app.app_context():  # type: ignore
             storage_db.create_all()
 
-        self.app = app.test_client()
+        self.app = FLASK_APP.test_client()
 
         for rule in storage_app.url_map.iter_rules():
             # We assume here that everything is in the style:
@@ -140,7 +140,7 @@ class SignupTests(AuthenticationTests):
             data=json.dumps(USER_DATA),
         )
         user = load_user_from_id(user_id=USER_DATA['email'])
-        assert bcrypt.check_password_hash(
+        assert FLASK_BCRYPT.check_password_hash(
             pw_hash=user.password_hash,
             password=USER_DATA['password'],
         )
