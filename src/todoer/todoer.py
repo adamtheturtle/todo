@@ -133,7 +133,7 @@ def login():
         return jsonify(
             title='The requested user does not exist.',
             detail='No user exists with the email "{email}"'.format(
-                email=email
+                email=email,
             ),
         ), codes.NOT_FOUND
 
@@ -188,7 +188,7 @@ def signup():
         return jsonify(
             title='There is already a user with the given email address.',
             detail='A user already exists with the email "{email}"'.format(
-                email=email
+                email=email,
             ),
         ), codes.CONFLICT
 

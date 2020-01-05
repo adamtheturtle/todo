@@ -120,7 +120,7 @@ def specific_user_get(email):
         return jsonify(
             title='The requested user does not exist.',
             detail='No user exists with the email "{email}"'.format(
-                email=email
+                email=email,
             ),
         ), codes.NOT_FOUND
 
@@ -143,12 +143,12 @@ def users_get():
     details = [
         {
             'email': user.email,
-            'password_hash': user.password_hash
+            'password_hash': user.password_hash,
         } for user in User.query.all()
     ]
 
     return make_response(
-        json.dumps(details), codes.OK, {'Content-Type': 'application/json'}
+        json.dumps(details), codes.OK, {'Content-Type': 'application/json'},
     )
 
 
@@ -179,7 +179,7 @@ def users_post():
         return jsonify(
             title='There is already a user with the given email address.',
             detail='A user already exists with the email "{email}"'.format(
-                email=email
+                email=email,
             ),
         ), codes.CONFLICT
 

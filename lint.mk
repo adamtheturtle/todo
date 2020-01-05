@@ -20,7 +20,7 @@ fix-yapf:
 
 .PHONY: mypy
 mypy:
-	mypy *.py src/ tests/ docs/source/ admin
+	mypy *.py src/ tests/ docs/source/
 
 .PHONY: check-manifest
 check-manifest:
@@ -48,7 +48,7 @@ pip-missing-reqs:
 
 .PHONY: pylint
 pylint:
-	pylint *.py src/ tests/ admin/ docs/
+	pylint *.py src/ tests/ docs/
 
 .PHONY: pyroma
 pyroma:

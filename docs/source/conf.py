@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- CODING: UTF-8 -*-
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -71,7 +71,7 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,

@@ -31,7 +31,7 @@ class TestCreateUser:
         response = storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA)
+            data=json.dumps(USER_DATA),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
@@ -46,7 +46,7 @@ class TestCreateUser:
         data.pop('email')
 
         response = storage_app.post(
-            '/users', content_type='application/json', data=json.dumps(data)
+            '/users', content_type='application/json', data=json.dumps(data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -67,7 +67,7 @@ class TestCreateUser:
         response = storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']})
+            data=json.dumps({'email': USER_DATA['email']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -85,14 +85,14 @@ class TestCreateUser:
         storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA)
+            data=json.dumps(USER_DATA),
         )
         data = USER_DATA.copy()
         data['password'] = 'different'
         response = storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA)
+            data=json.dumps(USER_DATA),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CONFLICT
@@ -101,7 +101,7 @@ class TestCreateUser:
             'There is already a user with the given email address.',
             'detail':
             'A user already exists with the email "{email}"'.format(
-                email=USER_DATA['email']
+                email=USER_DATA['email'],
             ),
         }
         assert response.json == expected
@@ -128,11 +128,11 @@ class TestGetUser:
         storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA)
+            data=json.dumps(USER_DATA),
         )
         response = storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
-            content_type='application/json'
+            content_type='application/json',
         )
         assert response.status_code == codes.OK
         assert response.json == USER_DATA
@@ -144,7 +144,7 @@ class TestGetUser:
         """
         response = storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
-            content_type='application/json'
+            content_type='application/json',
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.NOT_FOUND
@@ -153,7 +153,7 @@ class TestGetUser:
             'The requested user does not exist.',
             'detail':
             'No user exists with the email "{email}"'.format(
-                email=USER_DATA['email']
+                email=USER_DATA['email'],
             ),
         }
         assert response.json == expected
@@ -199,15 +199,15 @@ class TestGetUsers:
             USER_DATA,
             {
                 'email': 'bob@example.com',
-                'password_hash': '123abc'
+                'password_hash': '123abc',
             },
             {
                 'email': 'carol@example.com',
-                'password_hash': '456def'
+                'password_hash': '456def',
             },
             {
                 'email': 'dan@example.com',
-                'password_hash': '789efg'
+                'password_hash': '789efg',
             },
         ]
 
@@ -215,7 +215,7 @@ class TestGetUsers:
             storage_app.post(
                 '/users',
                 content_type='application/json',
-                data=json.dumps(user)
+                data=json.dumps(user),
             )
 
         response = storage_app.get(
@@ -546,9 +546,11 @@ class TestListTodos:
         list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'filter': {
-                'completed': True
-            }}),
+            data=json.dumps({
+                'filter': {
+                    'completed': True,
+                },
+            }),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -578,9 +580,11 @@ class TestListTodos:
         list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'filter': {
-                'completed': False
-            }}),
+            data=json.dumps({
+                'filter': {
+                    'completed': False,
+                },
+            }),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -653,7 +657,7 @@ class TestUpdateTodo:
             content_type='application/json',
             data=json.dumps({
                 'completed': True,
-                'completion_timestamp': 2.0
+                'completion_timestamp': 2.0,
             }),
         )
 
@@ -688,8 +692,8 @@ class TestUpdateTodo:
             data=json.dumps(
                 {
                     'completed': False,
-                    'completion_timestamp': None
-                }
+                    'completion_timestamp': None,
+                },
             ),
         )
 
@@ -726,7 +730,7 @@ class TestUpdateTodo:
             content_type='application/json',
             data=json.dumps({
                 'content': new_content,
-                'completed': False
+                'completed': False,
             }),
         )
 
