@@ -30,7 +30,7 @@ class Todo(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
     A todo has text content, a completed flag and a timestamp of when it was
     completed.
     """
-    id = STORAGE_SQLALCHEMY_DB.Column(
+    todo_id = STORAGE_SQLALCHEMY_DB.Column(
         STORAGE_SQLALCHEMY_DB.Integer,
         primary_key=True,
     )
@@ -45,7 +45,7 @@ class Todo(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
         Return a representation of a todo item suitable for JSON responses.
         """
         representation = dict(
-            id=self.id,
+            todo_id=self.todo_id,
             content=self.content,
             completed=self.completed,
             completion_timestamp=self.completion_timestamp,
@@ -245,12 +245,12 @@ def specific_todo_get(todo_id: int) -> Tuple[Response, int]:
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=todo_id).first()
+    todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
         return jsonify(
             title='The requested todo does not exist.',
-            detail='No todo exists with the id "{id}"'.format(id=id),
+            detail=f'No todo exists with the id "{todo_id}"',
         ), codes.NOT_FOUND
 
     result = jsonify(todo.as_dict()), codes.OK
@@ -268,7 +268,7 @@ def delete_todo(todo_id: int) -> Tuple[Response, int]:
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=todo_id).first()
+    todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
         return jsonify(
@@ -331,7 +331,7 @@ def update_todo(todo_id: int) -> Tuple[Response, int]:
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=todo_id).first()
+    todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
         return jsonify(

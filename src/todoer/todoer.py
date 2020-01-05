@@ -223,7 +223,7 @@ def create_todo() -> Tuple[Response, int]:
     :resheader Content-Type: application/json
     :reqjson string content: The content of the new item.
     :reqjson boolean completed: Whether the item is completed.
-    :resjson number id: The id of the todo item.
+    :resjson number todo_id: The id of the todo item.
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp (now),
@@ -259,7 +259,7 @@ def read_todo(todo_id: int) -> Tuple[Response, int]:
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :queryparameter number id: The id of the todo item.
+    :queryparameter number todo_id: The id of the todo item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
@@ -280,7 +280,7 @@ def delete_todo(todo_id: int) -> Tuple[Response, int]:
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :queryparameter number id: The id of the todo item.
+    :queryparameter number todo_id: The id of the todo item.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """

@@ -477,7 +477,7 @@ class CreateTodoTests(AuthenticationTests):
         assert response.status_code == codes.CREATED
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = 1
+        expected['todo_id'] = 1
         assert response.json == expected
 
     @responses.activate
@@ -588,14 +588,14 @@ class ReadTodoTests(AuthenticationTests):
         )
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert read.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
         assert read.json == expected
 
     @responses.activate
@@ -613,13 +613,13 @@ class ReadTodoTests(AuthenticationTests):
         )
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
         assert round(
@@ -653,14 +653,14 @@ class ReadTodoTests(AuthenticationTests):
         )
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert read.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
         assert read.json == expected
 
     @responses.activate
@@ -703,7 +703,7 @@ class ReadTodoTests(AuthenticationTests):
         self.app.post('/logout', content_type='application/json')
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -728,14 +728,14 @@ class DeleteTodoTests(AuthenticationTests):
         )
 
         delete = self.app.delete(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert delete.status_code == codes.OK
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -754,12 +754,12 @@ class DeleteTodoTests(AuthenticationTests):
         )
 
         self.app.delete(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
         delete = self.app.delete(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -796,7 +796,7 @@ class DeleteTodoTests(AuthenticationTests):
         self.app.post('/logout', content_type='application/json')
 
         delete = self.app.delete(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -852,7 +852,7 @@ class ListTodosTests(AuthenticationTests):
                 data=json.dumps(todo),
             )
             expected_data = todo.copy()
-            expected_data['id'] = create.json['id']
+            expected_data['todo_id'] = create.json['todo_id']
             expected_data['completion_timestamp'] = None
             expected.append(expected_data)
 
@@ -897,7 +897,7 @@ class ListTodosTests(AuthenticationTests):
 
         assert list_todos.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
-        expected['id'] = 2
+        expected['todo_id'] = 2
         [todo] = list_todos_data['todos']
         assert round(abs(todo.pop('completion_timestamp') - TIMESTAMP), 3) == 0
         assert todo == expected
@@ -935,7 +935,7 @@ class ListTodosTests(AuthenticationTests):
         assert list_todos.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = 1
+        expected['todo_id'] = 1
         assert list_todos_data['todos'] == [expected]
 
     @responses.activate
@@ -968,7 +968,7 @@ class UpdateTodoTests(AuthenticationTests):
         new_content = 'Book vacation'
 
         patch = self.app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({'content': new_content}),
         )
@@ -980,7 +980,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert patch.json == expected
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -1001,7 +1001,7 @@ class UpdateTodoTests(AuthenticationTests):
         self.app.post('/logout', content_type='application/json')
 
         patch = self.app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({'content': 'Book vacation'}),
         )
@@ -1022,7 +1022,7 @@ class UpdateTodoTests(AuthenticationTests):
         )
 
         patch = self.app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({'completed': True}),
         )
@@ -1044,7 +1044,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert patch.json == expected
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -1067,7 +1067,7 @@ class UpdateTodoTests(AuthenticationTests):
         )
 
         patch = self.app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({'completed': False}),
         )
@@ -1081,7 +1081,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert patch.json == expected
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -1103,7 +1103,7 @@ class UpdateTodoTests(AuthenticationTests):
         new_content = 'Book vacation'
 
         patch = self.app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({
                 'content': new_content,
@@ -1120,7 +1120,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert patch.json == expected
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -1147,7 +1147,7 @@ class UpdateTodoTests(AuthenticationTests):
         )
         with freeze_time(patch_time):
             patch = self.app.patch(
-                '/todos/{id}'.format(id=create.json['id']),
+                '/todos/{id}'.format(id=create.json['todo_id']),
                 content_type='application/json',
                 data=json.dumps({'completed': True}),
             )
@@ -1163,7 +1163,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert patch.json == create.json
 
         read = self.app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -1186,7 +1186,7 @@ class UpdateTodoTests(AuthenticationTests):
         )
 
         patch = self.app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{id}'.format(id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({}),
         )

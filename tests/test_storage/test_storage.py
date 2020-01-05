@@ -259,7 +259,7 @@ class TestCreateTodo:
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
         expected = COMPLETED_TODO_DATA.copy()
-        expected['id'] = 1
+        expected['todo_id'] = 1
         assert response.json == expected
 
     def test_missing_text(self, storage_app: FlaskClient) -> None:
@@ -321,7 +321,7 @@ class TestCreateTodo:
         assert response.status_code == codes.CREATED
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = 1
+        expected['todo_id'] = 1
         assert response.json == expected
 
     def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
@@ -349,7 +349,7 @@ class TestGetTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         read = storage_app.get(
             '/todos/{todo_id}'.format(todo_id=item_id),
@@ -358,7 +358,7 @@ class TestGetTodo:
 
         assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
-        expected['id'] = item_id
+        expected['todo_id'] = item_id
         assert read.json == expected
 
     def test_timestamp_null(self, storage_app: FlaskClient) -> None:
@@ -374,7 +374,7 @@ class TestGetTodo:
             data=json.dumps(data),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         read = storage_app.get(
             '/todos/{todo_id}'.format(todo_id=item_id),
@@ -384,7 +384,7 @@ class TestGetTodo:
         assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = item_id
+        expected['todo_id'] = item_id
         assert read.json == expected
 
     def test_non_existant(self, storage_app: FlaskClient) -> None:
@@ -429,7 +429,7 @@ class TestDeleteTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         delete = storage_app.delete(
             '/todos/{todo_id}'.format(todo_id=item_id),
@@ -455,7 +455,7 @@ class TestDeleteTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         storage_app.delete(
             '/todos/{todo_id}'.format(todo_id=item_id),
@@ -512,14 +512,14 @@ class TestListTodos:
 
         todos = [COMPLETED_TODO_DATA, other_todo]
         expected = []
-        for todo in enumerate(todos):
+        for todo in todos:
             create = storage_app.post(
                 '/todos',
                 content_type='application/json',
                 data=json.dumps(todo),
             )
             expected_data = todo.copy()
-            expected_data['id'] = create.json['id']
+            expected_data['todo_id'] = create.json['todo_id']
             expected.append(expected_data)
 
         list_todos = storage_app.get(
@@ -560,8 +560,8 @@ class TestListTodos:
 
         assert list_todos.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
-        item_id = json.loads(create_completed.data.decode('utf8')).get('id')
-        expected['id'] = item_id
+        item_id = json.loads(create_completed.data.decode('utf8')).get('todo_id')
+        expected['todo_id'] = item_id
         assert list_todos_data['todos'] == [expected]
 
     def test_filter_not_completed(self, storage_app: FlaskClient) -> None:
@@ -594,7 +594,7 @@ class TestListTodos:
 
         assert list_todos.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['id'] = 1
+        expected['todo_id'] = 1
         expected['completion_timestamp'] = None
         assert list_todos_data['todos'] == [expected]
 
@@ -625,7 +625,7 @@ class TestUpdateTodo:
         new_content = 'Book vacation'
 
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({'content': new_content}),
         )
@@ -633,13 +633,13 @@ class TestUpdateTodo:
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['content'] = new_content
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -656,7 +656,7 @@ class TestUpdateTodo:
         )
 
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps(
                 {
@@ -669,13 +669,13 @@ class TestUpdateTodo:
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completed'] = True
         expected['completion_timestamp'] = 2
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -692,7 +692,7 @@ class TestUpdateTodo:
         )
 
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps(
                 {
@@ -705,13 +705,13 @@ class TestUpdateTodo:
         expected = COMPLETED_TODO_DATA.copy()
         expected['completed'] = False
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
@@ -731,7 +731,7 @@ class TestUpdateTodo:
         new_content = 'Book vacation'
 
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({
                 'content': new_content,
@@ -743,13 +743,13 @@ class TestUpdateTodo:
         expected['content'] = new_content
         expected['completed'] = False
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
