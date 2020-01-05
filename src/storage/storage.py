@@ -3,66 +3,75 @@ A storage service for use by a todoer authentication service.
 """
 
 import os
+from typing import Dict, Optional, Tuple, Union
 
-from flask import Flask, json, jsonify, request, make_response
-
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, Response, json, jsonify, make_response, request
 from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
-
+from flask_sqlalchemy import SQLAlchemy
 from requests import codes
 
-db = SQLAlchemy()
+STORAGE_SQLALCHEMY_DB = SQLAlchemy()
 
 
-class User(db.Model):
+class User(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
     """
     A user has an email address and a password hash.
     """
-    email = db.Column(db.String, primary_key=True)
-    password_hash = db.Column(db.String)
+
+    email = STORAGE_SQLALCHEMY_DB.Column(
+        STORAGE_SQLALCHEMY_DB.String,
+        primary_key=True,
+    )
+    password_hash = STORAGE_SQLALCHEMY_DB.Column(STORAGE_SQLALCHEMY_DB.String)
 
 
-class Todo(db.Model):
+class Todo(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
     """
     A todo has text content, a completed flag and a timestamp of when it was
     completed.
     """
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String)
-    completed = db.Column(db.Boolean)
-    completion_timestamp = db.Column(db.Float)
 
-    def as_dict(self):
+    todo_id = STORAGE_SQLALCHEMY_DB.Column(
+        STORAGE_SQLALCHEMY_DB.Integer,
+        primary_key=True,
+    )
+    content = STORAGE_SQLALCHEMY_DB.Column(STORAGE_SQLALCHEMY_DB.String)
+    completed = STORAGE_SQLALCHEMY_DB.Column(STORAGE_SQLALCHEMY_DB.Boolean)
+    completion_timestamp = STORAGE_SQLALCHEMY_DB.Column(
+        STORAGE_SQLALCHEMY_DB.Float,
+    )
+
+    def as_dict(self) -> Dict[str, Union[int, bool, float]]:
         """
         Return a representation of a todo item suitable for JSON responses.
         """
-        return dict(
-            id=self.id,
+        representation = dict(
+            todo_id=self.todo_id,
             content=self.content,
             completed=self.completed,
             completion_timestamp=self.completion_timestamp,
         )
+        return representation
 
 
-def create_app(database_uri):
+def create_app(database_uri: str) -> Flask:
     """
     Create an application with a database in a given location.
 
     :param database_uri: The location of the database for the application.
     :type database_uri: string
     :return: An application instance.
-    :rtype: ``Flask``
     """
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-    db.init_app(app)
+    flask_app = Flask(__name__)
+    flask_app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
+    flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    STORAGE_SQLALCHEMY_DB.init_app(flask_app)
 
-    with app.app_context():
-        db.create_all()
+    with flask_app.app_context():  # type: ignore
+        STORAGE_SQLALCHEMY_DB.create_all()
 
-    return app
+    return flask_app
 
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
@@ -70,28 +79,30 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
     'sqlite:///:memory:',
 )
 
-app = create_app(database_uri=SQLALCHEMY_DATABASE_URI)
+STORAGE_FLASK_APP = create_app(database_uri=SQLALCHEMY_DATABASE_URI)
 
 # Inputs can be validated using JSON schema.
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
-app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
-jsonschema = JsonSchema(app)
+STORAGE_FLASK_APP.config['JSONSCHEMA_DIR'] = os.path.join(
+    str(STORAGE_FLASK_APP.root_path),
+    'schemas',
+)
+JsonSchema(STORAGE_FLASK_APP)
 
 
-def load_user_from_id(user_id):
+def load_user_from_id(user_id: str) -> Optional[User]:
     """
     :param user_id: The ID of the user Flask is trying to load.
-    :type user_id: string
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
-    :rtype: ``User`` or ``None``.
     """
-    return User.query.filter_by(email=user_id).first()
+    result: Optional[User] = User.query.filter_by(email=user_id).first()
+    return result
 
 
-@app.errorhandler(ValidationError)
-def on_validation_error(error):
+@STORAGE_FLASK_APP.errorhandler(ValidationError)
+def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     """
     :resjson string title: An explanation that there was a validation error.
     :resjson string message: The precise validation error.
@@ -103,9 +114,9 @@ def on_validation_error(error):
     ), codes.BAD_REQUEST
 
 
-@app.route('/users/<email>', methods=['GET'])
+@STORAGE_FLASK_APP.route('/users/<email>', methods=['GET'])
 @consumes('application/json')
-def specific_user_get(email):
+def specific_user_get(email: str) -> Tuple[Response, int]:
     """
     Get information about particular user.
 
@@ -122,16 +133,17 @@ def specific_user_get(email):
         return jsonify(
             title='The requested user does not exist.',
             detail='No user exists with the email "{email}"'.format(
-                email=email),
+                email=email,
+            ),
         ), codes.NOT_FOUND
 
     return_data = jsonify(email=user.email, password_hash=user.password_hash)
     return return_data, codes.OK
 
 
-@app.route('/users', methods=['GET'])
+@STORAGE_FLASK_APP.route('/users', methods=['GET'])
 @consumes('application/json')
-def users_get():
+def users_get() -> Response:
     """
     Get information about all users.
 
@@ -142,27 +154,27 @@ def users_get():
     :status 200: Information about all users is returned.
     """
     details = [
-        {'email': user.email, 'password_hash': user.password_hash} for user
-        in User.query.all()]
+        {
+            'email': user.email,
+            'password_hash': user.password_hash,
+        } for user in User.query.all()
+    ]
 
-    return make_response(
+    result: Response = make_response(
         json.dumps(details),
         codes.OK,
-        {'Content-Type': 'application/json'})
+        {'Content-Type': 'application/json'},
+    )
+    return result
 
 
-@app.route('/users', methods=['POST'])
+@STORAGE_FLASK_APP.route('/users', methods=['POST'])
 @consumes('application/json')
 @validate('users', 'create')
-def users_post():
+def users_post() -> Tuple[Response, int]:
     """
     Create a new user.
 
-    :param email: The email address of the new user.
-    :type email: string
-    :param password_hash: A password hash to associate with the given ``email``
-        address.
-    :type password_hash: string
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
     :resjson string email: The email address of the new user.
@@ -178,29 +190,23 @@ def users_post():
         return jsonify(
             title='There is already a user with the given email address.',
             detail='A user already exists with the email "{email}"'.format(
-                email=email),
+                email=email,
+            ),
         ), codes.CONFLICT
 
     user = User(email=email, password_hash=password_hash)
-    db.session.add(user)
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.add(user)
+    STORAGE_SQLALCHEMY_DB.session.commit()
 
     return jsonify(email=email, password_hash=password_hash), codes.CREATED
 
 
-@app.route('/todos', methods=['POST'])
+@STORAGE_FLASK_APP.route('/todos', methods=['POST'])
 @consumes('application/json')
 @validate('todos', 'create')
-def todos_post():
+def todos_post() -> Tuple[Response, int]:
     """
     Create a new todo item.
-
-    :param content: The content of the new item.
-    :type content: string
-    :param completed: Whether the item is completed.
-    :type completed: boolean
-    :param completion_timestamp: The completion UNIX timestamp (optional).
-    :type completion_timestamp: number
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
@@ -220,15 +226,15 @@ def todos_post():
         completed=completed,
         completion_timestamp=completion_timestamp,
     )
-    db.session.add(todo)
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.add(todo)
+    STORAGE_SQLALCHEMY_DB.session.commit()
 
     return jsonify(todo.as_dict()), codes.CREATED
 
 
-@app.route('/todos/<id>', methods=['GET'])
+@STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['GET'])
 @consumes('application/json')
-def specific_todo_get(id):
+def specific_todo_get(todo_id: int) -> Tuple[Response, int]:
     """
     Get information about particular todo item.
 
@@ -241,20 +247,21 @@ def specific_todo_get(id):
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=int(id)).first()
+    todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
         return jsonify(
             title='The requested todo does not exist.',
-            detail='No todo exists with the id "{id}"'.format(id=id),
+            detail=f'No todo exists with the id "{todo_id}"',
         ), codes.NOT_FOUND
 
-    return jsonify(todo.as_dict()), codes.OK
+    result = jsonify(todo.as_dict()), codes.OK
+    return result
 
 
-@app.route('/todos/<id>', methods=['DELETE'])
+@STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['DELETE'])
 @consumes('application/json')
-def delete_todo(id):
+def delete_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Delete a particular todo item.
 
@@ -263,23 +270,23 @@ def delete_todo(id):
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=int(id)).first()
+    todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
         return jsonify(
             title='The requested todo does not exist.',
-            detail='No todo exists with the id "{id}"'.format(id=id),
+            detail=f'No todo exists with the id "{todo_id}"',
         ), codes.NOT_FOUND
 
-    db.session.delete(todo)
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.delete(todo)
+    STORAGE_SQLALCHEMY_DB.session.commit()
 
     return jsonify(), codes.OK
 
 
-@app.route('/todos', methods=['GET'])
+@STORAGE_FLASK_APP.route('/todos', methods=['GET'])
 @consumes('application/json')
-def list_todos():
+def list_todos() -> Tuple[Response, int]:
     """
     List todo items.
 
@@ -300,9 +307,9 @@ def list_todos():
     return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
 
 
-@app.route('/todos/<id>', methods=['PATCH'])
+@STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['PATCH'])
 @consumes('application/json')
-def update_todo(id):
+def update_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Update a todo item.
 
@@ -326,12 +333,12 @@ def update_todo(id):
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    todo = Todo.query.filter_by(id=int(id)).first()
+    todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
         return jsonify(
             title='The requested todo does not exist.',
-            detail='No todo exists with the id "{id}"'.format(id=id),
+            detail=f'No todo exists with the id "{todo_id}"',
         ), codes.NOT_FOUND
 
     if 'content' in request.get_json():
@@ -343,12 +350,12 @@ def update_todo(id):
     if 'completion_timestamp' in request.get_json():
         todo.completion_timestamp = request.get_json()['completion_timestamp']
 
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.commit()
     return jsonify(todo.as_dict()), codes.OK
 
 
-if __name__ == '__main__':   # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
     # See http://flask.pocoo.org/docs/0.10/quickstart/#a-minimal-application
-    app.run(host='0.0.0.0', port=5001)
+    STORAGE_FLASK_APP.run(host='0.0.0.0', port=5001)

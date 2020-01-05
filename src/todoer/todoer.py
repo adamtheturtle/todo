@@ -4,71 +4,71 @@ An authentication service with todo capabilities.
 
 import datetime
 import os
-
+from typing import Optional, Tuple
 from urllib.parse import urljoin
 
-from flask import Flask, jsonify, request, json
+import pytz
+import requests
+from flask import Flask, Response, json, jsonify, request
 from flask_bcrypt import Bcrypt
+from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_login import (
     LoginManager,
+    UserMixin,
     login_required,
     login_user,
     logout_user,
-    UserMixin,
 )
-from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
-
-import pytz
-
-import requests
 from requests import codes
 
 
-class User(UserMixin):
+class User(UserMixin):  # type: ignore
     """
     A user has an email address and a password hash.
     """
 
-    def __init__(self, email, password_hash):
+    def __init__(self, email: str, password_hash: str) -> None:
         """
-        :param str email: A user's email.
-        :param str password_hash: The hash of a user's password.
+        :param email: A user's email.
+        :param password_hash: The hash of a user's password.
 
-        :ivar str email: A user's email.
-        :ivar str password_hash: The hash of a user's password.
+        :ivar email: A user's email.
+        :ivar password_hash: The hash of a user's password.
         """
         self.email = email
         self.password_hash = password_hash
 
-    def get_id(self):
+    def get_id(self) -> str:
         """
         See https://flask-login.readthedocs.org/en/latest/#your-user-class
 
-        :return: the email address to satify Flask-Login's requirements. This
+        :return: the email address to satisfy Flask-Login's requirements. This
             is used in conjunction with ``load_user`` for session management.
-        :rtype: string
         """
         return self.email
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret')
-bcrypt = Bcrypt(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
+TODOER_FLASK_APP = Flask(__name__)
+TODOER_FLASK_APP.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret')
+FLASK_BCRYPT = Bcrypt(TODOER_FLASK_APP)
+LOGIN_MANAGER = LoginManager()
+LOGIN_MANAGER.init_app(TODOER_FLASK_APP)
 
 # Inputs can be validated using JSON schema.
 # Schemas are in app.config['JSONSCHEMA_DIR'].
 # See https://github.com/mattupstate/flask-jsonschema for details.
-app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
-jsonschema = JsonSchema(app)
+TODOER_FLASK_APP.config['JSONSCHEMA_DIR'] = os.path.join(
+    str(TODOER_FLASK_APP.root_path),
+    'schemas',
+)
+JsonSchema(TODOER_FLASK_APP)
 
 STORAGE_URL = 'http://storage:5001'
 
 
-@login_manager.user_loader
-def load_user_from_id(user_id):
+@LOGIN_MANAGER.user_loader
+def load_user_from_id(user_id: str) -> Optional[User]:
     """
     Flask-Login ``user_loader`` callback.
 
@@ -82,7 +82,6 @@ def load_user_from_id(user_id):
     :type user_id: string
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
-    :rtype: ``User`` or ``None``.
     """
     url = urljoin(STORAGE_URL, 'users/{email}').format(email=user_id)
     response = requests.get(url, headers={'Content-Type': 'application/json'})
@@ -93,10 +92,11 @@ def load_user_from_id(user_id):
             email=details['email'],
             password_hash=details['password_hash'],
         )
+    return None
 
 
-@app.errorhandler(ValidationError)
-def on_validation_error(error):
+@TODOER_FLASK_APP.errorhandler(ValidationError)
+def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     """
     :resjson string title: An explanation that there was a validation error.
     :resjson string message: The precise validation error.
@@ -108,10 +108,10 @@ def on_validation_error(error):
     ), codes.BAD_REQUEST
 
 
-@app.route('/login', methods=['POST'])
+@TODOER_FLASK_APP.route('/login', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'get')
-def login():
+def login() -> Tuple[Response, int]:
     """
     Log in a given user.
 
@@ -136,25 +136,26 @@ def login():
         return jsonify(
             title='The requested user does not exist.',
             detail='No user exists with the email "{email}"'.format(
-                email=email),
+                email=email,
+            ),
         ), codes.NOT_FOUND
 
-    if not bcrypt.check_password_hash(user.password_hash, password):
+    if not FLASK_BCRYPT.check_password_hash(user.password_hash, password):
         return jsonify(
             title='An incorrect password was provided.',
             detail='The password for the user "{email}" does not match the '
-                   'password provided.'.format(email=email),
+            'password provided.'.format(email=email),
         ), codes.UNAUTHORIZED
 
     login_user(user, remember=True)
 
-    return jsonify(email=email, password=password)
+    return jsonify(email=email, password=password), codes.OK
 
 
-@app.route('/logout', methods=['POST'])
+@TODOER_FLASK_APP.route('/logout', methods=['POST'])
 @consumes('application/json')
 @login_required
-def logout():
+def logout() -> Tuple[Response, int]:
     """
     Log the current user out.
 
@@ -165,10 +166,10 @@ def logout():
     return jsonify({}), codes.OK
 
 
-@app.route('/signup', methods=['POST'])
+@TODOER_FLASK_APP.route('/signup', methods=['POST'])
 @consumes('application/json')
 @validate('user', 'create')
-def signup():
+def signup() -> Tuple[Response, int]:
     """
     Sign up a new user.
 
@@ -190,13 +191,15 @@ def signup():
         return jsonify(
             title='There is already a user with the given email address.',
             detail='A user already exists with the email "{email}"'.format(
-                email=email),
+                email=email,
+            ),
         ), codes.CONFLICT
 
     data = {
-        'email': email,
-        'password_hash': bcrypt.generate_password_hash(password).decode(
-            'utf8'),
+        'email':
+        email,
+        'password_hash':
+        FLASK_BCRYPT.generate_password_hash(password).decode('utf8'),
     }
 
     requests.post(
@@ -208,11 +211,11 @@ def signup():
     return jsonify(email=email, password=password), codes.CREATED
 
 
-@app.route('/todos', methods=['POST'])
+@TODOER_FLASK_APP.route('/todos', methods=['POST'])
 @consumes('application/json')
 @validate('todos', 'create')
 @login_required
-def create_todo():
+def create_todo() -> Tuple[Response, int]:
     """
     Create a new todo item. Requires log in.
 
@@ -220,7 +223,7 @@ def create_todo():
     :resheader Content-Type: application/json
     :reqjson string content: The content of the new item.
     :reqjson boolean completed: Whether the item is completed.
-    :resjson number id: The id of the todo item.
+    :resjson number todo_id: The id of the todo item.
     :resjson string content: The content of the new item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp (now),
@@ -247,50 +250,50 @@ def create_todo():
     return jsonify(create.json()), create.status_code
 
 
-@app.route('/todos/<id>', methods=['GET'])
+@TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['GET'])
 @consumes('application/json')
 @login_required
-def read_todo(id):
+def read_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Get information about a particular todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :queryparameter number id: The id of the todo item.
+    :queryparameter number todo_id: The id of the todo item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     response = requests.get(url, headers={'Content-Type': 'application/json'})
     return jsonify(response.json()), response.status_code
 
 
-@app.route('/todos/<id>', methods=['DELETE'])
+@TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['DELETE'])
 @consumes('application/json')
 @login_required
-def delete_todo(id):
+def delete_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Delete a particular todo item. Requires log in.
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :queryparameter number id: The id of the todo item.
+    :queryparameter number todo_id: The id of the todo item.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     headers = {'Content-Type': 'application/json'}
     response = requests.delete(url, headers=headers)
     return jsonify(response.json()), response.status_code
 
 
-@app.route('/todos', methods=['GET'])
+@TODOER_FLASK_APP.route('/todos', methods=['GET'])
 @consumes('application/json')
 @login_required
-def list_todos():
+def list_todos() -> Tuple[Response, int]:
     """
     List todo items, with optional filters. Requires log in.
 
@@ -312,24 +315,24 @@ def list_todos():
     return jsonify(response.json()), response.status_code
 
 
-@app.route('/todos/<id>', methods=['PATCH'])
+@TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['PATCH'])
 @consumes('application/json')
 @login_required
-def update_todo(id):
+def update_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Update a todo item. If an item is changed from not-completed to completed,
     the ``completion_timestamp`` is set as now. Requires log in.
 
     :reqheader Content-Type: application/json
 
-    :queryparameter number id: The id of the todo item.
+    :queryparameter number todo_id: The id of the todo item.
 
     :reqjson string content: The new of the item (optional).
     :reqjson boolean completed: Whether the item is completed (optional).
 
     :resheader Content-Type: application/json
 
-    :resjson number id: The id of the item.
+    :resjson number todo_id: The id of the item.
     :resjson string content: The content item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp (now),
@@ -338,7 +341,7 @@ def update_todo(id):
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
     """
-    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     headers = {'Content-Type': 'application/json'}
     response = requests.get(url, headers=headers)
 
@@ -355,15 +358,15 @@ def update_todo(id):
         data['completion_timestamp'] = None
 
     response = requests.patch(
-        urljoin(STORAGE_URL, 'todos/{id}').format(id=id),
+        urljoin(STORAGE_URL, f'todos/{todo_id}'),
         headers={'Content-Type': 'application/json'},
         data=json.dumps(data),
     )
     return jsonify(response.json()), response.status_code
 
 
-if __name__ == '__main__':   # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     # Specifying 0.0.0.0 as the host tells the operating system to listen on
     # all public IPs. This makes the server visible externally.
     # See http://flask.pocoo.org/docs/0.10/quickstart/#a-minimal-application
-    app.run(host='0.0.0.0')
+    TODOER_FLASK_APP.run(host='0.0.0.0')

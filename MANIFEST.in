@@ -1,0 +1,2 @@
+include src/storage/schemas/*.json
+include src/todoer/schemas/*.json

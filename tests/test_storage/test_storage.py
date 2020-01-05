@@ -4,6 +4,7 @@ Tests for the storage service.
 
 import json
 
+from flask.testing import FlaskClient
 from requests import codes
 
 USER_DATA = {'email': 'alice@example.com', 'password_hash': '123abc'}
@@ -23,7 +24,7 @@ class TestCreateUser:
     Tests for the user creation endpoint at ``POST /users``.
     """
 
-    def test_success_response(self, storage_app):
+    def test_success_response(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /users`` request with an email address and password hash
         returns a JSON response with user details and a CREATED status.
@@ -31,12 +32,13 @@ class TestCreateUser:
         response = storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA),
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
         assert response.json == USER_DATA
 
-    def test_missing_email(self, storage_app):
+    def test_missing_email(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /users`` request without an email address returns a
         BAD_REQUEST status code and an error message.
@@ -47,7 +49,8 @@ class TestCreateUser:
         response = storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(data))
+            data=json.dumps(data),
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
         expected = {
@@ -56,7 +59,7 @@ class TestCreateUser:
         }
         assert response.json == expected
 
-    def test_missing_password_hash(self, storage_app):
+    def test_missing_password_hash(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /users`` request without a password hash returns a BAD_REQUEST
         status code and an error message.
@@ -67,7 +70,8 @@ class TestCreateUser:
         response = storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']}))
+            data=json.dumps({'email': USER_DATA['email']}),
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
         expected = {
@@ -76,7 +80,7 @@ class TestCreateUser:
         }
         assert response.json == expected
 
-    def test_existing_user(self, storage_app):
+    def test_existing_user(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /users`` request for an email address which already exists
         returns a CONFLICT status code and error details.
@@ -84,23 +88,28 @@ class TestCreateUser:
         storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA),
+        )
         data = USER_DATA.copy()
         data['password'] = 'different'
         response = storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA),
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CONFLICT
         expected = {
-            'title': 'There is already a user with the given email address.',
-            'detail': 'A user already exists with the email "{email}"'.format(
-                email=USER_DATA['email']),
+            'title':
+            'There is already a user with the given email address.',
+            'detail':
+            'A user already exists with the email "{email}"'.format(
+                email=USER_DATA['email'],
+            ),
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -114,7 +123,7 @@ class TestGetUser:
     Tests for getting a user at ``GET /users/{email}``.
     """
 
-    def test_success(self, storage_app):
+    def test_success(self, storage_app: FlaskClient) -> None:
         """
         A ``GET`` request for an existing user returns an OK status code and
         the user's details.
@@ -122,31 +131,37 @@ class TestGetUser:
         storage_app.post(
             '/users',
             content_type='application/json',
-            data=json.dumps(USER_DATA))
+            data=json.dumps(USER_DATA),
+        )
         response = storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
-            content_type='application/json')
+            content_type='application/json',
+        )
         assert response.status_code == codes.OK
         assert response.json == USER_DATA
 
-    def test_non_existant_user(self, storage_app):
+    def test_non_existant_user(self, storage_app: FlaskClient) -> None:
         """
         A ``GET`` request for a user which does not exist returns a NOT_FOUND
         status code and error details.
         """
         response = storage_app.get(
             '/users/{email}'.format(email=USER_DATA['email']),
-            content_type='application/json')
+            content_type='application/json',
+        )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.NOT_FOUND
         expected = {
-            'title': 'The requested user does not exist.',
-            'detail': 'No user exists with the email "{email}"'.format(
-                email=USER_DATA['email']),
+            'title':
+            'The requested user does not exist.',
+            'detail':
+            'No user exists with the email "{email}"'.format(
+                email=USER_DATA['email'],
+            ),
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -164,7 +179,7 @@ class TestGetUsers:
     Tests for getting information about all users at ``GET /users/``.
     """
 
-    def test_no_users(self, storage_app):
+    def test_no_users(self, storage_app: FlaskClient) -> None:
         """
         A ``GET`` request for information about all users returns an OK status
         code and an empty array when there are no users.
@@ -178,23 +193,33 @@ class TestGetUsers:
         assert response.status_code == codes.OK
         assert response.json == []
 
-    def test_with_users(self, storage_app):
+    def test_with_users(self, storage_app: FlaskClient) -> None:
         """
         A ``GET`` request for information about all users returns an OK status
         code and an array of user information.
         """
         users = [
             USER_DATA,
-            {'email': 'bob@example.com', 'password_hash': '123abc'},
-            {'email': 'carol@example.com', 'password_hash': '456def'},
-            {'email': 'dan@example.com', 'password_hash': '789efg'},
+            {
+                'email': 'bob@example.com',
+                'password_hash': '123abc',
+            },
+            {
+                'email': 'carol@example.com',
+                'password_hash': '456def',
+            },
+            {
+                'email': 'dan@example.com',
+                'password_hash': '789efg',
+            },
         ]
 
         for user in users:
             storage_app.post(
                 '/users',
                 content_type='application/json',
-                data=json.dumps(user))
+                data=json.dumps(user),
+            )
 
         response = storage_app.get(
             '/users',
@@ -205,7 +230,7 @@ class TestGetUsers:
         assert response.status_code == codes.OK
         assert response.json == users
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -219,7 +244,7 @@ class TestCreateTodo:
     Tests for the user creation endpoint at ``POST /todos``.
     """
 
-    def test_success_response(self, storage_app):
+    def test_success_response(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /todos`` request with the item's text content, a flag
         describing it as completed and a completion time returns a JSON
@@ -234,10 +259,10 @@ class TestCreateTodo:
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
         expected = COMPLETED_TODO_DATA.copy()
-        expected['id'] = 1
+        expected['todo_id'] = 1
         assert response.json == expected
 
-    def test_missing_text(self, storage_app):
+    def test_missing_text(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
@@ -258,7 +283,7 @@ class TestCreateTodo:
         }
         assert response.json == expected
 
-    def test_missing_completed_flag(self, storage_app):
+    def test_missing_completed_flag(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
@@ -279,7 +304,7 @@ class TestCreateTodo:
         }
         assert response.json == expected
 
-    def test_missing_completion_time(self, storage_app):
+    def test_missing_completion_time(self, storage_app: FlaskClient) -> None:
         """
         A ``POST /todos`` request without a completion time creates an item
         with a ``null`` completion time.
@@ -296,10 +321,10 @@ class TestCreateTodo:
         assert response.status_code == codes.CREATED
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = 1
+        expected['todo_id'] = 1
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -313,7 +338,7 @@ class TestGetTodo:
     Tests for getting a todo item at ``GET /todos/{id}.``.
     """
 
-    def test_success(self, storage_app):
+    def test_success(self, storage_app: FlaskClient) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
@@ -324,19 +349,19 @@ class TestGetTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
         assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
-        expected['id'] = item_id
+        expected['todo_id'] = item_id
         assert read.json == expected
 
-    def test_timestamp_null(self, storage_app):
+    def test_timestamp_null(self, storage_app: FlaskClient) -> None:
         """
         If the timestamp is not given, the response includes a null timestamp.
         """
@@ -349,20 +374,20 @@ class TestGetTodo:
             data=json.dumps(data),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
         assert read.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
         expected['completion_timestamp'] = None
-        expected['id'] = item_id
+        expected['todo_id'] = item_id
         assert read.json == expected
 
-    def test_non_existant(self, storage_app):
+    def test_non_existant(self, storage_app: FlaskClient) -> None:
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
@@ -380,7 +405,7 @@ class TestGetTodo:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -394,7 +419,7 @@ class TestDeleteTodo:
     Tests for deleting a todo item at ``DELETE /todos/{id}.``.
     """
 
-    def test_success(self, storage_app):
+    def test_success(self, storage_app: FlaskClient) -> None:
         """
         It is possible to delete a todo item.
         """
@@ -404,23 +429,23 @@ class TestDeleteTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         delete = storage_app.delete(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
         assert delete.status_code == codes.OK
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
         assert read.status_code == codes.NOT_FOUND
 
-    def test_delete_twice(self, storage_app):
+    def test_delete_twice(self, storage_app: FlaskClient) -> None:
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
@@ -430,15 +455,15 @@ class TestDeleteTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
-        item_id = create.json['id']
+        item_id = create.json['todo_id']
 
         storage_app.delete(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
         delete = storage_app.delete(
-            '/todos/{id}'.format(id=item_id),
+            '/todos/{todo_id}'.format(todo_id=item_id),
             content_type='application/json',
         )
 
@@ -449,7 +474,7 @@ class TestDeleteTodo:
         }
         assert delete.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -466,7 +491,7 @@ class TestListTodos:
     Tests for listing todo items at ``GET /todos``.
     """
 
-    def test_no_todos(self, storage_app):
+    def test_no_todos(self, storage_app: FlaskClient) -> None:
         """
         When there are no todos, an empty array is returned.
         """
@@ -478,7 +503,7 @@ class TestListTodos:
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == []
 
-    def test_list(self, storage_app):
+    def test_list(self, storage_app: FlaskClient) -> None:
         """
         All todos are listed.
         """
@@ -487,14 +512,14 @@ class TestListTodos:
 
         todos = [COMPLETED_TODO_DATA, other_todo]
         expected = []
-        for index, data in enumerate(todos):
+        for todo in todos:
             create = storage_app.post(
                 '/todos',
                 content_type='application/json',
-                data=json.dumps(data),
+                data=json.dumps(todo),
             )
-            expected_data = data.copy()
-            expected_data['id'] = create.json['id']
+            expected_data = todo.copy()
+            expected_data['todo_id'] = create.json['todo_id']
             expected.append(expected_data)
 
         list_todos = storage_app.get(
@@ -505,7 +530,7 @@ class TestListTodos:
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == expected
 
-    def test_filter_completed(self, storage_app):
+    def test_filter_completed(self, storage_app: FlaskClient) -> None:
         """
         It is possible to filter by only completed items.
         """
@@ -524,18 +549,23 @@ class TestListTodos:
         list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'filter': {'completed': True}}),
+            data=json.dumps({
+                'filter': {
+                    'completed': True,
+                },
+            }),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
         assert list_todos.status_code == codes.OK
         expected = COMPLETED_TODO_DATA.copy()
-        item_id = json.loads(create_completed.data.decode('utf8')).get('id')
-        expected['id'] = item_id
+        loaded_data = json.loads(create_completed.data.decode('utf8'))
+        item_id = loaded_data.get('todo_id')
+        expected['todo_id'] = item_id
         assert list_todos_data['todos'] == [expected]
 
-    def test_filter_not_completed(self, storage_app):
+    def test_filter_not_completed(self, storage_app: FlaskClient) -> None:
         """
         It is possible to filter by only items which are not completed.
         """
@@ -554,18 +584,22 @@ class TestListTodos:
         list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({'filter': {'completed': False}}),
+            data=json.dumps({
+                'filter': {
+                    'completed': False,
+                },
+            }),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
         assert list_todos.status_code == codes.OK
         expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['id'] = 1
+        expected['todo_id'] = 1
         expected['completion_timestamp'] = None
         assert list_todos_data['todos'] == [expected]
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -579,7 +613,7 @@ class TestUpdateTodo:
     Tests for updating a todo item at ``PATCH /todos/{id}.``.
     """
 
-    def test_change_content(self, storage_app):
+    def test_change_content(self, storage_app: FlaskClient) -> None:
         """
         It is possible to change the content of a todo item.
         """
@@ -592,7 +626,7 @@ class TestUpdateTodo:
         new_content = 'Book vacation'
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps({'content': new_content}),
         )
@@ -600,19 +634,19 @@ class TestUpdateTodo:
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['content'] = new_content
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_flag_completed(self, storage_app):
+    def test_flag_completed(self, storage_app: FlaskClient) -> None:
         """
         It is possible to flag a todo item as completed.
         """
@@ -623,27 +657,32 @@ class TestUpdateTodo:
         )
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
-            data=json.dumps({'completed': True, 'completion_timestamp': 2.0}),
+            data=json.dumps(
+                {
+                    'completed': True,
+                    'completion_timestamp': 2.0,
+                },
+            ),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['completed'] = True
         expected['completion_timestamp'] = 2
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_flag_not_completed(self, storage_app):
+    def test_flag_not_completed(self, storage_app: FlaskClient) -> None:
         """
         It is possible to flag a todo item as not completed.
         """
@@ -654,28 +693,32 @@ class TestUpdateTodo:
         )
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
             data=json.dumps(
-                {'completed': False, 'completion_timestamp': None}),
+                {
+                    'completed': False,
+                    'completion_timestamp': None,
+                },
+            ),
         )
 
         expected = COMPLETED_TODO_DATA.copy()
         expected['completed'] = False
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_change_content_and_flag(self, storage_app):
+    def test_change_content_and_flag(self, storage_app: FlaskClient) -> None:
         """
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
@@ -689,28 +732,31 @@ class TestUpdateTodo:
         new_content = 'Book vacation'
 
         patch = storage_app.patch(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
-            data=json.dumps({'content': new_content, 'completed': False}),
+            data=json.dumps({
+                'content': new_content,
+                'completed': False,
+            }),
         )
 
         expected = NOT_COMPLETED_TODO_DATA.copy()
         expected['content'] = new_content
         expected['completed'] = False
         expected['completion_timestamp'] = None
-        expected['id'] = create.json['id']
+        expected['todo_id'] = create.json['todo_id']
 
         assert patch.status_code == codes.OK
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{id}'.format(id=create.json['id']),
+            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
             content_type='application/json',
         )
 
         assert read.json == expected
 
-    def test_non_existant(self, storage_app):
+    def test_non_existant(self, storage_app: FlaskClient) -> None:
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
@@ -728,7 +774,7 @@ class TestUpdateTodo:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app: FlaskClient) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.

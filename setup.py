@@ -1,33 +1,34 @@
-from setuptools import setup, find_packages
+"""
+Setup script.
+"""
 
-# We use requirements.txt instead of just declaring the requirements here
-# because this helps with Docker package caching.
-with open("requirements.txt") as requirements:
-    install_requires = requirements.readlines()
+from pathlib import Path
+from typing import List
 
-# We use dev-requirements.txt instead of just declaring the requirements here
-# because Read The Docs needs a requirements file.
-with open("dev-requirements.txt") as dev_requirements:
-    dev_requires = dev_requirements.readlines()
+from setuptools import setup
 
-with open('README.md') as f:
-    long_description = f.read()
+
+def _get_dependencies(requirements_file: Path) -> List[str]:
+    """
+    Return requirements from a requirements file.
+
+    This expects a requirements file with no ``--find-links`` lines.
+    """
+    lines = requirements_file.read_text().strip().split('\n')
+    return [line for line in lines if not line.startswith('#')]
+
+
+INSTALL_REQUIRES = _get_dependencies(
+    requirements_file=Path('requirements.txt'),
+)
+
+DEV_REQUIRES = _get_dependencies(
+    requirements_file=Path('dev-requirements.txt'),
+)
 
 setup(
-    name="Qlutter TODOer",
-    version="0.1",
-    author="Adam Dangoor",
-    description="Manage TODOs.",
-    long_description=long_description,
-    license='GNU Affero General Public License v3',
-    packages=find_packages(),
-    install_requires=install_requires,
-    extras_require={
-        "dev": dev_requires,
-    },
-    classifiers=[
-        'Operating System :: POSIX',
-        'Environment :: Web Environment',
-        'License :: OSI Approved :: GNU Affero General Public License v3',
-    ],
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
+    install_requires=INSTALL_REQUIRES,
+    extras_require={'dev': DEV_REQUIRES},
 )
