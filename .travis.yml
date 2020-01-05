@@ -4,20 +4,10 @@ python:
 install:
   - "pip install -e .[dev]"
 before_script:
-  # Run various code analysis tools, for linting and correctness:
   - "flake8 ."
-  # Style check the documentation:
   - "doc8 docs/"
 script:
-  # Build documentation HTML.
-  - sphinx-build -W -b html -d build/doctrees docs/source build/html
-  # Run all discoverable tests, but set the source directories so that the coverage tool knows not to include coverage for all dependencies.
-  - "coverage run --branch --source=todoer,storage -m unittest discover"
-after_success:
-  # Sends the coverage report to coveralls.io which can report to Pull Requests
-  # and track test coverage over time.
-  - "coveralls"
-# Cache pip dependencies.
-# See http://docs.travis-ci.com/user/caching/#pip-cache.
+  - "sphinx-build -W -b html -d build/doctrees docs/source build/html"
+  - "pytest -vvv --exitfirst --cov-fail-under 100 --cov todoer --cov storage"
 cache:
   - pip
