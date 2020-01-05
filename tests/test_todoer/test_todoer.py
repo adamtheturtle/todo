@@ -30,7 +30,7 @@ class AuthenticationTests(unittest.TestCase):
     fake for ``requests`` to connect to.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         """
         Create an environment with a fake storage app available and mocked for
         ``requests``.
@@ -59,7 +59,7 @@ class AuthenticationTests(unittest.TestCase):
                     content_type='application/json',
                 )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         with storage_app.app_context():
             storage_db.session.remove()
             storage_db.drop_all()
@@ -90,7 +90,7 @@ class AuthenticationTests(unittest.TestCase):
             }, response.data,
         )
 
-    def log_in_as_new_user(self):
+    def log_in_as_new_user(self) -> None:
         """
         Create a user and log in as that user.
         """
@@ -112,7 +112,7 @@ class SignupTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_signup(self):
+    def test_signup(self) -> None:
         """
         A signup ``POST`` request with an email address and password returns a
         JSON response with user credentials and a CREATED status.
@@ -127,7 +127,7 @@ class SignupTests(AuthenticationTests):
         assert response.json == USER_DATA
 
     @responses.activate
-    def test_passwords_hashed(self):
+    def test_passwords_hashed(self) -> None:
         """
         Passwords are hashed before being saved to the database.
         """
@@ -142,7 +142,7 @@ class SignupTests(AuthenticationTests):
             password=USER_DATA['password'],
         )
 
-    def test_missing_email(self):
+    def test_missing_email(self) -> None:
         """
         A signup request without an email address returns a BAD_REQUEST status
         code and an error message.
@@ -160,7 +160,7 @@ class SignupTests(AuthenticationTests):
         }
         assert response.json == expected
 
-    def test_missing_password(self):
+    def test_missing_password(self) -> None:
         """
         A signup request without a password returns a BAD_REQUEST status code
         and an error message.
@@ -179,7 +179,7 @@ class SignupTests(AuthenticationTests):
         assert response.json == expected
 
     @responses.activate
-    def test_existing_user(self):
+    def test_existing_user(self) -> None:
         """
         A signup request for an email address which already exists returns a
         CONFLICT status code and error details.
@@ -208,7 +208,7 @@ class SignupTests(AuthenticationTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -223,7 +223,7 @@ class LoginTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_login(self):
+    def test_login(self) -> None:
         """
         Logging in as a user which has been signed up returns an OK status
         code.
@@ -241,7 +241,7 @@ class LoginTests(AuthenticationTests):
         assert response.status_code == codes.OK
 
     @responses.activate
-    def test_non_existant_user(self):
+    def test_non_existant_user(self) -> None:
         """
         Attempting to log in as a user which has been not been signed up
         returns a NOT_FOUND status code and error details..
@@ -264,7 +264,7 @@ class LoginTests(AuthenticationTests):
         assert response.json == expected
 
     @responses.activate
-    def test_wrong_password(self):
+    def test_wrong_password(self) -> None:
         """
         Attempting to log in with an incorrect password returns an UNAUTHORIZED
         status code and error details.
@@ -291,7 +291,7 @@ class LoginTests(AuthenticationTests):
         assert response.json == expected
 
     @responses.activate
-    def test_remember_me_cookie_set(self):
+    def test_remember_me_cookie_set(self) -> None:
         """
         A "Remember Me" token is in the response header of a successful login.
         """
@@ -311,7 +311,7 @@ class LoginTests(AuthenticationTests):
         headers_dict = {key: value for key, value in items}
         assert 'remember_token' in headers_dict
 
-    def test_missing_email(self):
+    def test_missing_email(self) -> None:
         """
         A login request without an email address returns a BAD_REQUEST status
         code and an error message.
@@ -329,7 +329,7 @@ class LoginTests(AuthenticationTests):
         }
         assert response.json == expected
 
-    def test_missing_password(self):
+    def test_missing_password(self) -> None:
         """
         A login request without a password returns a BAD_REQUEST status code
         and an error message.
@@ -347,7 +347,7 @@ class LoginTests(AuthenticationTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -362,7 +362,7 @@ class LogoutTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_logout(self):
+    def test_logout(self) -> None:
         """
         A POST request to log out when a user is logged in returns an OK status
         code.
@@ -380,7 +380,7 @@ class LogoutTests(AuthenticationTests):
         response = self.app.post('/logout', content_type='application/json')
         assert response.status_code == codes.OK
 
-    def test_not_logged_in(self):
+    def test_not_logged_in(self) -> None:
         """
         A POST request to log out when no user is logged in returns an
         UNAUTHORIZED status code.
@@ -389,7 +389,7 @@ class LogoutTests(AuthenticationTests):
         assert response.status_code == codes.UNAUTHORIZED
 
     @responses.activate
-    def test_logout_twice(self):
+    def test_logout_twice(self) -> None:
         """
         A POST request to log out, after a successful log out attempt returns
         an UNAUTHORIZED status code.
@@ -408,7 +408,7 @@ class LogoutTests(AuthenticationTests):
         response = self.app.post('/logout', content_type='application/json')
         assert response.status_code == codes.UNAUTHORIZED
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -424,7 +424,7 @@ class LoadUserTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_user_exists(self):
+    def test_user_exists(self) -> None:
         """
         If a user exists with the email given as the user ID to
         ``load_user_from_id``, that user is returned.
@@ -438,7 +438,7 @@ class LoadUserTests(AuthenticationTests):
             USER_DATA['email']
 
     @responses.activate
-    def test_user_does_not_exist(self):
+    def test_user_does_not_exist(self) -> None:
         """
         If no user exists with the email given as the user ID to
         ``load_user_from_id``, ``None`` is returned.
@@ -452,7 +452,7 @@ class CreateTodoTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_success_response(self):
+    def test_success_response(self) -> None:
         """
         A ``POST`` request with content and a completed flag set to ``false``
         returns a JSON response with the given data and a ``null``
@@ -473,7 +473,7 @@ class CreateTodoTests(AuthenticationTests):
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_current_completion_time(self):
+    def test_current_completion_time(self) -> None:
         """
         If the completed flag is set to ``true`` then the completed time is
         the number of seconds since the epoch.
@@ -494,7 +494,7 @@ class CreateTodoTests(AuthenticationTests):
             ndigits=3,
         ) == 0
 
-    def test_missing_text(self):
+    def test_missing_text(self) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
@@ -515,7 +515,7 @@ class CreateTodoTests(AuthenticationTests):
         }
         assert response.json == expected
 
-    def test_missing_completed_flag(self):
+    def test_missing_completed_flag(self) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
@@ -537,7 +537,7 @@ class CreateTodoTests(AuthenticationTests):
         assert response.json == expected
 
     @responses.activate
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -547,7 +547,7 @@ class CreateTodoTests(AuthenticationTests):
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
-    def test_not_logged_in(self):
+    def test_not_logged_in(self) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
@@ -566,7 +566,7 @@ class ReadTodoTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_success(self):
+    def test_success(self) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
@@ -591,7 +591,7 @@ class ReadTodoTests(AuthenticationTests):
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_completed(self):
+    def test_completed(self) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details, included the completion timestamp.
@@ -620,7 +620,7 @@ class ReadTodoTests(AuthenticationTests):
         assert read.json == expected
 
     @responses.activate
-    def test_multiple_todos(self):
+    def test_multiple_todos(self) -> None:
         """
         A ``GET`` request gets the correct todo when there are multiple.
         """
@@ -655,7 +655,7 @@ class ReadTodoTests(AuthenticationTests):
         assert read.json == expected
 
     @responses.activate
-    def test_non_existant(self):
+    def test_non_existant(self) -> None:
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
@@ -671,7 +671,7 @@ class ReadTodoTests(AuthenticationTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -680,7 +680,7 @@ class ReadTodoTests(AuthenticationTests):
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
-    def test_not_logged_in(self):
+    def test_not_logged_in(self) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
@@ -707,7 +707,7 @@ class DeleteTodoTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_success(self):
+    def test_success(self) -> None:
         """
         It is possible to delete a todo item.
         """
@@ -733,7 +733,7 @@ class DeleteTodoTests(AuthenticationTests):
         assert read.status_code == codes.NOT_FOUND
 
     @responses.activate
-    def test_delete_twice(self):
+    def test_delete_twice(self) -> None:
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
@@ -762,7 +762,7 @@ class DeleteTodoTests(AuthenticationTests):
         assert delete.json == expected
 
     @responses.activate
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -772,7 +772,7 @@ class DeleteTodoTests(AuthenticationTests):
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
-    def test_not_logged_in(self):
+    def test_not_logged_in(self) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
@@ -800,7 +800,7 @@ class ListTodosTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_no_todos(self):
+    def test_no_todos(self) -> None:
         """
         When there are no todos, an empty array is returned.
         """
@@ -814,7 +814,7 @@ class ListTodosTests(AuthenticationTests):
         assert list_todos.json['todos'] == []
 
     @responses.activate
-    def test_not_logged_in(self):
+    def test_not_logged_in(self) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
@@ -826,7 +826,7 @@ class ListTodosTests(AuthenticationTests):
         assert list_todos.status_code == codes.UNAUTHORIZED
 
     @responses.activate
-    def test_list(self):
+    def test_list(self) -> None:
         """
         All todos are listed.
         """
@@ -857,7 +857,7 @@ class ListTodosTests(AuthenticationTests):
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_filter_completed(self):
+    def test_filter_completed(self) -> None:
         """
         It is possible to filter by only completed items.
         """
@@ -894,7 +894,7 @@ class ListTodosTests(AuthenticationTests):
         assert todo == expected
 
     @responses.activate
-    def test_filter_not_completed(self):
+    def test_filter_not_completed(self) -> None:
         """
         It is possible to filter by only items which are not completed.
         """
@@ -930,7 +930,7 @@ class ListTodosTests(AuthenticationTests):
         assert list_todos_data['todos'] == [expected]
 
     @responses.activate
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -945,7 +945,7 @@ class UpdateTodoTests(AuthenticationTests):
     """
 
     @responses.activate
-    def test_change_content(self):
+    def test_change_content(self) -> None:
         """
         It is possible to change the content of a todo item.
         """
@@ -978,7 +978,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert read.json == expected
 
     @responses.activate
-    def test_not_logged_in(self):
+    def test_not_logged_in(self) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
@@ -1001,7 +1001,7 @@ class UpdateTodoTests(AuthenticationTests):
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_flag_completed(self):
+    def test_flag_completed(self) -> None:
         """
         It is possible to flag a todo item as completed.
         """
@@ -1046,7 +1046,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert read.json == expected
 
     @responses.activate
-    def test_flag_not_completed(self):
+    def test_flag_not_completed(self) -> None:
         """
         It is possible to flag a todo item as not completed.
         """
@@ -1079,7 +1079,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert read.json == expected
 
     @responses.activate
-    def test_change_content_and_flag(self):
+    def test_change_content_and_flag(self) -> None:
         """
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
@@ -1118,7 +1118,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert read.json == expected
 
     @responses.activate
-    def test_flag_completed_already_completed(self):
+    def test_flag_completed_already_completed(self) -> None:
         """
         Flagging an already completed item as completed does not change the
         completion timestamp.
@@ -1164,7 +1164,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert read.json == create.json
 
     @responses.activate
-    def test_remain_same(self):
+    def test_remain_same(self) -> None:
         """
         Not requesting any changes keeps the item the same.
         """
@@ -1184,7 +1184,7 @@ class UpdateTodoTests(AuthenticationTests):
         assert create.json == patch.json
 
     @responses.activate
-    def test_non_existant(self):
+    def test_non_existant(self) -> None:
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
@@ -1200,7 +1200,7 @@ class UpdateTodoTests(AuthenticationTests):
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.

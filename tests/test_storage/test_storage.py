@@ -23,7 +23,7 @@ class TestCreateUser:
     Tests for the user creation endpoint at ``POST /users``.
     """
 
-    def test_success_response(self, storage_app):
+    def test_success_response(self, storage_app) -> None:
         """
         A ``POST /users`` request with an email address and password hash
         returns a JSON response with user details and a CREATED status.
@@ -37,7 +37,7 @@ class TestCreateUser:
         assert response.status_code == codes.CREATED
         assert response.json == USER_DATA
 
-    def test_missing_email(self, storage_app):
+    def test_missing_email(self, storage_app) -> None:
         """
         A ``POST /users`` request without an email address returns a
         BAD_REQUEST status code and an error message.
@@ -56,7 +56,7 @@ class TestCreateUser:
         }
         assert response.json == expected
 
-    def test_missing_password_hash(self, storage_app):
+    def test_missing_password_hash(self, storage_app) -> None:
         """
         A ``POST /users`` request without a password hash returns a BAD_REQUEST
         status code and an error message.
@@ -77,7 +77,7 @@ class TestCreateUser:
         }
         assert response.json == expected
 
-    def test_existing_user(self, storage_app):
+    def test_existing_user(self, storage_app) -> None:
         """
         A ``POST /users`` request for an email address which already exists
         returns a CONFLICT status code and error details.
@@ -106,7 +106,7 @@ class TestCreateUser:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -120,7 +120,7 @@ class TestGetUser:
     Tests for getting a user at ``GET /users/{email}``.
     """
 
-    def test_success(self, storage_app):
+    def test_success(self, storage_app) -> None:
         """
         A ``GET`` request for an existing user returns an OK status code and
         the user's details.
@@ -137,7 +137,7 @@ class TestGetUser:
         assert response.status_code == codes.OK
         assert response.json == USER_DATA
 
-    def test_non_existant_user(self, storage_app):
+    def test_non_existant_user(self, storage_app) -> None:
         """
         A ``GET`` request for a user which does not exist returns a NOT_FOUND
         status code and error details.
@@ -158,7 +158,7 @@ class TestGetUser:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -176,7 +176,7 @@ class TestGetUsers:
     Tests for getting information about all users at ``GET /users/``.
     """
 
-    def test_no_users(self, storage_app):
+    def test_no_users(self, storage_app) -> None:
         """
         A ``GET`` request for information about all users returns an OK status
         code and an empty array when there are no users.
@@ -190,7 +190,7 @@ class TestGetUsers:
         assert response.status_code == codes.OK
         assert response.json == []
 
-    def test_with_users(self, storage_app):
+    def test_with_users(self, storage_app) -> None:
         """
         A ``GET`` request for information about all users returns an OK status
         code and an array of user information.
@@ -227,7 +227,7 @@ class TestGetUsers:
         assert response.status_code == codes.OK
         assert response.json == users
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -241,7 +241,7 @@ class TestCreateTodo:
     Tests for the user creation endpoint at ``POST /todos``.
     """
 
-    def test_success_response(self, storage_app):
+    def test_success_response(self, storage_app) -> None:
         """
         A ``POST /todos`` request with the item's text content, a flag
         describing it as completed and a completion time returns a JSON
@@ -259,7 +259,7 @@ class TestCreateTodo:
         expected['id'] = 1
         assert response.json == expected
 
-    def test_missing_text(self, storage_app):
+    def test_missing_text(self, storage_app) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
@@ -280,7 +280,7 @@ class TestCreateTodo:
         }
         assert response.json == expected
 
-    def test_missing_completed_flag(self, storage_app):
+    def test_missing_completed_flag(self, storage_app) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
@@ -301,7 +301,7 @@ class TestCreateTodo:
         }
         assert response.json == expected
 
-    def test_missing_completion_time(self, storage_app):
+    def test_missing_completion_time(self, storage_app) -> None:
         """
         A ``POST /todos`` request without a completion time creates an item
         with a ``null`` completion time.
@@ -321,7 +321,7 @@ class TestCreateTodo:
         expected['id'] = 1
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -335,7 +335,7 @@ class TestGetTodo:
     Tests for getting a todo item at ``GET /todos/{id}.``.
     """
 
-    def test_success(self, storage_app):
+    def test_success(self, storage_app) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
@@ -358,7 +358,7 @@ class TestGetTodo:
         expected['id'] = item_id
         assert read.json == expected
 
-    def test_timestamp_null(self, storage_app):
+    def test_timestamp_null(self, storage_app) -> None:
         """
         If the timestamp is not given, the response includes a null timestamp.
         """
@@ -384,7 +384,7 @@ class TestGetTodo:
         expected['id'] = item_id
         assert read.json == expected
 
-    def test_non_existant(self, storage_app):
+    def test_non_existant(self, storage_app) -> None:
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
@@ -402,7 +402,7 @@ class TestGetTodo:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -416,7 +416,7 @@ class TestDeleteTodo:
     Tests for deleting a todo item at ``DELETE /todos/{id}.``.
     """
 
-    def test_success(self, storage_app):
+    def test_success(self, storage_app) -> None:
         """
         It is possible to delete a todo item.
         """
@@ -442,7 +442,7 @@ class TestDeleteTodo:
 
         assert read.status_code == codes.NOT_FOUND
 
-    def test_delete_twice(self, storage_app):
+    def test_delete_twice(self, storage_app) -> None:
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
@@ -471,7 +471,7 @@ class TestDeleteTodo:
         }
         assert delete.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -488,7 +488,7 @@ class TestListTodos:
     Tests for listing todo items at ``GET /todos``.
     """
 
-    def test_no_todos(self, storage_app):
+    def test_no_todos(self, storage_app) -> None:
         """
         When there are no todos, an empty array is returned.
         """
@@ -500,7 +500,7 @@ class TestListTodos:
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == []
 
-    def test_list(self, storage_app):
+    def test_list(self, storage_app) -> None:
         """
         All todos are listed.
         """
@@ -527,7 +527,7 @@ class TestListTodos:
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == expected
 
-    def test_filter_completed(self, storage_app):
+    def test_filter_completed(self, storage_app) -> None:
         """
         It is possible to filter by only completed items.
         """
@@ -561,7 +561,7 @@ class TestListTodos:
         expected['id'] = item_id
         assert list_todos_data['todos'] == [expected]
 
-    def test_filter_not_completed(self, storage_app):
+    def test_filter_not_completed(self, storage_app) -> None:
         """
         It is possible to filter by only items which are not completed.
         """
@@ -595,7 +595,7 @@ class TestListTodos:
         expected['completion_timestamp'] = None
         assert list_todos_data['todos'] == [expected]
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -609,7 +609,7 @@ class TestUpdateTodo:
     Tests for updating a todo item at ``PATCH /todos/{id}.``.
     """
 
-    def test_change_content(self, storage_app):
+    def test_change_content(self, storage_app) -> None:
         """
         It is possible to change the content of a todo item.
         """
@@ -642,7 +642,7 @@ class TestUpdateTodo:
 
         assert read.json == expected
 
-    def test_flag_completed(self, storage_app):
+    def test_flag_completed(self, storage_app) -> None:
         """
         It is possible to flag a todo item as completed.
         """
@@ -676,7 +676,7 @@ class TestUpdateTodo:
 
         assert read.json == expected
 
-    def test_flag_not_completed(self, storage_app):
+    def test_flag_not_completed(self, storage_app) -> None:
         """
         It is possible to flag a todo item as not completed.
         """
@@ -712,7 +712,7 @@ class TestUpdateTodo:
 
         assert read.json == expected
 
-    def test_change_content_and_flag(self, storage_app):
+    def test_change_content_and_flag(self, storage_app) -> None:
         """
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
@@ -750,7 +750,7 @@ class TestUpdateTodo:
 
         assert read.json == expected
 
-    def test_non_existant(self, storage_app):
+    def test_non_existant(self, storage_app) -> None:
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
@@ -768,7 +768,7 @@ class TestUpdateTodo:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, storage_app):
+    def test_incorrect_content_type(self, storage_app) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
