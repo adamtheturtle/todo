@@ -3,6 +3,7 @@ A storage service for use by a todoer authentication service.
 """
 
 import os
+from typing import Optional
 
 from flask import Flask, json, jsonify, make_response, request
 from flask_jsonschema import JsonSchema, ValidationError, validate
@@ -77,12 +78,11 @@ app.config['JSONSCHEMA_DIR'] = os.path.join(app.root_path, 'schemas')
 jsonschema = JsonSchema(app)
 
 
-def load_user_from_id(user_id: str) -> User:
+def load_user_from_id(user_id: str) -> Optional[User]:
     """
     :param user_id: The ID of the user Flask is trying to load.
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
-    :rtype: ``User`` or ``None``.
     """
     return User.query.filter_by(email=user_id).first()
 
