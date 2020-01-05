@@ -305,8 +305,7 @@ class LoginTests(AuthenticationTests):
         cookies = response.headers.getlist('Set-Cookie')
 
         items = [list(parse_cookie(cookie).items())[0] for cookie in cookies]
-        headers_dict = {key: value for key, value in items}
-        assert 'remember_token' in headers_dict
+        assert 'remember_token' in dict(items)
 
     def test_missing_email(self) -> None:
         """
