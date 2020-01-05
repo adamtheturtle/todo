@@ -36,10 +36,6 @@ class AuthenticationTests(InMemoryStorageTests):
     fake for ``requests`` to connect to.
     """
 
-    def create_app(self):
-        app.config['TESTING'] = True
-        return app
-
     def setUp(self):
         """
         Create an environment with a fake storage app available and mocked for

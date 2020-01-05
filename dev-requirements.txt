@@ -1,4 +1,3 @@
-Flask-Testing # Tools for testing Flask applications
 doc8 # Style check documentation
 flake8 # Code analysis tool with linting
 freezegun # Freeze clock for unit tests
