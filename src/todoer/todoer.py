@@ -253,7 +253,7 @@ def create_todo() -> Tuple[Response, int]:
 @TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['GET'])
 @consumes('application/json')
 @login_required
-def read_todo(todo_id: str) -> Tuple[Response, int]:
+def read_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Get information about a particular todo item. Requires log in.
 
@@ -266,15 +266,15 @@ def read_todo(todo_id: str) -> Tuple[Response, int]:
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     response = requests.get(url, headers={'Content-Type': 'application/json'})
     return jsonify(response.json()), response.status_code
 
 
-@TODOER_FLASK_APP.route('/todos/<id>', methods=['DELETE'])
+@TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['DELETE'])
 @consumes('application/json')
 @login_required
-def delete_todo(id: str) -> Tuple[Response, int]:
+def delete_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Delete a particular todo item. Requires log in.
 
@@ -284,7 +284,7 @@ def delete_todo(id: str) -> Tuple[Response, int]:
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
     """
-    url = urljoin(STORAGE_URL, 'todos/{id}').format(id=id)
+    url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     headers = {'Content-Type': 'application/json'}
     response = requests.delete(url, headers=headers)
     return jsonify(response.json()), response.status_code
@@ -318,7 +318,7 @@ def list_todos() -> Tuple[Response, int]:
 @TODOER_FLASK_APP.route('/todos/<int:todo_id>', methods=['PATCH'])
 @consumes('application/json')
 @login_required
-def update_todo(todo_id: str) -> Tuple[Response, int]:
+def update_todo(todo_id: int) -> Tuple[Response, int]:
     """
     Update a todo item. If an item is changed from not-completed to completed,
     the ``completion_timestamp`` is set as now. Requires log in.

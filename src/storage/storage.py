@@ -11,26 +11,34 @@ from flask_negotiate import consumes
 from flask_sqlalchemy import SQLAlchemy
 from requests import codes
 
-db = SQLAlchemy()
+STORAGE_SQLALCHEMY_DB = SQLAlchemy()
 
 
-class User(db.Model):  # type: ignore
+class User(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
     """
     A user has an email address and a password hash.
     """
-    email = db.Column(db.String, primary_key=True)
-    password_hash = db.Column(db.String)
+    email = STORAGE_SQLALCHEMY_DB.Column(
+        STORAGE_SQLALCHEMY_DB.String,
+        primary_key=True,
+    )
+    password_hash = STORAGE_SQLALCHEMY_DB.Column(STORAGE_SQLALCHEMY_DB.String)
 
 
-class Todo(db.Model):  # type: ignore
+class Todo(STORAGE_SQLALCHEMY_DB.Model):  # type: ignore
     """
     A todo has text content, a completed flag and a timestamp of when it was
     completed.
     """
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String)
-    completed = db.Column(db.Boolean)
-    completion_timestamp = db.Column(db.Float)
+    id = STORAGE_SQLALCHEMY_DB.Column(
+        STORAGE_SQLALCHEMY_DB.Integer,
+        primary_key=True,
+    )
+    content = STORAGE_SQLALCHEMY_DB.Column(STORAGE_SQLALCHEMY_DB.String)
+    completed = STORAGE_SQLALCHEMY_DB.Column(STORAGE_SQLALCHEMY_DB.Boolean)
+    completion_timestamp = STORAGE_SQLALCHEMY_DB.Column(
+        STORAGE_SQLALCHEMY_DB.Float,
+    )
 
     def as_dict(self) -> Dict[str, Union[int, bool, float]]:
         """
@@ -56,10 +64,10 @@ def create_app(database_uri: str) -> Flask:
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-    db.init_app(app)
+    STORAGE_SQLALCHEMY_DB.init_app(app)
 
     with app.app_context():  # type: ignore
-        db.create_all()
+        STORAGE_SQLALCHEMY_DB.create_all()
 
     return app
 
@@ -182,8 +190,8 @@ def users_post() -> Tuple[Response, int]:
         ), codes.CONFLICT
 
     user = User(email=email, password_hash=password_hash)
-    db.session.add(user)
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.add(user)
+    STORAGE_SQLALCHEMY_DB.session.commit()
 
     return jsonify(email=email, password_hash=password_hash), codes.CREATED
 
@@ -213,8 +221,8 @@ def todos_post() -> Tuple[Response, int]:
         completed=completed,
         completion_timestamp=completion_timestamp,
     )
-    db.session.add(todo)
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.add(todo)
+    STORAGE_SQLALCHEMY_DB.session.commit()
 
     return jsonify(todo.as_dict()), codes.CREATED
 
@@ -265,8 +273,8 @@ def delete_todo(id: str) -> Tuple[Response, int]:
             detail='No todo exists with the id "{id}"'.format(id=id),
         ), codes.NOT_FOUND
 
-    db.session.delete(todo)
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.delete(todo)
+    STORAGE_SQLALCHEMY_DB.session.commit()
 
     return jsonify(), codes.OK
 
@@ -337,7 +345,7 @@ def update_todo(id: str) -> Tuple[Response, int]:
     if 'completion_timestamp' in request.get_json():
         todo.completion_timestamp = request.get_json()['completion_timestamp']
 
-    db.session.commit()
+    STORAGE_SQLALCHEMY_DB.session.commit()
     return jsonify(todo.as_dict()), codes.OK
 
 
