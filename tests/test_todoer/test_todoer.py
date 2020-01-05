@@ -61,7 +61,7 @@ class AuthenticationTests(unittest.TestCase):
                     # they represent, e.g. ``responses.GET``.
                     method=getattr(responses, method),
                     url=re.compile(pattern),
-                    callback=self.request_callback,
+                    callback=request_callback,
                     content_type='application/json',
                 )
 
@@ -70,34 +70,34 @@ class AuthenticationTests(unittest.TestCase):
             STORAGE_SQLALCHEMY_DB.session.remove()
             STORAGE_SQLALCHEMY_DB.drop_all()
 
-    def request_callback(
-        self,
-        request: PreparedRequest,
-    ) -> Tuple[int, Dict[str, str], bytes]:
-        """
-        Given a request to the storage service, send an equivalent request to
-        an in memory fake of the storage service and return some key details
-        of the response.
 
-        :param request: The incoming request to pass onto the storage app.
-        :return: A tuple of status code, response headers and response data
-            from the storage app.
-        """
-        # The storage application is a ``werkzeug.test.Client`` and therefore
-        # has methods like 'head', 'get' and 'post'.
-        lower_request_method = str(request.method).lower()
-        test_client_method = getattr(
-            STORAGE_FLASK_APP.test_client(),
-            lower_request_method,
-        )
-        response = test_client_method(
-            request.path_url,
-            content_type=request.headers['Content-Type'],
-            data=request.body,
-        )
+def request_callback(
+    request: PreparedRequest,
+) -> Tuple[int, Dict[str, str], bytes]:
+    """
+    Given a request to the storage service, send an equivalent request to
+    an in memory fake of the storage service and return some key details
+    of the response.
 
-        result = (response.status_code, dict(response.headers), response.data)
-        return result
+    :param request: The incoming request to pass onto the storage app.
+    :return: A tuple of status code, response headers and response data
+        from the storage app.
+    """
+    # The storage application is a ``werkzeug.test.Client`` and therefore
+    # has methods like 'head', 'get' and 'post'.
+    lower_request_method = str(request.method).lower()
+    test_client_method = getattr(
+        STORAGE_FLASK_APP.test_client(),
+        lower_request_method,
+    )
+    response = test_client_method(
+        request.path_url,
+        content_type=request.headers['Content-Type'],
+        data=request.body,
+    )
+
+    result = (response.status_code, dict(response.headers), response.data)
+    return result
 
 
 def log_in_as_new_user(flask_app: FlaskClient) -> None:
