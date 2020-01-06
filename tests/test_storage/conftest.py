@@ -27,6 +27,7 @@ def storage_app() -> Iterator[FlaskClient]:
         STORAGE_SQLALCHEMY_DB.drop_all()
 
 
+@pytest.fixture()
 def user_data() -> Dict[str, Optional[Union[str, int, bool]]]:
     """
     Data for a new user.
