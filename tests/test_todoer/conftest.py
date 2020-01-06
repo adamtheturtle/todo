@@ -4,7 +4,7 @@ Test tools for the TODO service.
 
 import re
 import uuid
-from typing import Dict, Iterator, Tuple, Optional, Union
+from typing import Dict, Iterator, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import pytest
