@@ -484,7 +484,7 @@ class TestCreateTodo:
         the number of seconds since the epoch.
         """
         freezer.move_to(
-            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
         )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.post(
@@ -630,7 +630,7 @@ class TestReadTodo:
         details, included the completion timestamp.
         """
         freezer.move_to(
-            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
         )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
@@ -959,7 +959,7 @@ class TestListTodos:
         It is possible to filter by only completed items.
         """
         freezer.move_to(
-            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
         )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         todoer_app.post(
@@ -1133,7 +1133,7 @@ class TestUpdateTodo:
         It is possible to flag a todo item as completed.
         """
         freezer.move_to(
-            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
         )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
