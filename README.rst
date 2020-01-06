@@ -5,6 +5,9 @@ todoer
 
 A TODO manager with authentication.
 
+.. contents::
+   :local:
+
 Running the service
 -------------------
 
