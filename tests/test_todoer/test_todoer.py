@@ -511,8 +511,9 @@ class TestReadTodo:
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -536,8 +537,9 @@ class TestReadTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -576,8 +578,9 @@ class TestReadTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -626,8 +629,9 @@ class TestReadTodo:
 
         todoer_app.post('/logout', content_type='application/json')
 
+        item_id = create.json['todo_id']
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -651,15 +655,16 @@ class TestDeleteTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         delete = todoer_app.delete(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
         assert delete.status_code == codes.OK
 
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -677,13 +682,14 @@ class TestDeleteTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         todoer_app.delete(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
         delete = todoer_app.delete(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -719,8 +725,9 @@ class TestDeleteTodo:
 
         todoer_app.post('/logout', content_type='application/json')
 
+        item_id = create.json['todo_id']
         delete = todoer_app.delete(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -891,8 +898,9 @@ class TestUpdateTodo:
 
         new_content = 'Book vacation'
 
+        item_id = create.json['todo_id']
         patch = todoer_app.patch(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({'content': new_content}),
         )
@@ -904,7 +912,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -924,8 +932,9 @@ class TestUpdateTodo:
 
         todoer_app.post('/logout', content_type='application/json')
 
+        item_id = create.json['todo_id']
         patch = todoer_app.patch(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({'content': 'Book vacation'}),
         )
@@ -945,8 +954,9 @@ class TestUpdateTodo:
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         patch = todoer_app.patch(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({'completed': True}),
         )
@@ -968,7 +978,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -990,8 +1000,9 @@ class TestUpdateTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         patch = todoer_app.patch(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({'completed': False}),
         )
@@ -1005,7 +1016,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -1026,8 +1037,9 @@ class TestUpdateTodo:
 
         new_content = 'Book vacation'
 
+        item_id = create.json['todo_id']
         patch = todoer_app.patch(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({
                 'content': new_content,
@@ -1044,7 +1056,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -1072,9 +1084,10 @@ class TestUpdateTodo:
             TIMESTAMP + 1,
             tz=pytz.utc,
         )
+        item_id = create.json['todo_id']
         with freeze_time(patch_time):
             patch = todoer_app.patch(
-                '/todos/{id}'.format(id=create.json['todo_id']),
+                f'todos/{item_id}',
                 content_type='application/json',
                 data=json.dumps({'completed': True}),
             )
@@ -1090,7 +1103,7 @@ class TestUpdateTodo:
         assert patch.json == create.json
 
         read = todoer_app.get(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -1112,8 +1125,9 @@ class TestUpdateTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         patch = todoer_app.patch(
-            '/todos/{id}'.format(id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({}),
         )
