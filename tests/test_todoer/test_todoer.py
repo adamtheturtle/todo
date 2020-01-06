@@ -16,7 +16,6 @@ from werkzeug.http import parse_cookie
 
 from todoer.todoer import FLASK_BCRYPT, load_user_from_id
 
-COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
 TIMESTAMP = 1463437744.335567
 
 
@@ -49,6 +48,7 @@ class TestSignup:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -69,6 +69,7 @@ class TestSignup:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -89,6 +90,7 @@ class TestSignup:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -112,6 +114,7 @@ class TestSignup:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -136,6 +139,7 @@ class TestSignup:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -166,6 +170,7 @@ class TestSignup:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -186,6 +191,7 @@ class TestLogin:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -209,6 +215,7 @@ class TestLogin:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -234,6 +241,7 @@ class TestLogin:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -269,6 +277,7 @@ class TestLogin:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -293,6 +302,7 @@ class TestLogin:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -316,6 +326,7 @@ class TestLogin:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -339,6 +350,7 @@ class TestLogin:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -359,6 +371,7 @@ class TestLogout:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -382,6 +395,7 @@ class TestLogout:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -396,6 +410,7 @@ class TestLogout:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -420,6 +435,7 @@ class TestLogout:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -441,6 +457,7 @@ class TestLoadUser:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -475,6 +492,7 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -500,6 +518,7 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -510,7 +529,7 @@ class TestCreateTodo:
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         assert response.headers['Content-Type'] == 'application/json'
@@ -526,19 +545,19 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
         """
-        data = COMPLETED_TODO_DATA.copy()
-        data.pop('content')
+        completed_todo_data.pop('content')
 
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(data),
+            data=json.dumps(completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -552,19 +571,19 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
         """
-        data = COMPLETED_TODO_DATA.copy()
-        data.pop('completed')
+        completed_todo_data.pop('completed')
 
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(data),
+            data=json.dumps(completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -579,6 +598,7 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -594,6 +614,7 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -618,6 +639,7 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -648,6 +670,7 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -658,7 +681,7 @@ class TestReadTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -668,7 +691,7 @@ class TestReadTodo:
         )
 
         assert read.status_code == codes.OK
-        expected = COMPLETED_TODO_DATA.copy()
+        expected = completed_todo_data.copy()
         expected['todo_id'] = create.json['todo_id']
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
@@ -683,6 +706,7 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -692,7 +716,7 @@ class TestReadTodo:
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         create = todoer_app.post(
@@ -704,7 +728,7 @@ class TestReadTodo:
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -723,6 +747,7 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -744,6 +769,7 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -758,6 +784,7 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -791,6 +818,7 @@ class TestDeleteTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -800,7 +828,7 @@ class TestDeleteTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -823,6 +851,7 @@ class TestDeleteTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -832,7 +861,7 @@ class TestDeleteTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -858,6 +887,7 @@ class TestDeleteTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -873,6 +903,7 @@ class TestDeleteTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -883,7 +914,7 @@ class TestDeleteTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         todoer_app.post('/logout', content_type='application/json')
@@ -907,6 +938,7 @@ class TestListTodos:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -926,6 +958,7 @@ class TestListTodos:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -943,6 +976,7 @@ class TestListTodos:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -979,6 +1013,7 @@ class TestListTodos:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -994,7 +1029,7 @@ class TestListTodos:
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         list_todos = todoer_app.get(
@@ -1010,7 +1045,7 @@ class TestListTodos:
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
         assert list_todos.status_code == codes.OK
-        expected = COMPLETED_TODO_DATA.copy()
+        expected = completed_todo_data.copy()
         expected['todo_id'] = 2
         [todo] = list_todos_data['todos']
         assert round(abs(todo.pop('completion_timestamp') - TIMESTAMP), 3) == 0
@@ -1021,6 +1056,7 @@ class TestListTodos:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1036,7 +1072,7 @@ class TestListTodos:
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         list_todos = todoer_app.get(
@@ -1062,6 +1098,7 @@ class TestListTodos:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1082,6 +1119,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1121,6 +1159,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1150,6 +1189,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1201,6 +1241,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1210,7 +1251,7 @@ class TestUpdateTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -1240,6 +1281,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1285,6 +1327,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1297,7 +1340,7 @@ class TestUpdateTodo:
             create = todoer_app.post(
                 '/todos',
                 content_type='application/json',
-                data=json.dumps(COMPLETED_TODO_DATA),
+                data=json.dumps(completed_todo_data),
             )
 
         patch_time = datetime.datetime.fromtimestamp(
@@ -1338,6 +1381,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1347,7 +1391,7 @@ class TestUpdateTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -1364,6 +1408,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1388,6 +1433,7 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """

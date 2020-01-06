@@ -82,9 +82,23 @@ def request_callback(
 
 @pytest.fixture()
 def user_data() -> Dict[str, Optional[Union[str, int, bool]]]:
+    """
+    Data for a new user.
+    """
     return {'email': uuid.uuid4().hex, 'password': uuid.uuid4().hex}
 
 
 @pytest.fixture()
 def not_completed_todo_data() -> Dict[str, Optional[Union[str, int, bool]]]:
+    """
+    Data for a not completed todo item.
+    """
     return {'content': uuid.uuid4().hex, 'completed': False}
+
+
+@pytest.fixture()
+def completed_todo_data() -> Dict[str, Optional[Union[str, int, bool]]]:
+    """
+    Data for a completed todo item.
+    """
+    return {'content': uuid.uuid4().hex, 'completed': True}
