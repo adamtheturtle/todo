@@ -83,7 +83,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
     """
-    url = urljoin(STORAGE_URL, 'users/{email}').format(email=user_id)
+    url = urljoin(STORAGE_URL, f'users/{user_id}')
     response = requests.get(url, headers={'Content-Type': 'application/json'})
 
     if response.status_code == codes.OK:
@@ -135,16 +135,16 @@ def login() -> Tuple[Response, int]:
     if user is None:
         return jsonify(
             title='The requested user does not exist.',
-            detail='No user exists with the email "{email}"'.format(
-                email=email,
-            ),
+            detail=f'No user exists with the email "{email}"',
         ), codes.NOT_FOUND
 
     if not FLASK_BCRYPT.check_password_hash(user.password_hash, password):
         return jsonify(
             title='An incorrect password was provided.',
-            detail='The password for the user "{email}" does not match the '
-            'password provided.'.format(email=email),
+            detail=(
+                f'The password for the user "{email}" does not match the '
+                'password provided.'
+            ),
         ), codes.UNAUTHORIZED
 
     login_user(user, remember=True)
@@ -190,9 +190,7 @@ def signup() -> Tuple[Response, int]:
     if load_user_from_id(email) is not None:
         return jsonify(
             title='There is already a user with the given email address.',
-            detail='A user already exists with the email "{email}"'.format(
-                email=email,
-            ),
+            detail=f'A user already exists with the email "{email}"',
         ), codes.CONFLICT
 
     data = {
@@ -259,12 +257,14 @@ def read_todo(todo_id: int) -> Tuple[Response, int]:
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :queryparameter number todo_id: The id of the todo item.
+    :arg number todo_id: The id of the todo item.
     :resjson boolean completed: Whether the item is completed.
     :resjson number completion_timestamp: The completion UNIX timestamp, or
         ``null`` if there is none.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
+
+    :return: Details of the requested TODO item.
     """
     url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     response = requests.get(url, headers={'Content-Type': 'application/json'})
@@ -280,9 +280,11 @@ def delete_todo(todo_id: int) -> Tuple[Response, int]:
 
     :reqheader Content-Type: application/json
     :resheader Content-Type: application/json
-    :queryparameter number todo_id: The id of the todo item.
+    :arg number todo_id: The id of the todo item.
     :status 200: The requested item's information is returned.
     :status 404: There is no item with the given ``id``.
+
+    :return: An empty response.
     """
     url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     headers = {'Content-Type': 'application/json'}
@@ -325,7 +327,7 @@ def update_todo(todo_id: int) -> Tuple[Response, int]:
 
     :reqheader Content-Type: application/json
 
-    :queryparameter number todo_id: The id of the todo item.
+    :arg number todo_id: The id of the todo item.
 
     :reqjson string content: The new of the item (optional).
     :reqjson boolean completed: Whether the item is completed (optional).
@@ -340,6 +342,8 @@ def update_todo(todo_id: int) -> Tuple[Response, int]:
 
     :status 200: An item with the given details has been created.
     :status 404: There is no item with the given ``id``.
+
+    :return: Details of the updated todo item.
     """
     url = urljoin(STORAGE_URL, f'todos/{todo_id}')
     headers = {'Content-Type': 'application/json'}

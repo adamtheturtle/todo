@@ -99,13 +99,10 @@ class TestCreateUser:
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CONFLICT
+        email = USER_DATA['email']
         expected = {
-            'title':
-            'There is already a user with the given email address.',
-            'detail':
-            'A user already exists with the email "{email}"'.format(
-                email=USER_DATA['email'],
-            ),
+            'title': 'There is already a user with the given email address.',
+            'detail': f'A user already exists with the email "{email}"',
         }
         assert response.json == expected
 
@@ -133,8 +130,9 @@ class TestGetUser:
             content_type='application/json',
             data=json.dumps(USER_DATA),
         )
+        email = USER_DATA['email']
         response = storage_app.get(
-            '/users/{email}'.format(email=USER_DATA['email']),
+            f'/users/{email}',
             content_type='application/json',
         )
         assert response.status_code == codes.OK
@@ -145,19 +143,16 @@ class TestGetUser:
         A ``GET`` request for a user which does not exist returns a NOT_FOUND
         status code and error details.
         """
+        email = USER_DATA['email']
         response = storage_app.get(
-            '/users/{email}'.format(email=USER_DATA['email']),
+            f'/users/{email}',
             content_type='application/json',
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.NOT_FOUND
         expected = {
-            'title':
-            'The requested user does not exist.',
-            'detail':
-            'No user exists with the email "{email}"'.format(
-                email=USER_DATA['email'],
-            ),
+            'title': 'The requested user does not exist.',
+            'detail': f'No user exists with the email "{email}"',
         }
         assert response.json == expected
 
@@ -166,11 +161,8 @@ class TestGetUser:
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        response = storage_app.get(
-            '/users/{email}'.format(email=USER_DATA['email']),
-            content_type='text/html',
-        )
-
+        email = USER_DATA['email']
+        response = storage_app.get(f'/users/{email}', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
 
@@ -352,7 +344,7 @@ class TestGetTodo:
         item_id = create.json['todo_id']
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=item_id),
+            f'/todos/{item_id}',
             content_type='application/json',
         )
 
@@ -377,7 +369,7 @@ class TestGetTodo:
         item_id = create.json['todo_id']
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=item_id),
+            f'/todos/{item_id}',
             content_type='application/json',
         )
 
@@ -432,14 +424,14 @@ class TestDeleteTodo:
         item_id = create.json['todo_id']
 
         delete = storage_app.delete(
-            '/todos/{todo_id}'.format(todo_id=item_id),
+            f'/todos/{item_id}',
             content_type='application/json',
         )
 
         assert delete.status_code == codes.OK
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=item_id),
+            f'/todos/{item_id}',
             content_type='application/json',
         )
 
@@ -458,12 +450,12 @@ class TestDeleteTodo:
         item_id = create.json['todo_id']
 
         storage_app.delete(
-            '/todos/{todo_id}'.format(todo_id=item_id),
+            f'/todos/{item_id}',
             content_type='application/json',
         )
 
         delete = storage_app.delete(
-            '/todos/{todo_id}'.format(todo_id=item_id),
+            f'/todos/{item_id}',
             content_type='application/json',
         )
 
@@ -625,8 +617,9 @@ class TestUpdateTodo:
 
         new_content = 'Book vacation'
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({'content': new_content}),
         )
@@ -640,7 +633,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -656,8 +649,9 @@ class TestUpdateTodo:
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps(
                 {
@@ -676,7 +670,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -692,8 +686,9 @@ class TestUpdateTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps(
                 {
@@ -712,7 +707,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -731,8 +726,9 @@ class TestUpdateTodo:
 
         new_content = 'Book vacation'
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({
                 'content': new_content,
@@ -750,7 +746,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 

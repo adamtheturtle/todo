@@ -132,9 +132,7 @@ def specific_user_get(email: str) -> Tuple[Response, int]:
     if user is None:
         return jsonify(
             title='The requested user does not exist.',
-            detail='No user exists with the email "{email}"'.format(
-                email=email,
-            ),
+            detail=f'No user exists with the email "{email}"',
         ), codes.NOT_FOUND
 
     return_data = jsonify(email=user.email, password_hash=user.password_hash)
@@ -189,9 +187,7 @@ def users_post() -> Tuple[Response, int]:
     if load_user_from_id(email) is not None:
         return jsonify(
             title='There is already a user with the given email address.',
-            detail='A user already exists with the email "{email}"'.format(
-                email=email,
-            ),
+            detail=f'A user already exists with the email "{email}"',
         ), codes.CONFLICT
 
     user = User(email=email, password_hash=password_hash)
