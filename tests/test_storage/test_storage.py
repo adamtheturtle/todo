@@ -15,7 +15,8 @@ class TestCreateUser:
     """
 
     def test_success_response(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -32,7 +33,8 @@ class TestCreateUser:
         assert response.json == user_data
 
     def test_missing_email(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -56,7 +58,8 @@ class TestCreateUser:
         assert response.json == expected
 
     def test_missing_password_hash(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -80,7 +83,8 @@ class TestCreateUser:
         assert response.json == expected
 
     def test_existing_user(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -109,7 +113,8 @@ class TestCreateUser:
         assert response.json == expected
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -125,7 +130,8 @@ class TestGetUser:
     """
 
     def test_success(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -146,7 +152,8 @@ class TestGetUser:
         assert response.json == user_data
 
     def test_non_existant_user(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -167,7 +174,8 @@ class TestGetUser:
         assert response.json == expected
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -185,7 +193,8 @@ class TestGetUsers:
     """
 
     def test_no_users(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         A ``GET`` request for information about all users returns an OK status
@@ -201,7 +210,8 @@ class TestGetUsers:
         assert response.json == []
 
     def test_with_users(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -241,7 +251,8 @@ class TestGetUsers:
         assert response.json == users
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -257,7 +268,8 @@ class TestCreateTodo:
     """
 
     def test_success_response(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -278,7 +290,8 @@ class TestCreateTodo:
         assert response.json == expected
 
     def test_missing_text(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -302,7 +315,8 @@ class TestCreateTodo:
         assert response.json == expected
 
     def test_missing_completed_flag(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -326,7 +340,8 @@ class TestCreateTodo:
         assert response.json == expected
 
     def test_missing_completion_time(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -349,7 +364,8 @@ class TestCreateTodo:
         assert response.json == expected
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -365,7 +381,8 @@ class TestGetTodo:
     """
 
     def test_success(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -391,7 +408,8 @@ class TestGetTodo:
         assert read.json == expected
 
     def test_timestamp_null(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -420,7 +438,8 @@ class TestGetTodo:
         assert read.json == expected
 
     def test_non_existant(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
@@ -440,7 +459,8 @@ class TestGetTodo:
         assert response.json == expected
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -456,7 +476,8 @@ class TestDeleteTodo:
     """
 
     def test_success(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -485,7 +506,8 @@ class TestDeleteTodo:
         assert read.status_code == codes.NOT_FOUND
 
     def test_delete_twice(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -517,7 +539,8 @@ class TestDeleteTodo:
         assert delete.json == expected
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -536,7 +559,8 @@ class TestListTodos:
     """
 
     def test_no_todos(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         When there are no todos, an empty array is returned.
@@ -550,7 +574,8 @@ class TestListTodos:
         assert list_todos.json['todos'] == []
 
     def test_list(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -580,15 +605,10 @@ class TestListTodos:
         assert list_todos.json['todos'] == expected
 
     def test_filter_completed(
-        self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[
-            str, Optional[
-                Union[
-                    float, str, int,
-                    bool,
-                ]
-            ],
-        ],
+        self,
+        storage_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
+                                                          bool, ]], ],
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -626,15 +646,10 @@ class TestListTodos:
         assert list_todos_data['todos'] == [expected]
 
     def test_filter_not_completed(
-        self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[
-            str, Optional[
-                Union[
-                    float, str, int,
-                    bool,
-                ]
-            ],
-        ],
+        self,
+        storage_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
+                                                          bool, ]], ],
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -671,7 +686,8 @@ class TestListTodos:
         assert list_todos_data['todos'] == [expected]
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -687,15 +703,10 @@ class TestUpdateTodo:
     """
 
     def test_change_content(
-        self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[
-            str, Optional[
-                Union[
-                    float, str, int,
-                    bool,
-                ]
-            ],
-        ],
+        self,
+        storage_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
+                                                          bool, ]], ],
     ) -> None:
         """
         It is possible to change the content of a todo item.
@@ -731,15 +742,10 @@ class TestUpdateTodo:
         assert read.json == expected
 
     def test_flag_completed(
-        self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[
-            str, Optional[
-                Union[
-                    float, str, int,
-                    bool,
-                ]
-            ],
-        ],
+        self,
+        storage_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
+                                                          bool, ]], ],
     ) -> None:
         """
         It is possible to flag a todo item as completed.
@@ -778,7 +784,8 @@ class TestUpdateTodo:
         assert read.json == expected
 
     def test_flag_not_completed(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
@@ -818,15 +825,10 @@ class TestUpdateTodo:
         assert read.json == expected
 
     def test_change_content_and_flag(
-        self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[
-            str, Optional[
-                Union[
-                    float, str, int,
-                    bool,
-                ]
-            ],
-        ],
+        self,
+        storage_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
+                                                          bool, ]], ],
     ) -> None:
         """
         It is possible to change the content of a todo item, as well as marking
@@ -867,7 +869,8 @@ class TestUpdateTodo:
         assert read.json == expected
 
     def test_non_existant(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
@@ -887,7 +890,8 @@ class TestUpdateTodo:
         assert response.json == expected
 
     def test_incorrect_content_type(
-        self, storage_app: FlaskClient,
+        self,
+        storage_app: FlaskClient,
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
