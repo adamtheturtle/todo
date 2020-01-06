@@ -4,7 +4,7 @@ Test tools for the TODO service.
 
 import re
 import uuid
-from typing import Dict, Iterator, Tuple
+from typing import Dict, Iterator, Tuple, Optional, Union
 from urllib.parse import urljoin
 
 import pytest
@@ -53,7 +53,7 @@ def todoer_app() -> Iterator[FlaskClient]:
 
 def request_callback(
     request: PreparedRequest,
-) -> Tuple[int, Dict[str, str], bytes]:
+) -> Tuple[int, Dict[str, Optional[Union[str, int, bool]]], bytes]:
     """
     Given a request to the storage service, send an equivalent request to
     an in memory fake of the storage service and return some key details
@@ -81,5 +81,10 @@ def request_callback(
 
 
 @pytest.fixture()
-def user_data() -> Dict[str, str]:
+def user_data() -> Dict[str, Optional[Union[str, int, bool]]]:
     return {'email': uuid.uuid4().hex, 'password': uuid.uuid4().hex}
+
+
+@pytest.fixture()
+def not_completed_todo_data() -> Dict[str, Optional[Union[str, int, bool]]]:
+    return {'content': uuid.uuid4().hex, 'completed': False}

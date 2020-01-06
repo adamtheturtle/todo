@@ -4,7 +4,7 @@ Tests for todoer.todoer.
 
 import datetime
 import json
-from typing import Dict
+from typing import Dict, Optional, Union
 
 import pytest
 import pytz
@@ -17,13 +17,12 @@ from werkzeug.http import parse_cookie
 from todoer.todoer import FLASK_BCRYPT, load_user_from_id
 
 COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
-NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
 TIMESTAMP = 1463437744.335567
 
 
 def log_in_as_new_user(
     flask_app: FlaskClient,
-    user_data: Dict[str, str],
+    user_data: Dict[str, Optional[Union[str, int, bool]]],
 ) -> None:
     """
     Create a user and log in as that user.
@@ -49,7 +48,8 @@ class TestSignup:
     def test_signup(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A signup ``POST`` request with an email address and password returns a
@@ -68,7 +68,8 @@ class TestSignup:
     def test_passwords_hashed(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         Passwords are hashed before being saved to the database.
@@ -87,7 +88,8 @@ class TestSignup:
     def test_missing_email(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A signup request without an email address returns a BAD_REQUEST status
@@ -109,7 +111,8 @@ class TestSignup:
     def test_missing_password(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A signup request without a password returns a BAD_REQUEST status code
@@ -132,7 +135,8 @@ class TestSignup:
     def test_existing_user(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A signup request for an email address which already exists returns a
@@ -161,7 +165,8 @@ class TestSignup:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -180,7 +185,8 @@ class TestLogin:
     def test_login(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         Logging in as a user which has been signed up returns an OK status
@@ -202,7 +208,8 @@ class TestLogin:
     def test_non_existant_user(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         Attempting to log in as a user which has been not been signed up
@@ -226,7 +233,8 @@ class TestLogin:
     def test_wrong_password(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         Attempting to log in with an incorrect password returns an UNAUTHORIZED
@@ -260,7 +268,8 @@ class TestLogin:
     def test_remember_me_cookie_set(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A "Remember Me" token is in the response header of a successful login.
@@ -283,7 +292,8 @@ class TestLogin:
     def test_missing_email(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A login request without an email address returns a BAD_REQUEST status
@@ -305,7 +315,8 @@ class TestLogin:
     def test_missing_password(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A login request without a password returns a BAD_REQUEST status code
@@ -327,7 +338,8 @@ class TestLogin:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -346,7 +358,8 @@ class TestLogout:
     def test_logout(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A POST request to log out when a user is logged in returns an OK status
@@ -368,7 +381,8 @@ class TestLogout:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A POST request to log out when no user is logged in returns an
@@ -381,7 +395,8 @@ class TestLogout:
     def test_logout_twice(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A POST request to log out, after a successful log out attempt returns
@@ -404,7 +419,8 @@ class TestLogout:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -424,7 +440,8 @@ class TestLoadUser:
     def test_user_exists(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a user exists with the email given as the user ID to
@@ -457,7 +474,8 @@ class TestCreateTodo:
     def test_success_response(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``POST`` request with content and a completed flag set to ``false``
@@ -468,21 +486,21 @@ class TestCreateTodo:
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
-        expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = None
-        expected['todo_id'] = 1
-        assert response.json == expected
+        not_completed_todo_data['completion_timestamp'] = None
+        not_completed_todo_data['todo_id'] = 1
+        assert response.json == not_completed_todo_data
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_current_completion_time(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If the completed flag is set to ``true`` then the completed time is
@@ -507,7 +525,8 @@ class TestCreateTodo:
     def test_missing_text(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
@@ -532,7 +551,8 @@ class TestCreateTodo:
     def test_missing_completed_flag(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
@@ -558,7 +578,8 @@ class TestCreateTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -572,7 +593,8 @@ class TestCreateTodo:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
@@ -580,7 +602,7 @@ class TestCreateTodo:
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         assert response.status_code == codes.UNAUTHORIZED
@@ -595,7 +617,8 @@ class TestReadTodo:
     def test_success(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
@@ -605,7 +628,7 @@ class TestReadTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -615,17 +638,17 @@ class TestReadTodo:
         )
 
         assert read.status_code == codes.OK
-        expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = None
-        expected['todo_id'] = create.json['todo_id']
-        assert read.json == expected
+        not_completed_todo_data['completion_timestamp'] = None
+        not_completed_todo_data['todo_id'] = create.json['todo_id']
+        assert read.json == not_completed_todo_data
 
     @responses.activate
     @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_completed(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
@@ -659,7 +682,8 @@ class TestReadTodo:
     def test_multiple_todos(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``GET`` request gets the correct todo when there are multiple.
@@ -674,7 +698,7 @@ class TestReadTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post(
@@ -690,16 +714,16 @@ class TestReadTodo:
         )
 
         assert read.status_code == codes.OK
-        expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = None
-        expected['todo_id'] = create.json['todo_id']
-        assert read.json == expected
+        not_completed_todo_data['completion_timestamp'] = None
+        not_completed_todo_data['todo_id'] = create.json['todo_id']
+        assert read.json == not_completed_todo_data
 
     @responses.activate
     def test_non_existant(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
@@ -719,7 +743,8 @@ class TestReadTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -732,7 +757,8 @@ class TestReadTodo:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
@@ -741,7 +767,7 @@ class TestReadTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post('/logout', content_type='application/json')
@@ -764,7 +790,8 @@ class TestDeleteTodo:
     def test_success(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         It is possible to delete a todo item.
@@ -795,7 +822,8 @@ class TestDeleteTodo:
     def test_delete_twice(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         Deleting an item twice gives returns a 404 code and error message.
@@ -829,7 +857,8 @@ class TestDeleteTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -843,7 +872,8 @@ class TestDeleteTodo:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
@@ -876,7 +906,8 @@ class TestListTodos:
     def test_no_todos(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When there are no todos, an empty array is returned.
@@ -894,7 +925,8 @@ class TestListTodos:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
@@ -910,16 +942,17 @@ class TestListTodos:
     def test_list(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         All todos are listed.
         """
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
-        other_todo = NOT_COMPLETED_TODO_DATA.copy()
+        other_todo = not_completed_todo_data.copy()
         other_todo['content'] = 'Get a haircut'
 
-        todos = [NOT_COMPLETED_TODO_DATA, other_todo]
+        todos = [not_completed_todo_data, other_todo]
         expected = []
         for todo in todos:
             create = todoer_app.post(
@@ -945,7 +978,8 @@ class TestListTodos:
     def test_filter_completed(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         It is possible to filter by only completed items.
@@ -954,7 +988,7 @@ class TestListTodos:
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post(
@@ -986,7 +1020,8 @@ class TestListTodos:
     def test_filter_not_completed(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         It is possible to filter by only items which are not completed.
@@ -995,7 +1030,7 @@ class TestListTodos:
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post(
@@ -1017,7 +1052,7 @@ class TestListTodos:
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
         assert list_todos.status_code == codes.OK
-        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected = not_completed_todo_data.copy()
         expected['completion_timestamp'] = None
         expected['todo_id'] = 1
         assert list_todos_data['todos'] == [expected]
@@ -1026,7 +1061,8 @@ class TestListTodos:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -1045,7 +1081,8 @@ class TestUpdateTodo:
     def test_change_content(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         It is possible to change the content of a todo item.
@@ -1054,7 +1091,7 @@ class TestUpdateTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         new_content = 'Book vacation'
@@ -1083,7 +1120,8 @@ class TestUpdateTodo:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
@@ -1092,7 +1130,7 @@ class TestUpdateTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post('/logout', content_type='application/json')
@@ -1111,7 +1149,8 @@ class TestUpdateTodo:
     def test_flag_completed(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         It is possible to flag a todo item as completed.
@@ -1120,7 +1159,7 @@ class TestUpdateTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -1161,7 +1200,8 @@ class TestUpdateTodo:
     def test_flag_not_completed(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         It is possible to flag a todo item as not completed.
@@ -1199,7 +1239,8 @@ class TestUpdateTodo:
     def test_change_content_and_flag(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         It is possible to change the content of a todo item, as well as marking
@@ -1209,7 +1250,7 @@ class TestUpdateTodo:
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         new_content = 'Book vacation'
@@ -1243,7 +1284,8 @@ class TestUpdateTodo:
     def test_flag_completed_already_completed(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         Flagging an already completed item as completed does not change the
@@ -1295,7 +1337,8 @@ class TestUpdateTodo:
     def test_remain_same(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         Not requesting any changes keeps the item the same.
@@ -1320,7 +1363,8 @@ class TestUpdateTodo:
     def test_non_existant(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
@@ -1343,7 +1387,8 @@ class TestUpdateTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        user_data: Dict[str, str],
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
