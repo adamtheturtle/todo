@@ -83,7 +83,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     :return: The user which has the email address ``user_id`` or ``None`` if
         there is no such user.
     """
-    url = urljoin(STORAGE_URL, 'users/{email}').format(email=user_id)
+    url = urljoin(STORAGE_URL, f'users/{user_id}')
     response = requests.get(url, headers={'Content-Type': 'application/json'})
 
     if response.status_code == codes.OK:
@@ -135,16 +135,16 @@ def login() -> Tuple[Response, int]:
     if user is None:
         return jsonify(
             title='The requested user does not exist.',
-            detail='No user exists with the email "{email}"'.format(
-                email=email,
-            ),
+            detail=f'No user exists with the email "{email}"',
         ), codes.NOT_FOUND
 
     if not FLASK_BCRYPT.check_password_hash(user.password_hash, password):
         return jsonify(
             title='An incorrect password was provided.',
-            detail='The password for the user "{email}" does not match the '
-            'password provided.'.format(email=email),
+            detail=(
+                f'The password for the user "{email}" does not match the '
+                'password provided.'
+            ),
         ), codes.UNAUTHORIZED
 
     login_user(user, remember=True)
