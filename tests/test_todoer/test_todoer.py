@@ -11,6 +11,7 @@ import pytz
 import responses
 from flask.testing import FlaskClient
 from freezegun import freeze_time
+from freezegun.api import FrozenDateTimeFactory
 from requests import codes
 from werkzeug.http import parse_cookie
 
@@ -476,7 +477,7 @@ class TestCreateTodo:
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
         timestamp: float,
-        freezer,
+        freezer: FrozenDateTimeFactory,
     ) -> None:
         """
         If the completed flag is set to ``true`` then the completed time is
@@ -622,7 +623,7 @@ class TestReadTodo:
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
         timestamp: float,
-        freezer,
+        freezer: FrozenDateTimeFactory,
     ) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
@@ -952,7 +953,7 @@ class TestListTodos:
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
         timestamp: float,
-        freezer,
+        freezer: FrozenDateTimeFactory,
     ) -> None:
         """
         It is possible to filter by only completed items.
@@ -1126,7 +1127,7 @@ class TestUpdateTodo:
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
         timestamp: float,
-        freezer,
+        freezer: FrozenDateTimeFactory,
     ) -> None:
         """
         It is possible to flag a todo item as completed.
