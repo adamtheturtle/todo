@@ -47,8 +47,6 @@ class TestSignup:
     def test_signup(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -68,8 +66,6 @@ class TestSignup:
     def test_passwords_hashed(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -89,8 +85,6 @@ class TestSignup:
     def test_missing_email(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -113,8 +107,6 @@ class TestSignup:
     def test_missing_password(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -138,8 +130,6 @@ class TestSignup:
     def test_existing_user(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -169,9 +159,6 @@ class TestSignup:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -190,8 +177,6 @@ class TestLogin:
     def test_login(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -214,8 +199,6 @@ class TestLogin:
     def test_non_existant_user(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -240,8 +223,6 @@ class TestLogin:
     def test_wrong_password(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -276,8 +257,6 @@ class TestLogin:
     def test_remember_me_cookie_set(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -301,8 +280,6 @@ class TestLogin:
     def test_missing_email(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -325,8 +302,6 @@ class TestLogin:
     def test_missing_password(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -349,9 +324,6 @@ class TestLogin:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -370,8 +342,6 @@ class TestLogout:
     def test_logout(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -394,9 +364,6 @@ class TestLogout:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A POST request to log out when no user is logged in returns an
@@ -409,8 +376,6 @@ class TestLogout:
     def test_logout_twice(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -434,9 +399,6 @@ class TestLogout:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -456,8 +418,6 @@ class TestLoadUser:
     def test_user_exists(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -492,7 +452,6 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -517,7 +476,6 @@ class TestCreateTodo:
     def test_current_completion_time(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -544,9 +502,7 @@ class TestCreateTodo:
     def test_missing_text(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
@@ -570,9 +526,7 @@ class TestCreateTodo:
     def test_missing_completed_flag(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
@@ -597,8 +551,6 @@ class TestCreateTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -614,8 +566,6 @@ class TestCreateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
@@ -639,7 +589,6 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -669,7 +618,6 @@ class TestReadTodo:
     def test_completed(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -746,8 +694,6 @@ class TestReadTodo:
     def test_non_existant(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -768,9 +714,6 @@ class TestReadTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -784,7 +727,6 @@ class TestReadTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -817,7 +759,6 @@ class TestDeleteTodo:
     def test_success(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -850,7 +791,6 @@ class TestDeleteTodo:
     def test_delete_twice(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -886,8 +826,6 @@ class TestDeleteTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -902,7 +840,6 @@ class TestDeleteTodo:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -937,8 +874,6 @@ class TestListTodos:
     def test_no_todos(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -957,9 +892,6 @@ class TestListTodos:
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
@@ -976,7 +908,6 @@ class TestListTodos:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1097,9 +1028,6 @@ class TestListTodos:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -1111,7 +1039,7 @@ class TestListTodos:
 
 class TestUpdateTodo:
     """
-    Tests for updating a todo item at ``PATCH /todos/{id}.``.
+    Tests for updating a todo item at ``PATCH /todos/{id}``.
     """
 
     @responses.activate
@@ -1119,7 +1047,6 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1159,7 +1086,6 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1189,7 +1115,6 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1240,7 +1165,6 @@ class TestUpdateTodo:
     def test_flag_not_completed(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -1281,7 +1205,6 @@ class TestUpdateTodo:
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1326,7 +1249,6 @@ class TestUpdateTodo:
     def test_flag_completed_already_completed(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -1380,7 +1302,6 @@ class TestUpdateTodo:
     def test_remain_same(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
@@ -1407,8 +1328,6 @@ class TestUpdateTodo:
     def test_non_existant(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
@@ -1432,9 +1351,6 @@ class TestUpdateTodo:
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
-        user_data: Dict[str, Optional[Union[str, int, bool]]],
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
