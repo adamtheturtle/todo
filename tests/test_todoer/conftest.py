@@ -3,6 +3,7 @@ Test tools for the TODO service.
 """
 
 import re
+import uuid
 from typing import Dict, Iterator, Tuple
 from urllib.parse import urljoin
 
@@ -77,3 +78,8 @@ def request_callback(
 
     result = (response.status_code, dict(response.headers), response.data)
     return result
+
+
+@pytest.fixture()
+def user_data() -> Dict[str, str]:
+    return {'email': uuid.uuid4().hex, 'password': uuid.uuid4().hex}
