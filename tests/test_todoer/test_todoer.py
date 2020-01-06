@@ -4,6 +4,7 @@ Tests for todoer.todoer.
 
 import datetime
 import json
+from typing import Dict
 
 import pytest
 import pytz
@@ -21,19 +22,22 @@ NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
 TIMESTAMP = 1463437744.335567
 
 
-def log_in_as_new_user(flask_app: FlaskClient) -> None:
+def log_in_as_new_user(
+    flask_app: FlaskClient,
+    user_data: Dict[str, str],
+) -> None:
     """
     Create a user and log in as that user.
     """
     flask_app.post(
         '/signup',
         content_type='application/json',
-        data=json.dumps(USER_DATA),
+        data=json.dumps(user_data),
     )
     flask_app.post(
         '/login',
         content_type='application/json',
-        data=json.dumps(USER_DATA),
+        data=json.dumps(user_data),
     )
 
 
@@ -387,7 +391,7 @@ class TestCreateTodo:
         returns a JSON response with the given data and a ``null``
         ``completion_timestamp``.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -407,7 +411,7 @@ class TestCreateTodo:
         If the completed flag is set to ``true`` then the completed time is
         the number of seconds since the epoch.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -471,7 +475,7 @@ class TestCreateTodo:
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         response = todoer_app.post('/todos', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
@@ -500,7 +504,7 @@ class TestReadTodo:
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -526,7 +530,7 @@ class TestReadTodo:
         A ``GET`` request for an existing todo an OK status code and the todo's
         details, included the completion timestamp.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -555,7 +559,7 @@ class TestReadTodo:
         """
         A ``GET`` request gets the correct todo when there are multiple.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -592,7 +596,7 @@ class TestReadTodo:
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         response = todoer_app.get('/todos/1', content_type='application/json')
 
         assert response.headers['Content-Type'] == 'application/json'
@@ -616,7 +620,7 @@ class TestReadTodo:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -644,7 +648,7 @@ class TestDeleteTodo:
         """
         It is possible to delete a todo item.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -671,7 +675,7 @@ class TestDeleteTodo:
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -702,7 +706,7 @@ class TestDeleteTodo:
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         response = todoer_app.delete('/todos/1', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
@@ -711,7 +715,7 @@ class TestDeleteTodo:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
 
         create = todoer_app.post(
             '/todos',
@@ -740,7 +744,7 @@ class TestListTodos:
         """
         When there are no todos, an empty array is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         list_todos = todoer_app.get(
             '/todos',
             content_type='application/json',
@@ -766,7 +770,7 @@ class TestListTodos:
         """
         All todos are listed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         other_todo = NOT_COMPLETED_TODO_DATA.copy()
         other_todo['content'] = 'Get a haircut'
 
@@ -797,7 +801,7 @@ class TestListTodos:
         """
         It is possible to filter by only completed items.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -834,7 +838,7 @@ class TestListTodos:
         """
         It is possible to filter by only items which are not completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -885,7 +889,7 @@ class TestUpdateTodo:
         """
         It is possible to change the content of a todo item.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -919,7 +923,7 @@ class TestUpdateTodo:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -943,7 +947,7 @@ class TestUpdateTodo:
         """
         It is possible to flag a todo item as completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -989,7 +993,7 @@ class TestUpdateTodo:
         """
         It is possible to flag a todo item as not completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -1024,7 +1028,7 @@ class TestUpdateTodo:
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -1067,7 +1071,7 @@ class TestUpdateTodo:
         Flagging an already completed item as completed does not change the
         completion timestamp.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create_time = datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc)
         with freeze_time(create_time):
             create = todoer_app.post(
@@ -1114,7 +1118,7 @@ class TestUpdateTodo:
         """
         Not requesting any changes keeps the item the same.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
@@ -1136,7 +1140,7 @@ class TestUpdateTodo:
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=USER_DATA)
         response = todoer_app.patch(
             '/todos/1',
             content_type='application/json',
