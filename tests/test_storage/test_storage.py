@@ -616,8 +616,9 @@ class TestUpdateTodo:
 
         new_content = 'Book vacation'
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({'content': new_content}),
         )
@@ -631,7 +632,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -647,8 +648,9 @@ class TestUpdateTodo:
             data=json.dumps(NOT_COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps(
                 {
@@ -667,7 +669,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -683,8 +685,9 @@ class TestUpdateTodo:
             data=json.dumps(COMPLETED_TODO_DATA),
         )
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps(
                 {
@@ -703,7 +706,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
@@ -722,8 +725,9 @@ class TestUpdateTodo:
 
         new_content = 'Book vacation'
 
+        item_id = create.json['todo_id']
         patch = storage_app.patch(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
             data=json.dumps({
                 'content': new_content,
@@ -741,7 +745,7 @@ class TestUpdateTodo:
         assert patch.json == expected
 
         read = storage_app.get(
-            '/todos/{todo_id}'.format(todo_id=create.json['todo_id']),
+            f'todos/{item_id}',
             content_type='application/json',
         )
 
