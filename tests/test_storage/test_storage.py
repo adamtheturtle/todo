@@ -258,7 +258,7 @@ class TestCreateTodo:
 
     def test_success_response(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request with the item's text content, a flag
@@ -279,7 +279,7 @@ class TestCreateTodo:
 
     def test_missing_text(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
@@ -303,7 +303,7 @@ class TestCreateTodo:
 
     def test_missing_completed_flag(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
@@ -327,7 +327,7 @@ class TestCreateTodo:
 
     def test_missing_completion_time(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         A ``POST /todos`` request without a completion time creates an item
@@ -366,7 +366,7 @@ class TestGetTodo:
 
     def test_success(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
@@ -392,7 +392,7 @@ class TestGetTodo:
 
     def test_timestamp_null(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         If the timestamp is not given, the response includes a null timestamp.
@@ -457,7 +457,7 @@ class TestDeleteTodo:
 
     def test_success(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         It is possible to delete a todo item.
@@ -486,7 +486,7 @@ class TestDeleteTodo:
 
     def test_delete_twice(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         Deleting an item twice gives returns a 404 code and error message.
@@ -551,7 +551,7 @@ class TestListTodos:
 
     def test_list(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         All todos are listed.
@@ -581,9 +581,15 @@ class TestListTodos:
 
     def test_filter_completed(
         self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        not_completed_todo_data: Dict[
+            str, Optional[
+                Union[
+                    float, str, int,
+                    bool,
+                ]
+            ],
+        ],
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         It is possible to filter by only completed items.
@@ -621,9 +627,15 @@ class TestListTodos:
 
     def test_filter_not_completed(
         self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        not_completed_todo_data: Dict[
+            str, Optional[
+                Union[
+                    float, str, int,
+                    bool,
+                ]
+            ],
+        ],
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         It is possible to filter by only items which are not completed.
@@ -676,8 +688,14 @@ class TestUpdateTodo:
 
     def test_change_content(
         self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
+        not_completed_todo_data: Dict[
+            str, Optional[
+                Union[
+                    float, str, int,
+                    bool,
+                ]
+            ],
+        ],
     ) -> None:
         """
         It is possible to change the content of a todo item.
@@ -714,8 +732,14 @@ class TestUpdateTodo:
 
     def test_flag_completed(
         self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
+        not_completed_todo_data: Dict[
+            str, Optional[
+                Union[
+                    float, str, int,
+                    bool,
+                ]
+            ],
+        ],
     ) -> None:
         """
         It is possible to flag a todo item as completed.
@@ -755,7 +779,7 @@ class TestUpdateTodo:
 
     def test_flag_not_completed(
         self, storage_app: FlaskClient,
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
+        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]],
     ) -> None:
         """
         It is possible to flag a todo item as not completed.
@@ -795,8 +819,14 @@ class TestUpdateTodo:
 
     def test_change_content_and_flag(
         self, storage_app: FlaskClient,
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
+        not_completed_todo_data: Dict[
+            str, Optional[
+                Union[
+                    float, str, int,
+                    bool,
+                ]
+            ],
+        ],
     ) -> None:
         """
         It is possible to change the content of a todo item, as well as marking
