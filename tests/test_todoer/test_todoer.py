@@ -143,8 +143,7 @@ class TestSignup:
             content_type='application/json',
             data=json.dumps(user_data),
         )
-        data = user_data.copy()
-        data['password'] = 'different'
+        user_data['password'] = 'different'
         response = todoer_app.post(
             '/signup',
             content_type='application/json',
@@ -238,12 +237,11 @@ class TestLogin:
             content_type='application/json',
             data=json.dumps(user_data),
         )
-        data = user_data.copy()
-        data['password'] = 'incorrect'
+        user_data['password'] = 'incorrect'
         response = todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(data),
+            data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.UNAUTHORIZED
