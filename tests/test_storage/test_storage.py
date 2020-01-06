@@ -82,7 +82,6 @@ class TestCreateUser:
     def test_existing_user(
         self, storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
         A ``POST /users`` request for an email address which already exists
@@ -111,10 +110,6 @@ class TestCreateUser:
 
     def test_incorrect_content_type(
         self, storage_app: FlaskClient,
-        user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -132,9 +127,6 @@ class TestGetUser:
     def test_success(
         self, storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
         A ``GET`` request for an existing user returns an OK status code and
@@ -156,9 +148,6 @@ class TestGetUser:
     def test_non_existant_user(
         self, storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
         A ``GET`` request for a user which does not exist returns a NOT_FOUND
@@ -180,9 +169,6 @@ class TestGetUser:
     def test_incorrect_content_type(
         self, storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -217,9 +203,6 @@ class TestGetUsers:
     def test_with_users(
         self, storage_app: FlaskClient,
         user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
         A ``GET`` request for information about all users returns an OK status
@@ -259,10 +242,6 @@ class TestGetUsers:
 
     def test_incorrect_content_type(
         self, storage_app: FlaskClient,
-        user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
-        completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
@@ -279,9 +258,6 @@ class TestCreateTodo:
 
     def test_success_response(
         self, storage_app: FlaskClient,
-        user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
@@ -303,9 +279,6 @@ class TestCreateTodo:
 
     def test_missing_text(
         self, storage_app: FlaskClient,
-        user_data: Dict[str, Optional[Union[float, str, int, bool]]],
-        not_completed_todo_data: Dict[str, Optional[Union[float, str, int,
-                                                          bool]]],
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
@@ -330,7 +303,6 @@ class TestCreateTodo:
 
     def test_missing_completed_flag(
         self, storage_app: FlaskClient,
-        user_data: Dict[str, Optional[Union[float, str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[float, str, int, bool]]]
     ) -> None:
         """
