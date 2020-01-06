@@ -210,7 +210,8 @@ class TestLogin:
         assert response.status_code == codes.UNAUTHORIZED
         email = USER_DATA['email']
         expected = {
-            'title': 'An incorrect password was provided.',
+            'title':
+            'An incorrect password was provided.',
             'detail': (
                 f'The password for the user "{email}" does not match the '
                 'password provided.'
