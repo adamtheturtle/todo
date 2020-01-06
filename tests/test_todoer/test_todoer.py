@@ -129,13 +129,10 @@ class TestSignup:
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CONFLICT
+        email = USER_DATA['email']
         expected = {
-            'title':
-            'There is already a user with the given email address.',
-            'detail':
-            'A user already exists with the email "{email}"'.format(
-                email=USER_DATA['email'],
-            ),
+            'title': 'There is already a user with the given email address.',
+            'detail': f'A user already exists with the email "{email}"',
         }
         assert response.json == expected
 
@@ -184,13 +181,10 @@ class TestLogin:
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.NOT_FOUND
+        email = USER_DATA['email']
         expected = {
-            'title':
-            'The requested user does not exist.',
-            'detail':
-            'No user exists with the email "{email}"'.format(
-                email=USER_DATA['email'],
-            ),
+            'title': 'The requested user does not exist.',
+            'detail': f'No user exists with the email "{email}"',
         }
         assert response.json == expected
 
@@ -214,12 +208,13 @@ class TestLogin:
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.UNAUTHORIZED
+        email = USER_DATA['email']
         expected = {
-            'title':
-            'An incorrect password was provided.',
-            'detail':
-            'The password for the user "{email}" does not match the '
-            'password provided.'.format(email=USER_DATA['email']),
+            'title': 'An incorrect password was provided.',
+            'detail': (
+                f'The password for the user "{email}" does not match the '
+                'password provided.'
+            ),
         }
         assert response.json == expected
 

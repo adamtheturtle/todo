@@ -130,8 +130,9 @@ class TestGetUser:
             content_type='application/json',
             data=json.dumps(USER_DATA),
         )
+        email = USER_DATA['email']
         response = storage_app.get(
-            '/users/{email}'.format(email=USER_DATA['email']),
+            f'/users/{email}',
             content_type='application/json',
         )
         assert response.status_code == codes.OK
