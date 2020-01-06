@@ -2,6 +2,7 @@
 Test tools for the TODO service.
 """
 
+import random
 import re
 import uuid
 from typing import Dict, Iterator, Optional, Tuple, Union
@@ -102,3 +103,11 @@ def completed_todo_data() -> Dict[str, Optional[Union[str, int, bool]]]:
     Data for a completed todo item.
     """
     return {'content': uuid.uuid4().hex, 'completed': True}
+
+
+@pytest.fixture()
+def timestamp() -> float:
+    """
+    An example timestamp.
+    """
+    return random.uniform(1, 100 * 1000 * 1000)

@@ -16,8 +16,6 @@ from werkzeug.http import parse_cookie
 
 from todoer.todoer import FLASK_BCRYPT, load_user_from_id
 
-TIMESTAMP = 1463437744.335567
-
 
 def log_in_as_new_user(
     flask_app: FlaskClient,
@@ -472,17 +470,21 @@ class TestCreateTodo:
         assert response.json == not_completed_todo_data
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_current_completion_time(
         self,
         todoer_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer,
     ) -> None:
         """
         If the completed flag is set to ``true`` then the completed time is
         the number of seconds since the epoch.
         """
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+        )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.post(
             '/todos',
@@ -495,7 +497,7 @@ class TestCreateTodo:
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
         assert round(
-            number=abs(response.json['completion_timestamp'] - TIMESTAMP),
+            number=abs(response.json['completion_timestamp'] - timestamp),
             ndigits=3,
         ) == 0
 
@@ -614,17 +616,21 @@ class TestReadTodo:
         assert read.json == not_completed_todo_data
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_completed(
         self,
         todoer_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer,
     ) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details, included the completion timestamp.
         """
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+        )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
@@ -644,7 +650,7 @@ class TestReadTodo:
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
         assert round(
-            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            number=abs(read.json.pop('completion_timestamp') - timestamp),
             ndigits=3,
         ) == 0
         assert read.json == expected
@@ -939,17 +945,21 @@ class TestListTodos:
         assert list_todos.json['todos'] == expected
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_filter_completed(
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer,
     ) -> None:
         """
         It is possible to filter by only completed items.
         """
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+        )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         todoer_app.post(
             '/todos',
@@ -979,7 +989,7 @@ class TestListTodos:
         expected = completed_todo_data.copy()
         expected['todo_id'] = 2
         [todo] = list_todos_data['todos']
-        assert round(abs(todo.pop('completion_timestamp') - TIMESTAMP), 3) == 0
+        assert round(abs(todo.pop('completion_timestamp') - timestamp), 3) == 0
         assert todo == expected
 
     @responses.activate
@@ -1110,16 +1120,20 @@ class TestUpdateTodo:
         assert patch.status_code == codes.UNAUTHORIZED
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
     def test_flag_completed(
         self,
         todoer_app: FlaskClient,
         not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer,
     ) -> None:
         """
         It is possible to flag a todo item as completed.
         """
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+        )
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
@@ -1136,7 +1150,7 @@ class TestUpdateTodo:
 
         expected = create.json
         expected['completed'] = True
-        expected['completion_timestamp'] = TIMESTAMP
+        expected['completion_timestamp'] = timestamp
 
         assert patch.status_code == codes.OK
         # On some platforms (in particular Travis CI, float conversion loses
@@ -1156,7 +1170,7 @@ class TestUpdateTodo:
         )
 
         assert round(
-            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            number=abs(read.json.pop('completion_timestamp') - timestamp),
             ndigits=3,
         ) == 0
         assert read.json == expected
@@ -1251,13 +1265,14 @@ class TestUpdateTodo:
         todoer_app: FlaskClient,
         completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
         user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
     ) -> None:
         """
         Flagging an already completed item as completed does not change the
         completion timestamp.
         """
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
-        create_time = datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc)
+        create_time = datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
         with freeze_time(create_time):
             create = todoer_app.post(
                 '/todos',
@@ -1266,7 +1281,7 @@ class TestUpdateTodo:
             )
 
         patch_time = datetime.datetime.fromtimestamp(
-            TIMESTAMP + 1,
+            timestamp + 1,
             tz=pytz.utc,
         )
         item_id = create.json['todo_id']
@@ -1293,7 +1308,7 @@ class TestUpdateTodo:
         )
 
         assert round(
-            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            number=abs(read.json.pop('completion_timestamp') - timestamp),
             ndigits=3,
         ) == 0
         assert read.json == create.json
