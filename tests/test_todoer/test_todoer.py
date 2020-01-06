@@ -4,36 +4,36 @@ Tests for todoer.todoer.
 
 import datetime
 import json
+from typing import Dict, Optional, Union
 
 import pytest
 import pytz
 import responses
 from flask.testing import FlaskClient
 from freezegun import freeze_time
+from freezegun.api import FrozenDateTimeFactory
 from requests import codes
 from werkzeug.http import parse_cookie
 
 from todoer.todoer import FLASK_BCRYPT, load_user_from_id
 
-USER_DATA = {'email': 'alice@example.com', 'password': 'secret'}
-COMPLETED_TODO_DATA = {'content': 'Buy milk', 'completed': True}
-NOT_COMPLETED_TODO_DATA = {'content': 'Get haircut', 'completed': False}
-TIMESTAMP = 1463437744.335567
 
-
-def log_in_as_new_user(flask_app: FlaskClient) -> None:
+def log_in_as_new_user(
+    flask_app: FlaskClient,
+    user_data: Dict[str, Optional[Union[str, int, bool]]],
+) -> None:
     """
     Create a user and log in as that user.
     """
     flask_app.post(
         '/signup',
         content_type='application/json',
-        data=json.dumps(USER_DATA),
+        data=json.dumps(user_data),
     )
     flask_app.post(
         '/login',
         content_type='application/json',
-        data=json.dumps(USER_DATA),
+        data=json.dumps(user_data),
     )
 
 
@@ -43,7 +43,11 @@ class TestSignup:
     """
 
     @responses.activate
-    def test_signup(self, todoer_app: FlaskClient) -> None:
+    def test_signup(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A signup ``POST`` request with an email address and password returns a
         JSON response with user credentials and a CREATED status.
@@ -51,29 +55,37 @@ class TestSignup:
         response = todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
-        assert response.json == USER_DATA
+        assert response.json == user_data
 
     @responses.activate
-    def test_passwords_hashed(self, todoer_app: FlaskClient) -> None:
+    def test_passwords_hashed(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         Passwords are hashed before being saved to the database.
         """
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
-        user = load_user_from_id(user_id=USER_DATA['email'])
+        user = load_user_from_id(user_id=user_data['email'])
         assert FLASK_BCRYPT.check_password_hash(
             pw_hash=user.password_hash,
-            password=USER_DATA['password'],
+            password=user_data['password'],
         )
 
-    def test_missing_email(self, todoer_app: FlaskClient) -> None:
+    def test_missing_email(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A signup request without an email address returns a BAD_REQUEST status
         code and an error message.
@@ -81,7 +93,7 @@ class TestSignup:
         response = todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps({'password': USER_DATA['password']}),
+            data=json.dumps({'password': user_data['password']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -91,7 +103,11 @@ class TestSignup:
         }
         assert response.json == expected
 
-    def test_missing_password(self, todoer_app: FlaskClient) -> None:
+    def test_missing_password(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A signup request without a password returns a BAD_REQUEST status code
         and an error message.
@@ -99,7 +115,7 @@ class TestSignup:
         response = todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']}),
+            data=json.dumps({'email': user_data['email']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -110,7 +126,11 @@ class TestSignup:
         assert response.json == expected
 
     @responses.activate
-    def test_existing_user(self, todoer_app: FlaskClient) -> None:
+    def test_existing_user(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A signup request for an email address which already exists returns a
         CONFLICT status code and error details.
@@ -118,25 +138,27 @@ class TestSignup:
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
-        data = USER_DATA.copy()
-        data['password'] = 'different'
+        user_data['password'] = 'different'
         response = todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CONFLICT
-        email = USER_DATA['email']
+        email = user_data['email']
         expected = {
             'title': 'There is already a user with the given email address.',
             'detail': f'A user already exists with the email "{email}"',
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -151,7 +173,11 @@ class TestLogin:
     """
 
     @responses.activate
-    def test_login(self, todoer_app: FlaskClient) -> None:
+    def test_login(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         Logging in as a user which has been signed up returns an OK status
         code.
@@ -159,17 +185,21 @@ class TestLogin:
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         response = todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         assert response.status_code == codes.OK
 
     @responses.activate
-    def test_non_existant_user(self, todoer_app: FlaskClient) -> None:
+    def test_non_existant_user(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         Attempting to log in as a user which has been not been signed up
         returns a NOT_FOUND status code and error details..
@@ -177,11 +207,11 @@ class TestLogin:
         response = todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.NOT_FOUND
-        email = USER_DATA['email']
+        email = user_data['email']
         expected = {
             'title': 'The requested user does not exist.',
             'detail': f'No user exists with the email "{email}"',
@@ -189,7 +219,11 @@ class TestLogin:
         assert response.json == expected
 
     @responses.activate
-    def test_wrong_password(self, todoer_app: FlaskClient) -> None:
+    def test_wrong_password(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         Attempting to log in with an incorrect password returns an UNAUTHORIZED
         status code and error details.
@@ -197,18 +231,17 @@ class TestLogin:
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
-        data = USER_DATA.copy()
-        data['password'] = 'incorrect'
+        user_data['password'] = 'incorrect'
         response = todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(data),
+            data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.UNAUTHORIZED
-        email = USER_DATA['email']
+        email = user_data['email']
         expected = {
             'title':
             'An incorrect password was provided.',
@@ -220,26 +253,34 @@ class TestLogin:
         assert response.json == expected
 
     @responses.activate
-    def test_remember_me_cookie_set(self, todoer_app: FlaskClient) -> None:
+    def test_remember_me_cookie_set(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A "Remember Me" token is in the response header of a successful login.
         """
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         response = todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         cookies = response.headers.getlist('Set-Cookie')
 
         items = [list(parse_cookie(cookie).items())[0] for cookie in cookies]
         assert 'remember_token' in dict(items)
 
-    def test_missing_email(self, todoer_app: FlaskClient) -> None:
+    def test_missing_email(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A login request without an email address returns a BAD_REQUEST status
         code and an error message.
@@ -247,7 +288,7 @@ class TestLogin:
         response = todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps({'password': USER_DATA['password']}),
+            data=json.dumps({'password': user_data['password']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -257,7 +298,11 @@ class TestLogin:
         }
         assert response.json == expected
 
-    def test_missing_password(self, todoer_app: FlaskClient) -> None:
+    def test_missing_password(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A login request without a password returns a BAD_REQUEST status code
         and an error message.
@@ -265,7 +310,7 @@ class TestLogin:
         response = todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps({'email': USER_DATA['email']}),
+            data=json.dumps({'email': user_data['email']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -275,7 +320,10 @@ class TestLogin:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -290,7 +338,11 @@ class TestLogout:
     """
 
     @responses.activate
-    def test_logout(self, todoer_app: FlaskClient) -> None:
+    def test_logout(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A POST request to log out when a user is logged in returns an OK status
         code.
@@ -298,17 +350,20 @@ class TestLogout:
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         response = todoer_app.post('/logout', content_type='application/json')
         assert response.status_code == codes.OK
 
-    def test_not_logged_in(self, todoer_app: FlaskClient) -> None:
+    def test_not_logged_in(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         A POST request to log out when no user is logged in returns an
         UNAUTHORIZED status code.
@@ -317,7 +372,11 @@ class TestLogout:
         assert response.status_code == codes.UNAUTHORIZED
 
     @responses.activate
-    def test_logout_twice(self, todoer_app: FlaskClient) -> None:
+    def test_logout_twice(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A POST request to log out, after a successful log out attempt returns
         an UNAUTHORIZED status code.
@@ -325,18 +384,21 @@ class TestLogout:
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         todoer_app.post(
             '/login',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
         todoer_app.post('/logout', content_type='application/json')
         response = todoer_app.post('/logout', content_type='application/json')
         assert response.status_code == codes.UNAUTHORIZED
 
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -352,7 +414,11 @@ class TestLoadUser:
     """
 
     @responses.activate
-    def test_user_exists(self, todoer_app: FlaskClient) -> None:
+    def test_user_exists(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         If a user exists with the email given as the user ID to
         ``load_user_from_id``, that user is returned.
@@ -360,10 +426,10 @@ class TestLoadUser:
         todoer_app.post(
             '/signup',
             content_type='application/json',
-            data=json.dumps(USER_DATA),
+            data=json.dumps(user_data),
         )
-        assert load_user_from_id(user_id=USER_DATA['email']).email == \
-            USER_DATA['email']
+        assert load_user_from_id(user_id=user_data['email']).email == \
+            user_data['email']
 
     @responses.activate
     @pytest.mark.usefixtures('todoer_app')
@@ -381,37 +447,50 @@ class TestCreateTodo:
     """
 
     @responses.activate
-    def test_success_response(self, todoer_app: FlaskClient) -> None:
+    def test_success_response(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A ``POST`` request with content and a completed flag set to ``false``
         returns a JSON response with the given data and a ``null``
         ``completion_timestamp``.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.CREATED
-        expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = None
-        expected['todo_id'] = 1
-        assert response.json == expected
+        not_completed_todo_data['completion_timestamp'] = None
+        not_completed_todo_data['todo_id'] = 1
+        assert response.json == not_completed_todo_data
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_current_completion_time(self, todoer_app: FlaskClient) -> None:
+    def test_current_completion_time(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer: FrozenDateTimeFactory,
+    ) -> None:
         """
         If the completed flag is set to ``true`` then the completed time is
         the number of seconds since the epoch.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
+        )
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         assert response.headers['Content-Type'] == 'application/json'
@@ -419,22 +498,25 @@ class TestCreateTodo:
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
         assert round(
-            number=abs(response.json['completion_timestamp'] - TIMESTAMP),
+            number=abs(response.json['completion_timestamp'] - timestamp),
             ndigits=3,
         ) == 0
 
-    def test_missing_text(self, todoer_app: FlaskClient) -> None:
+    def test_missing_text(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A ``POST /todos`` request without text content returns a BAD_REQUEST
         status code and an error message.
         """
-        data = COMPLETED_TODO_DATA.copy()
-        data.pop('content')
+        completed_todo_data.pop('content')
 
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(data),
+            data=json.dumps(completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -444,18 +526,21 @@ class TestCreateTodo:
         }
         assert response.json == expected
 
-    def test_missing_completed_flag(self, todoer_app: FlaskClient) -> None:
+    def test_missing_completed_flag(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A ``POST /todos`` request without a completed flag returns a
         BAD_REQUEST status code and an error message.
         """
-        data = COMPLETED_TODO_DATA.copy()
-        data.pop('completed')
+        completed_todo_data.pop('completed')
 
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(data),
+            data=json.dumps(completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
         assert response.status_code == codes.BAD_REQUEST
@@ -466,24 +551,32 @@ class TestCreateTodo:
         assert response.json == expected
 
     @responses.activate
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.post('/todos', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
-    def test_not_logged_in(self, todoer_app: FlaskClient) -> None:
+    def test_not_logged_in(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
         response = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         assert response.status_code == codes.UNAUTHORIZED
@@ -495,16 +588,21 @@ class TestReadTodo:
     """
 
     @responses.activate
-    def test_success(self, todoer_app: FlaskClient) -> None:
+    def test_success(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -514,23 +612,31 @@ class TestReadTodo:
         )
 
         assert read.status_code == codes.OK
-        expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = None
-        expected['todo_id'] = create.json['todo_id']
-        assert read.json == expected
+        not_completed_todo_data['completion_timestamp'] = None
+        not_completed_todo_data['todo_id'] = create.json['todo_id']
+        assert read.json == not_completed_todo_data
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_completed(self, todoer_app: FlaskClient) -> None:
+    def test_completed(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer: FrozenDateTimeFactory,
+    ) -> None:
         """
         A ``GET`` request for an existing todo an OK status code and the todo's
         details, included the completion timestamp.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
+        )
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -540,38 +646,44 @@ class TestReadTodo:
         )
 
         assert read.status_code == codes.OK
-        expected = COMPLETED_TODO_DATA.copy()
+        expected = completed_todo_data.copy()
         expected['todo_id'] = create.json['todo_id']
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
         assert round(
-            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            number=abs(read.json.pop('completion_timestamp') - timestamp),
             ndigits=3,
         ) == 0
         assert read.json == expected
 
     @responses.activate
-    def test_multiple_todos(self, todoer_app: FlaskClient) -> None:
+    def test_multiple_todos(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A ``GET`` request gets the correct todo when there are multiple.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -581,18 +693,21 @@ class TestReadTodo:
         )
 
         assert read.status_code == codes.OK
-        expected = NOT_COMPLETED_TODO_DATA.copy()
-        expected['completion_timestamp'] = None
-        expected['todo_id'] = create.json['todo_id']
-        assert read.json == expected
+        not_completed_todo_data['completion_timestamp'] = None
+        not_completed_todo_data['todo_id'] = create.json['todo_id']
+        assert read.json == not_completed_todo_data
 
     @responses.activate
-    def test_non_existant(self, todoer_app: FlaskClient) -> None:
+    def test_non_existant(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         A ``GET`` request for a todo which does not exist returns a NOT_FOUND
         status code and error details.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.get('/todos/1', content_type='application/json')
 
         assert response.headers['Content-Type'] == 'application/json'
@@ -603,7 +718,10 @@ class TestReadTodo:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -612,15 +730,20 @@ class TestReadTodo:
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
-    def test_not_logged_in(self, todoer_app: FlaskClient) -> None:
+    def test_not_logged_in(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post('/logout', content_type='application/json')
@@ -640,15 +763,20 @@ class TestDeleteTodo:
     """
 
     @responses.activate
-    def test_success(self, todoer_app: FlaskClient) -> None:
+    def test_success(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         It is possible to delete a todo item.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -667,15 +795,20 @@ class TestDeleteTodo:
         assert read.status_code == codes.NOT_FOUND
 
     @responses.activate
-    def test_delete_twice(self, todoer_app: FlaskClient) -> None:
+    def test_delete_twice(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         Deleting an item twice gives returns a 404 code and error message.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -697,26 +830,35 @@ class TestDeleteTodo:
         assert delete.json == expected
 
     @responses.activate
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.delete('/todos/1', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
     @responses.activate
-    def test_not_logged_in(self, todoer_app: FlaskClient) -> None:
+    def test_not_logged_in(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
 
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         todoer_app.post('/logout', content_type='application/json')
@@ -736,11 +878,15 @@ class TestListTodos:
     """
 
     @responses.activate
-    def test_no_todos(self, todoer_app: FlaskClient) -> None:
+    def test_no_todos(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         When there are no todos, an empty array is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         list_todos = todoer_app.get(
             '/todos',
             content_type='application/json',
@@ -750,7 +896,10 @@ class TestListTodos:
         assert list_todos.json['todos'] == []
 
     @responses.activate
-    def test_not_logged_in(self, todoer_app: FlaskClient) -> None:
+    def test_not_logged_in(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
@@ -762,15 +911,20 @@ class TestListTodos:
         assert list_todos.status_code == codes.UNAUTHORIZED
 
     @responses.activate
-    def test_list(self, todoer_app: FlaskClient) -> None:
+    def test_list(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         All todos are listed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
-        other_todo = NOT_COMPLETED_TODO_DATA.copy()
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
+        other_todo = not_completed_todo_data.copy()
         other_todo['content'] = 'Get a haircut'
 
-        todos = [NOT_COMPLETED_TODO_DATA, other_todo]
+        todos = [not_completed_todo_data, other_todo]
         expected = []
         for todo in todos:
             create = todoer_app.post(
@@ -792,22 +946,32 @@ class TestListTodos:
         assert list_todos.json['todos'] == expected
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_filter_completed(self, todoer_app: FlaskClient) -> None:
+    def test_filter_completed(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer: FrozenDateTimeFactory,
+    ) -> None:
         """
         It is possible to filter by only completed items.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
+        )
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         list_todos = todoer_app.get(
@@ -823,28 +987,34 @@ class TestListTodos:
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
         assert list_todos.status_code == codes.OK
-        expected = COMPLETED_TODO_DATA.copy()
+        expected = completed_todo_data.copy()
         expected['todo_id'] = 2
         [todo] = list_todos_data['todos']
-        assert round(abs(todo.pop('completion_timestamp') - TIMESTAMP), 3) == 0
+        assert round(abs(todo.pop('completion_timestamp') - timestamp), 3) == 0
         assert todo == expected
 
     @responses.activate
-    def test_filter_not_completed(self, todoer_app: FlaskClient) -> None:
+    def test_filter_not_completed(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         It is possible to filter by only items which are not completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         list_todos = todoer_app.get(
@@ -860,13 +1030,16 @@ class TestListTodos:
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
         assert list_todos.status_code == codes.OK
-        expected = NOT_COMPLETED_TODO_DATA.copy()
+        expected = not_completed_todo_data.copy()
         expected['completion_timestamp'] = None
         expected['todo_id'] = 1
         assert list_todos_data['todos'] == [expected]
 
     @responses.activate
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
@@ -877,19 +1050,24 @@ class TestListTodos:
 
 class TestUpdateTodo:
     """
-    Tests for updating a todo item at ``PATCH /todos/{id}.``.
+    Tests for updating a todo item at ``PATCH /todos/{id}``.
     """
 
     @responses.activate
-    def test_change_content(self, todoer_app: FlaskClient) -> None:
+    def test_change_content(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         It is possible to change the content of a todo item.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         new_content = 'Book vacation'
@@ -915,15 +1093,20 @@ class TestUpdateTodo:
         assert read.json == expected
 
     @responses.activate
-    def test_not_logged_in(self, todoer_app: FlaskClient) -> None:
+    def test_not_logged_in(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         When no user is logged in, an UNAUTHORIZED status code is returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         todoer_app.post('/logout', content_type='application/json')
@@ -938,16 +1121,25 @@ class TestUpdateTodo:
         assert patch.status_code == codes.UNAUTHORIZED
 
     @responses.activate
-    @freeze_time(datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc))
-    def test_flag_completed(self, todoer_app: FlaskClient) -> None:
+    def test_flag_completed(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
+        freezer: FrozenDateTimeFactory,
+    ) -> None:
         """
         It is possible to flag a todo item as completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        freezer.move_to(
+            datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc),
+        )
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -959,7 +1151,7 @@ class TestUpdateTodo:
 
         expected = create.json
         expected['completed'] = True
-        expected['completion_timestamp'] = TIMESTAMP
+        expected['completion_timestamp'] = timestamp
 
         assert patch.status_code == codes.OK
         # On some platforms (in particular Travis CI, float conversion loses
@@ -979,21 +1171,26 @@ class TestUpdateTodo:
         )
 
         assert round(
-            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            number=abs(read.json.pop('completion_timestamp') - timestamp),
             ndigits=3,
         ) == 0
         assert read.json == expected
 
     @responses.activate
-    def test_flag_not_completed(self, todoer_app: FlaskClient) -> None:
+    def test_flag_not_completed(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         It is possible to flag a todo item as not completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -1019,16 +1216,21 @@ class TestUpdateTodo:
         assert read.json == expected
 
     @responses.activate
-    def test_change_content_and_flag(self, todoer_app: FlaskClient) -> None:
+    def test_change_content_and_flag(
+        self,
+        todoer_app: FlaskClient,
+        not_completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         It is possible to change the content of a todo item, as well as marking
         the item as completed.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(NOT_COMPLETED_TODO_DATA),
+            data=json.dumps(not_completed_todo_data),
         )
 
         new_content = 'Book vacation'
@@ -1062,22 +1264,25 @@ class TestUpdateTodo:
     def test_flag_completed_already_completed(
         self,
         todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+        timestamp: float,
     ) -> None:
         """
         Flagging an already completed item as completed does not change the
         completion timestamp.
         """
-        log_in_as_new_user(flask_app=todoer_app)
-        create_time = datetime.datetime.fromtimestamp(TIMESTAMP, tz=pytz.utc)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
+        create_time = datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
         with freeze_time(create_time):
             create = todoer_app.post(
                 '/todos',
                 content_type='application/json',
-                data=json.dumps(COMPLETED_TODO_DATA),
+                data=json.dumps(completed_todo_data),
             )
 
         patch_time = datetime.datetime.fromtimestamp(
-            TIMESTAMP + 1,
+            timestamp + 1,
             tz=pytz.utc,
         )
         item_id = create.json['todo_id']
@@ -1104,21 +1309,26 @@ class TestUpdateTodo:
         )
 
         assert round(
-            number=abs(read.json.pop('completion_timestamp') - TIMESTAMP),
+            number=abs(read.json.pop('completion_timestamp') - timestamp),
             ndigits=3,
         ) == 0
         assert read.json == create.json
 
     @responses.activate
-    def test_remain_same(self, todoer_app: FlaskClient) -> None:
+    def test_remain_same(
+        self,
+        todoer_app: FlaskClient,
+        completed_todo_data: Dict[str, Optional[Union[str, int, bool]]],
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         Not requesting any changes keeps the item the same.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         create = todoer_app.post(
             '/todos',
             content_type='application/json',
-            data=json.dumps(COMPLETED_TODO_DATA),
+            data=json.dumps(completed_todo_data),
         )
 
         item_id = create.json['todo_id']
@@ -1131,12 +1341,16 @@ class TestUpdateTodo:
         assert create.json == patch.json
 
     @responses.activate
-    def test_non_existant(self, todoer_app: FlaskClient) -> None:
+    def test_non_existant(
+        self,
+        todoer_app: FlaskClient,
+        user_data: Dict[str, Optional[Union[str, int, bool]]],
+    ) -> None:
         """
         If the todo item to be updated does not exist, a ``NOT_FOUND`` error is
         returned.
         """
-        log_in_as_new_user(flask_app=todoer_app)
+        log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.patch(
             '/todos/1',
             content_type='application/json',
@@ -1150,7 +1364,10 @@ class TestUpdateTodo:
         }
         assert response.json == expected
 
-    def test_incorrect_content_type(self, todoer_app: FlaskClient) -> None:
+    def test_incorrect_content_type(
+        self,
+        todoer_app: FlaskClient,
+    ) -> None:
         """
         If a Content-Type header other than 'application/json' is given, an
         UNSUPPORTED_MEDIA_TYPE status code is given.
