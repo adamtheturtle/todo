@@ -43,7 +43,6 @@ def todoer_app() -> Iterator[FlaskClient]:
                     method=getattr(responses, method),
                     url=re.compile(pattern),
                     callback=request_callback,
-                    content_type='application/json',
                 )
         yield TODOER_FLASK_APP.test_client()
 
