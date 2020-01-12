@@ -14,7 +14,6 @@ pylint_flask_sqlalchemy==0.1.0
 pyroma==2.6
 pytest-cov==2.8.1  # Measure code coverage
 pytest==5.3.2
-pytest==5.3.2
 responses==0.10.9 # Add mocks for requests
 sphinx==2.3.1
 sphinxcontrib-httpdomain # Describe RESTful HTTP APIs in Sphinx
