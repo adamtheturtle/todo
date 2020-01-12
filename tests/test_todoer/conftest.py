@@ -26,26 +26,26 @@ def todoer_app() -> Iterator[FlaskClient]:
     with STORAGE_FLASK_APP.app_context():  # type: ignore
         STORAGE_SQLALCHEMY_DB.create_all()
 
-    for rule in STORAGE_FLASK_APP.url_map.iter_rules():
-        # We assume here that everything is in the style:
-        # "{uri}/{method}/<{id}>" or "{uri}/{method}" when this is
-        # not necessarily the case.
-        pattern = urljoin(
-            STORAGE_URL,
-            re.sub(pattern='<.+>', repl='.+', string=rule.rule),
-        )
-
-        for method in rule.methods:
-            responses.add_callback(
-                # ``responses`` has methods named like the HTTP methods
-                # they represent, e.g. ``responses.GET``.
-                method=getattr(responses, method),
-                url=re.compile(pattern),
-                callback=request_callback,
-                content_type='application/json',
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        for rule in STORAGE_FLASK_APP.url_map.iter_rules():
+            # We assume here that everything is in the style:
+            # "{uri}/{method}/<{id}>" or "{uri}/{method}" when this is
+            # not necessarily the case.
+            pattern = urljoin(
+                STORAGE_URL,
+                re.sub(pattern='<.+>', repl='.+', string=rule.rule),
             )
 
-    yield TODOER_FLASK_APP.test_client()
+            for method in rule.methods:
+                resp_m.add_callback(
+                    # ``responses`` has methods named like the HTTP methods
+                    # they represent, e.g. ``responses.GET``.
+                    method=getattr(responses, method),
+                    url=re.compile(pattern),
+                    callback=request_callback,
+                    content_type='application/json',
+                )
+        yield TODOER_FLASK_APP.test_client()
 
     with STORAGE_FLASK_APP.app_context():  # type: ignore
         STORAGE_SQLALCHEMY_DB.session.remove()

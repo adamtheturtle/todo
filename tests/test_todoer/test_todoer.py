@@ -8,7 +8,6 @@ from typing import Dict, Optional, Union
 
 import pytest
 import pytz
-import responses
 from flask.testing import FlaskClient
 from freezegun import freeze_time
 from freezegun.api import FrozenDateTimeFactory
@@ -42,7 +41,6 @@ class TestSignup:
     Tests for the user sign up endpoint at ``/signup``.
     """
 
-    @responses.activate
     def test_signup(
         self,
         todoer_app: FlaskClient,
@@ -61,7 +59,6 @@ class TestSignup:
         assert response.status_code == codes.CREATED
         assert response.json == user_data
 
-    @responses.activate
     def test_passwords_hashed(
         self,
         todoer_app: FlaskClient,
@@ -125,7 +122,6 @@ class TestSignup:
         }
         assert response.json == expected
 
-    @responses.activate
     def test_existing_user(
         self,
         todoer_app: FlaskClient,
@@ -172,7 +168,6 @@ class TestLogin:
     Tests for the user log in endpoint at ``/login``.
     """
 
-    @responses.activate
     def test_login(
         self,
         todoer_app: FlaskClient,
@@ -194,7 +189,6 @@ class TestLogin:
         )
         assert response.status_code == codes.OK
 
-    @responses.activate
     def test_non_existant_user(
         self,
         todoer_app: FlaskClient,
@@ -218,7 +212,6 @@ class TestLogin:
         }
         assert response.json == expected
 
-    @responses.activate
     def test_wrong_password(
         self,
         todoer_app: FlaskClient,
@@ -252,7 +245,6 @@ class TestLogin:
         }
         assert response.json == expected
 
-    @responses.activate
     def test_remember_me_cookie_set(
         self,
         todoer_app: FlaskClient,
@@ -337,7 +329,6 @@ class TestLogout:
     Tests for the user log out endpoint at ``/logout``.
     """
 
-    @responses.activate
     def test_logout(
         self,
         todoer_app: FlaskClient,
@@ -371,7 +362,6 @@ class TestLogout:
         response = todoer_app.post('/logout', content_type='application/json')
         assert response.status_code == codes.UNAUTHORIZED
 
-    @responses.activate
     def test_logout_twice(
         self,
         todoer_app: FlaskClient,
@@ -413,7 +403,6 @@ class TestLoadUser:
     Flask-Login.
     """
 
-    @responses.activate
     def test_user_exists(
         self,
         todoer_app: FlaskClient,
@@ -431,7 +420,6 @@ class TestLoadUser:
         assert load_user_from_id(user_id=user_data['email']).email == \
             user_data['email']
 
-    @responses.activate
     @pytest.mark.usefixtures('todoer_app')
     def test_user_does_not_exist(self) -> None:
         """
@@ -446,7 +434,6 @@ class TestCreateTodo:
     Tests for the user creation endpoint at ``POST /todos``.
     """
 
-    @responses.activate
     def test_success_response(
         self,
         todoer_app: FlaskClient,
@@ -470,7 +457,6 @@ class TestCreateTodo:
         not_completed_todo_data['todo_id'] = 1
         assert response.json == not_completed_todo_data
 
-    @responses.activate
     def test_current_completion_time(
         self,
         todoer_app: FlaskClient,
@@ -550,7 +536,6 @@ class TestCreateTodo:
         }
         assert response.json == expected
 
-    @responses.activate
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
@@ -564,7 +549,6 @@ class TestCreateTodo:
         response = todoer_app.post('/todos', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
-    @responses.activate
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
@@ -587,7 +571,6 @@ class TestReadTodo:
     Tests for getting a todo item at ``GET /todos/{todo_id}``.
     """
 
-    @responses.activate
     def test_success(
         self,
         todoer_app: FlaskClient,
@@ -616,7 +599,6 @@ class TestReadTodo:
         not_completed_todo_data['todo_id'] = create.json['todo_id']
         assert read.json == not_completed_todo_data
 
-    @responses.activate
     def test_completed(
         self,
         todoer_app: FlaskClient,
@@ -656,7 +638,6 @@ class TestReadTodo:
         ) == 0
         assert read.json == expected
 
-    @responses.activate
     def test_multiple_todos(
         self,
         todoer_app: FlaskClient,
@@ -697,7 +678,6 @@ class TestReadTodo:
         not_completed_todo_data['todo_id'] = create.json['todo_id']
         assert read.json == not_completed_todo_data
 
-    @responses.activate
     def test_non_existant(
         self,
         todoer_app: FlaskClient,
@@ -729,7 +709,6 @@ class TestReadTodo:
         response = todoer_app.get('/todos/1', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
-    @responses.activate
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
@@ -762,7 +741,6 @@ class TestDeleteTodo:
     Tests for deleting a todo item at ``DELETE /todos/{id}.``.
     """
 
-    @responses.activate
     def test_success(
         self,
         todoer_app: FlaskClient,
@@ -794,7 +772,6 @@ class TestDeleteTodo:
 
         assert read.status_code == codes.NOT_FOUND
 
-    @responses.activate
     def test_delete_twice(
         self,
         todoer_app: FlaskClient,
@@ -829,7 +806,6 @@ class TestDeleteTodo:
         }
         assert delete.json == expected
 
-    @responses.activate
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
@@ -843,7 +819,6 @@ class TestDeleteTodo:
         response = todoer_app.delete('/todos/1', content_type='text/html')
         assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
 
-    @responses.activate
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
@@ -877,7 +852,6 @@ class TestListTodos:
     Tests for listing todo items at ``GET /todos``.
     """
 
-    @responses.activate
     def test_no_todos(
         self,
         todoer_app: FlaskClient,
@@ -895,7 +869,6 @@ class TestListTodos:
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == []
 
-    @responses.activate
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
@@ -910,7 +883,6 @@ class TestListTodos:
 
         assert list_todos.status_code == codes.UNAUTHORIZED
 
-    @responses.activate
     def test_list(
         self,
         todoer_app: FlaskClient,
@@ -945,7 +917,6 @@ class TestListTodos:
         assert list_todos.status_code == codes.OK
         assert list_todos.json['todos'] == expected
 
-    @responses.activate
     def test_filter_completed(
         self,
         todoer_app: FlaskClient,
@@ -993,7 +964,6 @@ class TestListTodos:
         assert round(abs(todo.pop('completion_timestamp') - timestamp), 3) == 0
         assert todo == expected
 
-    @responses.activate
     def test_filter_not_completed(
         self,
         todoer_app: FlaskClient,
@@ -1035,7 +1005,6 @@ class TestListTodos:
         expected['todo_id'] = 1
         assert list_todos_data['todos'] == [expected]
 
-    @responses.activate
     def test_incorrect_content_type(
         self,
         todoer_app: FlaskClient,
@@ -1053,7 +1022,6 @@ class TestUpdateTodo:
     Tests for updating a todo item at ``PATCH /todos/{id}``.
     """
 
-    @responses.activate
     def test_change_content(
         self,
         todoer_app: FlaskClient,
@@ -1092,7 +1060,6 @@ class TestUpdateTodo:
 
         assert read.json == expected
 
-    @responses.activate
     def test_not_logged_in(
         self,
         todoer_app: FlaskClient,
@@ -1120,7 +1087,6 @@ class TestUpdateTodo:
 
         assert patch.status_code == codes.UNAUTHORIZED
 
-    @responses.activate
     def test_flag_completed(
         self,
         todoer_app: FlaskClient,
@@ -1176,7 +1142,6 @@ class TestUpdateTodo:
         ) == 0
         assert read.json == expected
 
-    @responses.activate
     def test_flag_not_completed(
         self,
         todoer_app: FlaskClient,
@@ -1215,7 +1180,6 @@ class TestUpdateTodo:
 
         assert read.json == expected
 
-    @responses.activate
     def test_change_content_and_flag(
         self,
         todoer_app: FlaskClient,
@@ -1260,7 +1224,6 @@ class TestUpdateTodo:
 
         assert read.json == expected
 
-    @responses.activate
     def test_flag_completed_already_completed(
         self,
         todoer_app: FlaskClient,
@@ -1314,7 +1277,6 @@ class TestUpdateTodo:
         ) == 0
         assert read.json == create.json
 
-    @responses.activate
     def test_remain_same(
         self,
         todoer_app: FlaskClient,
@@ -1340,7 +1302,6 @@ class TestUpdateTodo:
 
         assert create.json == patch.json
 
-    @responses.activate
     def test_non_existant(
         self,
         todoer_app: FlaskClient,
