@@ -10,22 +10,14 @@ from urllib.parse import urljoin
 
 import pytest
 import responses
-from flask.testing import FlaskClient
 from requests import PreparedRequest
 
 from storage.storage import STORAGE_FLASK_APP, STORAGE_SQLALCHEMY_DB
-from todoer.todoer import STORAGE_URL, TODOER_FLASK_APP
+from todoer.todoer import STORAGE_URL
 
 
-@pytest.fixture()
-def todoer_app() -> Iterator[FlaskClient]:
-    """
-    Set up and tear down an application with an in memory database for testing.
-    """
-
-    with STORAGE_FLASK_APP.app_context():  # type: ignore
-        STORAGE_SQLALCHEMY_DB.create_all()
-
+@pytest.fixture(autouse=True)
+def _mock_storage_app() -> Iterator[None]:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
         for rule in STORAGE_FLASK_APP.url_map.iter_rules():
             # We assume here that everything is in the style:
@@ -46,7 +38,15 @@ def todoer_app() -> Iterator[FlaskClient]:
                     url=re.compile(pattern),
                     callback=request_callback,
                 )
-        yield TODOER_FLASK_APP.test_client()
+        yield
+
+
+@pytest.fixture(autouse=True)
+def _mock_storage_database() -> Iterator[None]:
+    with STORAGE_FLASK_APP.app_context():  # type: ignore
+        STORAGE_SQLALCHEMY_DB.create_all()
+
+    yield
 
     with STORAGE_FLASK_APP.app_context():  # type: ignore
         STORAGE_SQLALCHEMY_DB.session.remove()
