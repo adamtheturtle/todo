@@ -15,11 +15,9 @@ from requests import PreparedRequest
 from storage.storage import STORAGE_FLASK_APP, STORAGE_SQLALCHEMY_DB
 from todoer.todoer import STORAGE_URL
 
-
-@pytest.fixture(autouse=True)
-def _mock_storage_app() -> Iterator[None]:
+def _mock_flask_app(flask_app) -> responses.RequestsMock:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
-        for rule in STORAGE_FLASK_APP.url_map.iter_rules():
+        for rule in flask_app.url_map.iter_rules():
             # We assume here that everything is in the style:
             # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
             # "{uri}/{method}/<{type}:{id}>" when this is not necessarily the
@@ -39,6 +37,10 @@ def _mock_storage_app() -> Iterator[None]:
                     callback=request_callback,
                 )
         yield
+
+@pytest.fixture(autouse=True)
+def _mock_storage_app() -> Iterator[None]:
+    yield from _mock_flask_app(flask_app=STORAGE_FLASK_APP)
 
 
 @pytest.fixture(autouse=True)
