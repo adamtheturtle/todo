@@ -29,12 +29,14 @@ def todoer_app() -> Iterator[FlaskClient]:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
         for rule in STORAGE_FLASK_APP.url_map.iter_rules():
             # We assume here that everything is in the style:
-            # "{uri}/{method}/<{id}>" or "{uri}/{method}" when this is
-            # not necessarily the case.
-            pattern = urljoin(
-                STORAGE_URL,
-                re.sub(pattern='<.+>', repl='.+', string=rule.rule),
-            )
+            # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
+            # "{uri}/{method}/<{type}:{id}>" when this is not necessarily the
+            # case.
+            #
+            # We replace everything inside angle brackets with a match for any
+            # string of characters of length > 0.
+            path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
+            pattern = urljoin(STORAGE_URL, path_to_match)
 
             for method in rule.methods:
                 resp_m.add_callback(
@@ -43,7 +45,6 @@ def todoer_app() -> Iterator[FlaskClient]:
                     method=getattr(responses, method),
                     url=re.compile(pattern),
                     callback=request_callback,
-                    content_type='application/json',
                 )
         yield TODOER_FLASK_APP.test_client()
 
