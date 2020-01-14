@@ -18,14 +18,7 @@ from todoer.todoer import STORAGE_URL, TODOER_FLASK_APP
 
 
 @pytest.fixture()
-def todoer_app() -> Iterator[FlaskClient]:
-    """
-    Set up and tear down an application with an in memory database for testing.
-    """
-
-    with STORAGE_FLASK_APP.app_context():  # type: ignore
-        STORAGE_SQLALCHEMY_DB.create_all()
-
+def _mock_storage_app() -> Iterator[None]:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
         for rule in STORAGE_FLASK_APP.url_map.iter_rules():
             # We assume here that everything is in the style:
@@ -46,11 +39,35 @@ def todoer_app() -> Iterator[FlaskClient]:
                     url=re.compile(pattern),
                     callback=request_callback,
                 )
-        yield TODOER_FLASK_APP.test_client()
+        yield
+
+
+@pytest.fixture()
+def _mock_storage_database() -> Iterator[None]:
+    with STORAGE_FLASK_APP.app_context():  # type: ignore
+        STORAGE_SQLALCHEMY_DB.create_all()
+
+    yield
 
     with STORAGE_FLASK_APP.app_context():  # type: ignore
         STORAGE_SQLALCHEMY_DB.session.remove()
         STORAGE_SQLALCHEMY_DB.drop_all()
+
+
+
+@pytest.fixture()
+def todoer_app(
+    _mock_storage_app: None,
+    _mock_storage_database: None,
+) -> FlaskClient:
+    """
+    Set up and tear down an application with an in memory database for testing.
+    """
+    assert not _mock_storage_app
+    assert not _mock_storage_database
+
+    return TODOER_FLASK_APP.test_client()
+
 
 
 def request_callback(
