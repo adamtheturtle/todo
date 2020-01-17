@@ -5,6 +5,7 @@ Test tools for the TODO service.
 import random
 import re
 import uuid
+from functools import partial
 from typing import Dict, Iterator, Optional, Tuple, Union
 from urllib.parse import urljoin
 
@@ -25,6 +26,7 @@ def _add_flask_app_to_mock(
     """
     XXX
     """
+    callback = partial(_request_callback, flask_app=flask_app)
     for rule in flask_app.url_map.iter_rules():
         # We assume here that everything is in the style:
         # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
@@ -41,7 +43,7 @@ def _add_flask_app_to_mock(
                 # they represent, e.g. ``responses.GET``.
                 method=getattr(responses, method),
                 url=re.compile(pattern),
-                callback=request_callback,
+                callback=callback,
             )
 
 
@@ -68,22 +70,23 @@ def _mock_storage_database() -> Iterator[None]:
         STORAGE_SQLALCHEMY_DB.drop_all()
 
 
-def request_callback(
+def _request_callback(
     request: PreparedRequest,
+    flask_app: Flask,
 ) -> Tuple[int, Dict[str, Optional[Union[str, int, bool]]], bytes]:
     """
-    Given a request to the storage service, send an equivalent request to
-    an in memory fake of the storage service and return some key details
-    of the response.
+    Given a request to the flask app, send an equivalent request to an in
+    memory fake of the flask app and return some key details of the
+    response.
 
-    :param request: The incoming request to pass onto the storage app.
+    :param request: The incoming request to pass onto the flask app.
     :return: A tuple of status code, response headers and response data
-        from the storage app.
+        from the flask app.
     """
-    # The storage application is a ``werkzeug.test.Client`` and therefore
-    # has methods like 'head', 'get' and 'post'.
+    # The Flask test client is a ``werkzeug.test.Client`` and therefore has
+    # methods like 'head', 'get' and 'post'.
     lower_request_method = str(request.method).lower()
-    test_client = STORAGE_FLASK_APP.test_client()
+    test_client = flask_app.test_client()
     test_client_method = getattr(test_client, lower_request_method)
     response = test_client_method(
         request.path_url,
