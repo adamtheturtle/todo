@@ -24,7 +24,8 @@ def _add_flask_app_to_mock(
     base_url: str,
 ) -> None:
     """
-    XXX
+    Make it so that requests sent to the ``base_url`` are forwarded to the
+    ``Flask`` app, when in the context of the ``responses_mock``.
     """
     callback = partial(_request_callback, flask_app=flask_app)
     for rule in flask_app.url_map.iter_rules():
