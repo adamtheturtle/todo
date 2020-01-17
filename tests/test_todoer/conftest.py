@@ -81,6 +81,7 @@ def _request_callback(
     response.
 
     :param request: The incoming request to pass onto the flask app.
+    :param flask_app: The Flask application to pass requests to.
     :return: A tuple of status code, response headers and response data
         from the flask app.
     """
