@@ -5,39 +5,57 @@ Test tools for the TODO service.
 import random
 import re
 import uuid
+from functools import partial
 from typing import Dict, Iterator, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import pytest
 import responses
+from flask import Flask
 from requests import PreparedRequest
 
 from storage.storage import STORAGE_FLASK_APP, STORAGE_SQLALCHEMY_DB
 from todoer.todoer import STORAGE_URL
 
 
+def _add_flask_app_to_mock(
+    responses_mock: responses.RequestsMock,
+    flask_app: Flask,
+    base_url: str,
+) -> None:
+    """
+    Make it so that requests sent to the ``base_url`` are forwarded to the
+    ``Flask`` app, when in the context of the ``responses_mock``.
+    """
+    callback = partial(_request_callback, flask_app=flask_app)
+    for rule in flask_app.url_map.iter_rules():
+        # We assume here that everything is in the style:
+        # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
+        # "{uri}/{method}/<{type}:{id}>" when this is not necessarily the case.
+        #
+        # We replace everything inside angle brackets with a match for any
+        # string of characters of length > 0.
+        path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
+        pattern = urljoin(base_url, path_to_match)
+
+        for method in rule.methods:
+            responses_mock.add_callback(
+                # ``responses`` has methods named like the HTTP methods
+                # they represent, e.g. ``responses.GET``.
+                method=getattr(responses, method),
+                url=re.compile(pattern),
+                callback=callback,
+            )
+
+
 @pytest.fixture(autouse=True)
 def _mock_storage_app() -> Iterator[None]:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
-        for rule in STORAGE_FLASK_APP.url_map.iter_rules():
-            # We assume here that everything is in the style:
-            # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
-            # "{uri}/{method}/<{type}:{id}>" when this is not necessarily the
-            # case.
-            #
-            # We replace everything inside angle brackets with a match for any
-            # string of characters of length > 0.
-            path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
-            pattern = urljoin(STORAGE_URL, path_to_match)
-
-            for method in rule.methods:
-                resp_m.add_callback(
-                    # ``responses`` has methods named like the HTTP methods
-                    # they represent, e.g. ``responses.GET``.
-                    method=getattr(responses, method),
-                    url=re.compile(pattern),
-                    callback=request_callback,
-                )
+        _add_flask_app_to_mock(
+            responses_mock=resp_m,
+            flask_app=STORAGE_FLASK_APP,
+            base_url=STORAGE_URL,
+        )
         yield
 
 
@@ -53,25 +71,25 @@ def _mock_storage_database() -> Iterator[None]:
         STORAGE_SQLALCHEMY_DB.drop_all()
 
 
-def request_callback(
+def _request_callback(
     request: PreparedRequest,
+    flask_app: Flask,
 ) -> Tuple[int, Dict[str, Optional[Union[str, int, bool]]], bytes]:
     """
-    Given a request to the storage service, send an equivalent request to
-    an in memory fake of the storage service and return some key details
-    of the response.
+    Given a request to the flask app, send an equivalent request to an in
+    memory fake of the flask app and return some key details of the
+    response.
 
-    :param request: The incoming request to pass onto the storage app.
+    :param request: The incoming request to pass onto the flask app.
+    :param flask_app: The Flask application to pass requests to.
     :return: A tuple of status code, response headers and response data
-        from the storage app.
+        from the flask app.
     """
-    # The storage application is a ``werkzeug.test.Client`` and therefore
-    # has methods like 'head', 'get' and 'post'.
+    # The Flask test client is a ``werkzeug.test.Client`` and therefore has
+    # methods like 'head', 'get' and 'post'.
     lower_request_method = str(request.method).lower()
-    test_client_method = getattr(
-        STORAGE_FLASK_APP.test_client(),
-        lower_request_method,
-    )
+    test_client = flask_app.test_client()
+    test_client_method = getattr(test_client, lower_request_method)
     response = test_client_method(
         request.path_url,
         content_type=request.headers['Content-Type'],
