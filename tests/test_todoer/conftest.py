@@ -15,6 +15,7 @@ from requests import PreparedRequest
 from storage.storage import STORAGE_FLASK_APP, STORAGE_SQLALCHEMY_DB
 from todoer.todoer import STORAGE_URL
 
+
 def _mock_flask_app(flask_app) -> responses.RequestsMock:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
         for rule in flask_app.url_map.iter_rules():
@@ -37,6 +38,7 @@ def _mock_flask_app(flask_app) -> responses.RequestsMock:
                     callback=request_callback,
                 )
         yield
+
 
 @pytest.fixture(autouse=True)
 def _mock_storage_app() -> Iterator[None]:
