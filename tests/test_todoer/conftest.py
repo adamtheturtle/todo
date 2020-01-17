@@ -45,22 +45,15 @@ def _add_flask_app_to_mock(
             )
 
 
-def _mock_flask_app(flask_app: Flask, base_url: str) -> responses.RequestsMock:
+@pytest.fixture(autouse=True)
+def _mock_storage_app() -> Iterator[None]:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
         _add_flask_app_to_mock(
             responses_mock=resp_m,
-            flask_app=flask_app,
-            base_url=base_url,
+            flask_app=STORAGE_FLASK_APP,
+            base_url=STORAGE_URL,
         )
         yield
-
-
-@pytest.fixture(autouse=True)
-def _mock_storage_app() -> Iterator[None]:
-    yield from _mock_flask_app(
-        flask_app=STORAGE_FLASK_APP,
-        base_url=STORAGE_URL,
-    )
 
 
 @pytest.fixture(autouse=True)
