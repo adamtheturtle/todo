@@ -10,39 +10,57 @@ from urllib.parse import urljoin
 
 import pytest
 import responses
+from flask import Flask
 from requests import PreparedRequest
 
 from storage.storage import STORAGE_FLASK_APP, STORAGE_SQLALCHEMY_DB
 from todoer.todoer import STORAGE_URL
 
 
-def _mock_flask_app(flask_app) -> responses.RequestsMock:
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
-        for rule in flask_app.url_map.iter_rules():
-            # We assume here that everything is in the style:
-            # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
-            # "{uri}/{method}/<{type}:{id}>" when this is not necessarily the
-            # case.
-            #
-            # We replace everything inside angle brackets with a match for any
-            # string of characters of length > 0.
-            path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
-            pattern = urljoin(STORAGE_URL, path_to_match)
+def _add_flask_app_to_mock(
+    responses_mock: responses.RequestsMock,
+    flask_app: Flask,
+    base_url: str,
+) -> None:
+    """
+    XXX
+    """
+    for rule in flask_app.url_map.iter_rules():
+        # We assume here that everything is in the style:
+        # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
+        # "{uri}/{method}/<{type}:{id}>" when this is not necessarily the case.
+        #
+        # We replace everything inside angle brackets with a match for any
+        # string of characters of length > 0.
+        path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
+        pattern = urljoin(base_url, path_to_match)
 
-            for method in rule.methods:
-                resp_m.add_callback(
-                    # ``responses`` has methods named like the HTTP methods
-                    # they represent, e.g. ``responses.GET``.
-                    method=getattr(responses, method),
-                    url=re.compile(pattern),
-                    callback=request_callback,
-                )
+        for method in rule.methods:
+            responses_mock.add_callback(
+                # ``responses`` has methods named like the HTTP methods
+                # they represent, e.g. ``responses.GET``.
+                method=getattr(responses, method),
+                url=re.compile(pattern),
+                callback=request_callback,
+            )
+
+
+def _mock_flask_app(flask_app: Flask, base_url: str) -> responses.RequestsMock:
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        _add_flask_app_to_mock(
+            responses_mock=resp_m,
+            flask_app=flask_app,
+            base_url=base_url,
+        )
         yield
 
 
 @pytest.fixture(autouse=True)
 def _mock_storage_app() -> Iterator[None]:
-    yield from _mock_flask_app(flask_app=STORAGE_FLASK_APP)
+    yield from _mock_flask_app(
+        flask_app=STORAGE_FLASK_APP,
+        base_url=STORAGE_URL,
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -72,10 +90,8 @@ def request_callback(
     # The storage application is a ``werkzeug.test.Client`` and therefore
     # has methods like 'head', 'get' and 'post'.
     lower_request_method = str(request.method).lower()
-    test_client_method = getattr(
-        STORAGE_FLASK_APP.test_client(),
-        lower_request_method,
-    )
+    test_client = STORAGE_FLASK_APP.test_client()
+    test_client_method = getattr(test_client, lower_request_method)
     response = test_client_method(
         request.path_url,
         content_type=request.headers['Content-Type'],
