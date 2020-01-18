@@ -37,13 +37,10 @@ def _add_flask_app_to_mock(
         # string of characters of length > 0.
         path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
         pattern = urljoin(base_url, path_to_match)
+        url = re.compile(pattern)
 
         for method in rule.methods:
-            mock_obj.add_callback(
-                method=method,
-                url=re.compile(pattern),
-                callback=callback,
-            )
+            mock_obj.add_callback(method=method, url=url, callback=callback)
 
 
 @pytest.fixture(autouse=True)
