@@ -19,13 +19,13 @@ from todoer.todoer import STORAGE_URL
 
 
 def _add_flask_app_to_mock(
-    responses_mock: responses.RequestsMock,
+    mock_obj: responses.RequestsMock,
     flask_app: Flask,
     base_url: str,
 ) -> None:
     """
     Make it so that requests sent to the ``base_url`` are forwarded to the
-    ``Flask`` app, when in the context of the ``responses_mock``.
+    ``Flask`` app, when in the context of the ``mock_obj``.
     """
     callback = partial(_request_callback, flask_app=flask_app)
     for rule in flask_app.url_map.iter_rules():
@@ -39,7 +39,7 @@ def _add_flask_app_to_mock(
         pattern = urljoin(base_url, path_to_match)
 
         for method in rule.methods:
-            responses_mock.add_callback(
+            mock_obj.add_callback(
                 # ``responses`` has methods named like the HTTP methods
                 # they represent, e.g. ``responses.GET``.
                 method=getattr(responses, method),
@@ -52,7 +52,7 @@ def _add_flask_app_to_mock(
 def _mock_storage_app() -> Iterator[None]:
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
         _add_flask_app_to_mock(
-            responses_mock=resp_m,
+            mock_obj=resp_m,
             flask_app=STORAGE_FLASK_APP,
             base_url=STORAGE_URL,
         )
