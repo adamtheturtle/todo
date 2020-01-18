@@ -40,9 +40,7 @@ def _add_flask_app_to_mock(
 
         for method in rule.methods:
             mock_obj.add_callback(
-                # ``responses`` has methods named like the HTTP methods
-                # they represent, e.g. ``responses.GET``.
-                method=getattr(responses, method),
+                method=method,
                 url=re.compile(pattern),
                 callback=callback,
             )
