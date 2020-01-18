@@ -85,14 +85,11 @@ def _request_callback(
     :return: A tuple of status code, response headers and response data
         from the flask app.
     """
-    # The Flask test client is a ``werkzeug.test.Client`` and therefore has
-    # methods like 'head', 'get' and 'post'.
-    lower_request_method = str(request.method).lower()
     test_client = flask_app.test_client()
-    test_client_method = getattr(test_client, lower_request_method)
-    response = test_client_method(
-        request.path_url,
-        content_type=request.headers['Content-Type'],
+    response = test_client.open(
+        path=request.path_url,
+        method=request.method,
+        headers=dict(request.headers),
         data=request.body,
     )
 
