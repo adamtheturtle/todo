@@ -29,10 +29,6 @@ def _add_flask_app_to_mock(
     """
     callback = partial(_request_callback, flask_app=flask_app)
     for rule in flask_app.url_map.iter_rules():
-        # We assume here that everything is in the style:
-        # "{uri}/{method}/<{id}>" or "{uri}/{method}" or
-        # "{uri}/{method}/<{type}:{id}>" when this is not necessarily the case.
-        #
         # We replace everything inside angle brackets with a match for any
         # string of characters of length > 0.
         path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
