@@ -231,9 +231,9 @@ tests inside it:
    (my_virtualenv)$ pip install -e .[dev]
 
 Tests are run on
-`Travis-CI <https://travis-ci.org/adamtheturtle/todo>`__.
+`GitHub Actions <https://github.com/adamtheturtle/actions>`__.
 
-See ``.travis.yml`` for details of exactly what tests are run.
+See ``.github/workflows`` for details of exactly what tests are run.
 
 Documentation
 ~~~~~~~~~~~~~
@@ -258,8 +258,8 @@ Technical details
 API and the other interacts with a SQLite database. This allows the
 business logic to be separated from the storage logic.
 
-.. |Build Status| image:: https://travis-ci.org/adamtheturtle/todo.svg?branch=master
-   :target: https://travis-ci.org/adamtheturtle/todo
+.. |Build Status| image:: https://github.com/adamtheturtle/workflows/CI/badge.svg
+   :target: https://github.com/adamtheturtle/todo/actions
 .. |Coverage Status| image:: https://coveralls.io/repos/adamtheturtle/todo/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/adamtheturtle/todo?branch=master
 .. |Documentation Status| image:: https://readthedocs.org/projects/todoer/badge/?version=latest
