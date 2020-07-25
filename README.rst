@@ -258,7 +258,7 @@ Technical details
 API and the other interacts with a SQLite database. This allows the
 business logic to be separated from the storage logic.
 
-.. |Build Status| image:: https://github.com/adamtheturtle/workflows/CI/badge.svg
+.. |Build Status| image:: https://github.com/adamtheturtle/todo/workflows/CI/badge.svg
    :target: https://github.com/adamtheturtle/todo/actions
 .. |Coverage Status| image:: https://coveralls.io/repos/adamtheturtle/todo/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/adamtheturtle/todo?branch=master
