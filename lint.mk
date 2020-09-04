@@ -28,7 +28,11 @@ flake8:
 
 .PHONY: isort
 isort:
-	isort --recursive --check-only
+	isort --check-only .
+
+.PHONY: fix-isort
+fix-isort:
+	isort .
 
 .PHONY: pip-extra-reqs
 pip-extra-reqs:
@@ -40,7 +44,7 @@ pip-missing-reqs:
 
 .PHONY: pylint
 pylint:
-	pylint *.py src/ tests/ docs/
+	pylint --load-plugins pylint_flask_sqlalchemy *.py src/ tests/ docs/
 
 .PHONY: pyroma
 pyroma:

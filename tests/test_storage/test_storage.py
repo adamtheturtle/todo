@@ -3,10 +3,10 @@ Tests for the storage service.
 """
 
 import json
+from http import HTTPStatus
 from typing import Dict, Optional, Union
 
 from flask.testing import FlaskClient
-from requests import codes
 
 UserDataType = Dict[str, str]
 TodoDataType = Dict[str, Optional[Union[float, str, int, bool]]]
@@ -32,7 +32,7 @@ class TestCreateUser:
             data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CREATED
+        assert response.status_code == HTTPStatus.CREATED
         assert response.json == user_data
 
     def test_missing_email(
@@ -53,7 +53,7 @@ class TestCreateUser:
             data=json.dumps(data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
@@ -78,7 +78,7 @@ class TestCreateUser:
             data=json.dumps({'email': user_data['email']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'password_hash' is a required property",
@@ -107,7 +107,7 @@ class TestCreateUser:
             data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CONFLICT
+        assert response.status_code == HTTPStatus.CONFLICT
         email = user_data['email']
         expected = {
             'title': 'There is already a user with the given email address.',
@@ -124,7 +124,7 @@ class TestCreateUser:
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = storage_app.post('/users', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestGetUser:
@@ -151,7 +151,7 @@ class TestGetUser:
             f'/users/{email}',
             content_type='application/json',
         )
-        assert response.status_code == codes.OK
+        assert response.status_code == HTTPStatus.OK
         assert response.json == user_data
 
     def test_non_existant_user(
@@ -169,7 +169,7 @@ class TestGetUser:
             content_type='application/json',
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.NOT_FOUND
+        assert response.status_code == HTTPStatus.NOT_FOUND
         expected = {
             'title': 'The requested user does not exist.',
             'detail': f'No user exists with the email "{email}"',
@@ -187,7 +187,7 @@ class TestGetUser:
         """
         email = user_data['email']
         response = storage_app.get(f'/users/{email}', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestGetUsers:
@@ -209,7 +209,7 @@ class TestGetUsers:
         )
 
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.OK
+        assert response.status_code == HTTPStatus.OK
         assert response.json == []
 
     def test_with_users(
@@ -250,7 +250,7 @@ class TestGetUsers:
         )
 
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.OK
+        assert response.status_code == HTTPStatus.OK
         assert response.json == users
 
     def test_incorrect_content_type(
@@ -262,7 +262,7 @@ class TestGetUsers:
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = storage_app.get('/users', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestCreateTodo:
@@ -287,7 +287,7 @@ class TestCreateTodo:
             data=json.dumps(completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CREATED
+        assert response.status_code == HTTPStatus.CREATED
         expected = completed_todo_data.copy()
         expected['todo_id'] = 1
         assert response.json == expected
@@ -310,7 +310,7 @@ class TestCreateTodo:
             data=json.dumps(data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'content' is a required property",
@@ -335,7 +335,7 @@ class TestCreateTodo:
             data=json.dumps(data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'completed' is a required property",
@@ -360,7 +360,7 @@ class TestCreateTodo:
             data=json.dumps(data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CREATED
+        assert response.status_code == HTTPStatus.CREATED
         expected = completed_todo_data.copy()
         expected['completion_timestamp'] = None
         expected['todo_id'] = 1
@@ -375,7 +375,7 @@ class TestCreateTodo:
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = storage_app.post('/todos', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestGetTodo:
@@ -405,7 +405,7 @@ class TestGetTodo:
             content_type='application/json',
         )
 
-        assert read.status_code == codes.OK
+        assert read.status_code == HTTPStatus.OK
         expected = completed_todo_data.copy()
         expected['todo_id'] = item_id
         assert read.json == expected
@@ -434,7 +434,7 @@ class TestGetTodo:
             content_type='application/json',
         )
 
-        assert read.status_code == codes.OK
+        assert read.status_code == HTTPStatus.OK
         expected = completed_todo_data.copy()
         expected['completion_timestamp'] = None
         expected['todo_id'] = item_id
@@ -454,7 +454,7 @@ class TestGetTodo:
         )
 
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.NOT_FOUND
+        assert response.status_code == HTTPStatus.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
@@ -470,7 +470,7 @@ class TestGetTodo:
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = storage_app.get('/todos/1', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestDeleteTodo:
@@ -499,14 +499,14 @@ class TestDeleteTodo:
             content_type='application/json',
         )
 
-        assert delete.status_code == codes.OK
+        assert delete.status_code == HTTPStatus.OK
 
         read = storage_app.get(
             f'/todos/{item_id}',
             content_type='application/json',
         )
 
-        assert read.status_code == codes.NOT_FOUND
+        assert read.status_code == HTTPStatus.NOT_FOUND
 
     def test_delete_twice(
         self,
@@ -534,7 +534,7 @@ class TestDeleteTodo:
             content_type='application/json',
         )
 
-        assert delete.status_code == codes.NOT_FOUND
+        assert delete.status_code == HTTPStatus.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
@@ -553,7 +553,7 @@ class TestDeleteTodo:
             '/todos/1',
             content_type='text/html',
         )
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestListTodos:
@@ -573,7 +573,7 @@ class TestListTodos:
             content_type='application/json',
         )
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         assert list_todos.json['todos'] == []
 
     def test_list(
@@ -604,7 +604,7 @@ class TestListTodos:
             content_type='application/json',
         )
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         assert list_todos.json['todos'] == expected
 
     def test_filter_completed(
@@ -642,7 +642,7 @@ class TestListTodos:
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         expected = completed_todo_data.copy()
         loaded_data = json.loads(create_completed.data.decode('utf8'))
         item_id = loaded_data.get('todo_id')
@@ -684,7 +684,7 @@ class TestListTodos:
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         expected = not_completed_todo_data.copy()
         expected['todo_id'] = 1
         expected['completion_timestamp'] = None
@@ -699,7 +699,7 @@ class TestListTodos:
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = storage_app.get('/todos', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestUpdateTodo:
@@ -735,7 +735,7 @@ class TestUpdateTodo:
         expected['completion_timestamp'] = None
         expected['todo_id'] = create.json['todo_id']
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == expected
 
         read = storage_app.get(
@@ -776,7 +776,7 @@ class TestUpdateTodo:
         expected['completion_timestamp'] = 2
         expected['todo_id'] = create.json['todo_id']
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == expected
 
         read = storage_app.get(
@@ -817,7 +817,7 @@ class TestUpdateTodo:
         expected['completion_timestamp'] = None
         expected['todo_id'] = create.json['todo_id']
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == expected
 
         read = storage_app.get(
@@ -862,7 +862,7 @@ class TestUpdateTodo:
         expected['completion_timestamp'] = None
         expected['todo_id'] = create.json['todo_id']
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == expected
 
         read = storage_app.get(
@@ -886,7 +886,7 @@ class TestUpdateTodo:
         )
 
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.NOT_FOUND
+        assert response.status_code == HTTPStatus.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
@@ -902,4 +902,4 @@ class TestUpdateTodo:
         UNSUPPORTED_MEDIA_TYPE status code is given.
         """
         response = storage_app.patch('/todos/1', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE

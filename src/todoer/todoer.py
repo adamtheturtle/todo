@@ -4,6 +4,7 @@ An authentication service with todo capabilities.
 
 import datetime
 import os
+from http import HTTPStatus
 from typing import Optional, Tuple
 from urllib.parse import urljoin
 
@@ -20,7 +21,6 @@ from flask_login import (
     logout_user,
 )
 from flask_negotiate import consumes
-from requests import codes
 
 
 class User(UserMixin):  # type: ignore
@@ -86,7 +86,7 @@ def load_user_from_id(user_id: str) -> Optional[User]:
     url = urljoin(STORAGE_URL, f'users/{user_id}')
     response = requests.get(url, headers={'Content-Type': 'application/json'})
 
-    if response.status_code == codes.OK:
+    if response.status_code == HTTPStatus.OK:
         details = json.loads(response.text)
         return User(
             email=details['email'],
@@ -107,7 +107,7 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
             title='There was an error validating the given arguments.',
             detail=error.message,
         ),
-        codes.BAD_REQUEST,
+        HTTPStatus.BAD_REQUEST,
     )
 
 
@@ -141,7 +141,7 @@ def login() -> Tuple[Response, int]:
                 title='The requested user does not exist.',
                 detail=f'No user exists with the email "{email}"',
             ),
-            codes.NOT_FOUND,
+            HTTPStatus.NOT_FOUND,
         )
 
     if not FLASK_BCRYPT.check_password_hash(user.password_hash, password):
@@ -153,12 +153,12 @@ def login() -> Tuple[Response, int]:
                     'password provided.'
                 ),
             ),
-            codes.UNAUTHORIZED,
+            HTTPStatus.UNAUTHORIZED,
         )
 
     login_user(user, remember=True)
 
-    return jsonify(email=email, password=password), codes.OK
+    return jsonify(email=email, password=password), HTTPStatus.OK
 
 
 @TODOER_FLASK_APP.route('/logout', methods=['POST'])
@@ -172,7 +172,7 @@ def logout() -> Tuple[Response, int]:
     :status 200: The current user has been logged out.
     """
     logout_user()
-    return jsonify({}), codes.OK
+    return jsonify({}), HTTPStatus.OK
 
 
 @TODOER_FLASK_APP.route('/signup', methods=['POST'])
@@ -202,7 +202,7 @@ def signup() -> Tuple[Response, int]:
                 title='There is already a user with the given email address.',
                 detail=f'A user already exists with the email "{email}"',
             ),
-            codes.CONFLICT,
+            HTTPStatus.CONFLICT,
         )
 
     data = {
@@ -218,7 +218,7 @@ def signup() -> Tuple[Response, int]:
         data=json.dumps(data),
     )
 
-    return jsonify(email=email, password=password), codes.CREATED
+    return jsonify(email=email, password=password), HTTPStatus.CREATED
 
 
 @TODOER_FLASK_APP.route('/todos', methods=['POST'])
@@ -361,7 +361,7 @@ def update_todo(todo_id: int) -> Tuple[Response, int]:
     headers = {'Content-Type': 'application/json'}
     response = requests.get(url, headers=headers)
 
-    if not response.status_code == codes.OK:
+    if not response.status_code == HTTPStatus.OK:
         return jsonify(response.json()), response.status_code
 
     already_completed = response.json().get('completed')

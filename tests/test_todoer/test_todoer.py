@@ -4,13 +4,13 @@ Tests for todoer.todoer.
 
 import datetime
 import json
+from http import HTTPStatus
 from typing import Dict, Optional, Union
 
 import pytz
 from flask.testing import FlaskClient
 from freezegun import freeze_time
 from freezegun.api import FrozenDateTimeFactory
-from requests import codes
 from werkzeug.http import parse_cookie
 
 from todoer.todoer import FLASK_BCRYPT, TODOER_FLASK_APP, load_user_from_id
@@ -55,7 +55,7 @@ class TestSignup:
             data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CREATED
+        assert response.status_code == HTTPStatus.CREATED
         assert response.json == user_data
 
     def test_passwords_hashed(
@@ -92,7 +92,7 @@ class TestSignup:
             data=json.dumps({'password': user_data['password']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
@@ -114,7 +114,7 @@ class TestSignup:
             data=json.dumps({'email': user_data['email']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'password' is a required property",
@@ -142,7 +142,7 @@ class TestSignup:
             data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CONFLICT
+        assert response.status_code == HTTPStatus.CONFLICT
         email = user_data['email']
         expected = {
             'title': 'There is already a user with the given email address.',
@@ -157,7 +157,7 @@ class TestSignup:
         """
         todoer_app = TODOER_FLASK_APP.test_client()
         response = todoer_app.post('/signup', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestLogin:
@@ -184,7 +184,7 @@ class TestLogin:
             content_type='application/json',
             data=json.dumps(user_data),
         )
-        assert response.status_code == codes.OK
+        assert response.status_code == HTTPStatus.OK
 
     def test_non_existant_user(
         self,
@@ -201,7 +201,7 @@ class TestLogin:
             data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.NOT_FOUND
+        assert response.status_code == HTTPStatus.NOT_FOUND
         email = user_data['email']
         expected = {
             'title': 'The requested user does not exist.',
@@ -230,7 +230,7 @@ class TestLogin:
             data=json.dumps(user_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.UNAUTHORIZED
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
         email = user_data['email']
         expected = {
             'title': 'An incorrect password was provided.',
@@ -279,7 +279,7 @@ class TestLogin:
             data=json.dumps({'password': user_data['password']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'email' is a required property",
@@ -301,7 +301,7 @@ class TestLogin:
             data=json.dumps({'email': user_data['email']}),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'password' is a required property",
@@ -315,7 +315,7 @@ class TestLogin:
         """
         todoer_app = TODOER_FLASK_APP.test_client()
         response = todoer_app.post('/login', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestLogout:
@@ -343,7 +343,7 @@ class TestLogout:
             data=json.dumps(user_data),
         )
         response = todoer_app.post('/logout', content_type='application/json')
-        assert response.status_code == codes.OK
+        assert response.status_code == HTTPStatus.OK
 
     def test_not_logged_in(self) -> None:
         """
@@ -352,7 +352,7 @@ class TestLogout:
         """
         todoer_app = TODOER_FLASK_APP.test_client()
         response = todoer_app.post('/logout', content_type='application/json')
-        assert response.status_code == codes.UNAUTHORIZED
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_logout_twice(
         self,
@@ -375,7 +375,7 @@ class TestLogout:
         )
         todoer_app.post('/logout', content_type='application/json')
         response = todoer_app.post('/logout', content_type='application/json')
-        assert response.status_code == codes.UNAUTHORIZED
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_incorrect_content_type(self) -> None:
         """
@@ -384,7 +384,7 @@ class TestLogout:
         """
         todoer_app = TODOER_FLASK_APP.test_client()
         response = todoer_app.post('/logout')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestLoadUser:
@@ -443,7 +443,7 @@ class TestCreateTodo:
             data=json.dumps(not_completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CREATED
+        assert response.status_code == HTTPStatus.CREATED
         not_completed_todo_data['completion_timestamp'] = None
         not_completed_todo_data['todo_id'] = 1
         assert response.json == not_completed_todo_data
@@ -471,7 +471,7 @@ class TestCreateTodo:
         )
 
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.CREATED
+        assert response.status_code == HTTPStatus.CREATED
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
         assert (
@@ -499,7 +499,7 @@ class TestCreateTodo:
             data=json.dumps(completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'content' is a required property",
@@ -523,7 +523,7 @@ class TestCreateTodo:
             data=json.dumps(completed_todo_data),
         )
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         expected = {
             'title': 'There was an error validating the given arguments.',
             'detail': "'completed' is a required property",
@@ -541,7 +541,7 @@ class TestCreateTodo:
         todoer_app = TODOER_FLASK_APP.test_client()
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.post('/todos', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
     def test_not_logged_in(
         self,
@@ -557,7 +557,7 @@ class TestCreateTodo:
             data=json.dumps(not_completed_todo_data),
         )
 
-        assert response.status_code == codes.UNAUTHORIZED
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 class TestReadTodo:
@@ -588,7 +588,7 @@ class TestReadTodo:
             content_type='application/json',
         )
 
-        assert read.status_code == codes.OK
+        assert read.status_code == HTTPStatus.OK
         not_completed_todo_data['completion_timestamp'] = None
         not_completed_todo_data['todo_id'] = create.json['todo_id']
         assert read.json == not_completed_todo_data
@@ -621,7 +621,7 @@ class TestReadTodo:
             content_type='application/json',
         )
 
-        assert read.status_code == codes.OK
+        assert read.status_code == HTTPStatus.OK
         expected = completed_todo_data.copy()
         expected['todo_id'] = create.json['todo_id']
         # On some platforms (in particular Travis CI, float conversion loses
@@ -670,7 +670,7 @@ class TestReadTodo:
             content_type='application/json',
         )
 
-        assert read.status_code == codes.OK
+        assert read.status_code == HTTPStatus.OK
         not_completed_todo_data['completion_timestamp'] = None
         not_completed_todo_data['todo_id'] = create.json['todo_id']
         assert read.json == not_completed_todo_data
@@ -688,7 +688,7 @@ class TestReadTodo:
         response = todoer_app.get('/todos/1', content_type='application/json')
 
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.NOT_FOUND
+        assert response.status_code == HTTPStatus.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
@@ -702,7 +702,7 @@ class TestReadTodo:
         """
         todoer_app = TODOER_FLASK_APP.test_client()
         response = todoer_app.get('/todos/1', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
     def test_not_logged_in(
         self,
@@ -728,7 +728,7 @@ class TestReadTodo:
             content_type='application/json',
         )
 
-        assert read.status_code == codes.UNAUTHORIZED
+        assert read.status_code == HTTPStatus.UNAUTHORIZED
 
 
 class TestDeleteTodo:
@@ -758,14 +758,14 @@ class TestDeleteTodo:
             content_type='application/json',
         )
 
-        assert delete.status_code == codes.OK
+        assert delete.status_code == HTTPStatus.OK
 
         read = todoer_app.get(
             f'todos/{item_id}',
             content_type='application/json',
         )
 
-        assert read.status_code == codes.NOT_FOUND
+        assert read.status_code == HTTPStatus.NOT_FOUND
 
     def test_delete_twice(
         self,
@@ -794,7 +794,7 @@ class TestDeleteTodo:
             content_type='application/json',
         )
 
-        assert delete.status_code == codes.NOT_FOUND
+        assert delete.status_code == HTTPStatus.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
@@ -812,7 +812,7 @@ class TestDeleteTodo:
         todoer_app = TODOER_FLASK_APP.test_client()
         log_in_as_new_user(flask_app=todoer_app, user_data=user_data)
         response = todoer_app.delete('/todos/1', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
     def test_not_logged_in(
         self,
@@ -839,7 +839,7 @@ class TestDeleteTodo:
             content_type='application/json',
         )
 
-        assert delete.status_code == codes.UNAUTHORIZED
+        assert delete.status_code == HTTPStatus.UNAUTHORIZED
 
 
 class TestListTodos:
@@ -861,7 +861,7 @@ class TestListTodos:
             content_type='application/json',
         )
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         assert list_todos.json['todos'] == []
 
     def test_not_logged_in(self) -> None:
@@ -874,7 +874,7 @@ class TestListTodos:
             content_type='application/json',
         )
 
-        assert list_todos.status_code == codes.UNAUTHORIZED
+        assert list_todos.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_list(
         self,
@@ -907,7 +907,7 @@ class TestListTodos:
             content_type='application/json',
         )
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         assert list_todos.json['todos'] == expected
 
     def test_filter_completed(
@@ -952,7 +952,7 @@ class TestListTodos:
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         expected = completed_todo_data.copy()
         expected['todo_id'] = 2
         [todo] = list_todos_data['todos']
@@ -996,7 +996,7 @@ class TestListTodos:
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
 
-        assert list_todos.status_code == codes.OK
+        assert list_todos.status_code == HTTPStatus.OK
         expected = not_completed_todo_data.copy()
         expected['completion_timestamp'] = None
         expected['todo_id'] = 1
@@ -1009,7 +1009,7 @@ class TestListTodos:
         """
         todoer_app = TODOER_FLASK_APP.test_client()
         response = todoer_app.get('/todos', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 class TestUpdateTodo:
@@ -1045,7 +1045,7 @@ class TestUpdateTodo:
         expected = create.json
         expected['content'] = new_content
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == expected
 
         read = todoer_app.get(
@@ -1080,7 +1080,7 @@ class TestUpdateTodo:
             data=json.dumps({'content': 'Book vacation'}),
         )
 
-        assert patch.status_code == codes.UNAUTHORIZED
+        assert patch.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_flag_completed(
         self,
@@ -1114,7 +1114,7 @@ class TestUpdateTodo:
         expected['completed'] = True
         expected['completion_timestamp'] = timestamp
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
         assert (
@@ -1171,7 +1171,7 @@ class TestUpdateTodo:
         # Marking an item as not completed removes the completion timestamp.
         expected['completion_timestamp'] = None
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == expected
 
         read = todoer_app.get(
@@ -1217,7 +1217,7 @@ class TestUpdateTodo:
         expected['completed'] = False
         expected['completion_timestamp'] = None
 
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == expected
 
         read = todoer_app.get(
@@ -1269,7 +1269,7 @@ class TestUpdateTodo:
             )
             == 0
         )
-        assert patch.status_code == codes.OK
+        assert patch.status_code == HTTPStatus.OK
         assert patch.json == create.json
 
         read = todoer_app.get(
@@ -1327,7 +1327,7 @@ class TestUpdateTodo:
         )
 
         assert response.headers['Content-Type'] == 'application/json'
-        assert response.status_code == codes.NOT_FOUND
+        assert response.status_code == HTTPStatus.NOT_FOUND
         expected = {
             'title': 'The requested todo does not exist.',
             'detail': 'No todo exists with the id "1"',
@@ -1341,4 +1341,4 @@ class TestUpdateTodo:
         """
         todoer_app = TODOER_FLASK_APP.test_client()
         response = todoer_app.patch('/todos/1', content_type='text/html')
-        assert response.status_code == codes.UNSUPPORTED_MEDIA_TYPE
+        assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
