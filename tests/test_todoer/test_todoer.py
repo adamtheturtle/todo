@@ -233,8 +233,7 @@ class TestLogin:
         assert response.status_code == codes.UNAUTHORIZED
         email = user_data['email']
         expected = {
-            'title':
-            'An incorrect password was provided.',
+            'title': 'An incorrect password was provided.',
             'detail': (
                 f'The password for the user "{email}" does not match the '
                 'password provided.'
@@ -408,8 +407,10 @@ class TestLoadUser:
             content_type='application/json',
             data=json.dumps(user_data),
         )
-        assert load_user_from_id(user_id=user_data['email']).email == \
-            user_data['email']
+        assert (
+            load_user_from_id(user_id=user_data['email']).email
+            == user_data['email']
+        )
 
     def test_user_does_not_exist(self) -> None:
         """
@@ -473,10 +474,13 @@ class TestCreateTodo:
         assert response.status_code == codes.CREATED
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
-        assert round(
-            number=abs(response.json['completion_timestamp'] - timestamp),
-            ndigits=3,
-        ) == 0
+        assert (
+            round(
+                number=abs(response.json['completion_timestamp'] - timestamp),
+                ndigits=3,
+            )
+            == 0
+        )
 
     def test_missing_text(
         self,
@@ -622,10 +626,13 @@ class TestReadTodo:
         expected['todo_id'] = create.json['todo_id']
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
-        assert round(
-            number=abs(read.json.pop('completion_timestamp') - timestamp),
-            ndigits=3,
-        ) == 0
+        assert (
+            round(
+                number=abs(read.json.pop('completion_timestamp') - timestamp),
+                ndigits=3,
+            )
+            == 0
+        )
         assert read.json == expected
 
     def test_multiple_todos(
@@ -934,11 +941,13 @@ class TestListTodos:
         list_todos = todoer_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({
-                'filter': {
-                    'completed': True,
+            data=json.dumps(
+                {
+                    'filter': {
+                        'completed': True,
+                    },
                 },
-            }),
+            ),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -976,11 +985,13 @@ class TestListTodos:
         list_todos = todoer_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({
-                'filter': {
-                    'completed': False,
+            data=json.dumps(
+                {
+                    'filter': {
+                        'completed': False,
+                    },
                 },
-            }),
+            ),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -1106,13 +1117,16 @@ class TestUpdateTodo:
         assert patch.status_code == codes.OK
         # On some platforms (in particular Travis CI, float conversion loses
         # some accuracy).
-        assert round(
-            number=abs(
-                patch.json.pop('completion_timestamp') -
-                expected.pop('completion_timestamp'),
-            ),
-            ndigits=3,
-        ) == 0
+        assert (
+            round(
+                number=abs(
+                    patch.json.pop('completion_timestamp')
+                    - expected.pop('completion_timestamp'),
+                ),
+                ndigits=3,
+            )
+            == 0
+        )
         assert patch.json == expected
 
         read = todoer_app.get(
@@ -1120,10 +1134,13 @@ class TestUpdateTodo:
             content_type='application/json',
         )
 
-        assert round(
-            number=abs(read.json.pop('completion_timestamp') - timestamp),
-            ndigits=3,
-        ) == 0
+        assert (
+            round(
+                number=abs(read.json.pop('completion_timestamp') - timestamp),
+                ndigits=3,
+            )
+            == 0
+        )
         assert read.json == expected
 
     def test_flag_not_completed(
@@ -1187,10 +1204,12 @@ class TestUpdateTodo:
         patch = todoer_app.patch(
             f'todos/{item_id}',
             content_type='application/json',
-            data=json.dumps({
-                'content': new_content,
-                'completed': False,
-            }),
+            data=json.dumps(
+                {
+                    'content': new_content,
+                    'completed': False,
+                },
+            ),
         )
 
         expected = create.json
@@ -1240,13 +1259,16 @@ class TestUpdateTodo:
                 data=json.dumps({'completed': True}),
             )
 
-        assert round(
-            number=abs(
-                patch.json.pop('completion_timestamp') -
-                create.json.pop('completion_timestamp'),
-            ),
-            ndigits=3,
-        ) == 0
+        assert (
+            round(
+                number=abs(
+                    patch.json.pop('completion_timestamp')
+                    - create.json.pop('completion_timestamp'),
+                ),
+                ndigits=3,
+            )
+            == 0
+        )
         assert patch.status_code == codes.OK
         assert patch.json == create.json
 
@@ -1255,10 +1277,13 @@ class TestUpdateTodo:
             content_type='application/json',
         )
 
-        assert round(
-            number=abs(read.json.pop('completion_timestamp') - timestamp),
-            ndigits=3,
-        ) == 0
+        assert (
+            round(
+                number=abs(read.json.pop('completion_timestamp') - timestamp),
+                ndigits=3,
+            )
+            == 0
+        )
         assert read.json == create.json
 
     def test_remain_same(

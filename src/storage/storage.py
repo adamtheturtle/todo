@@ -108,10 +108,13 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     :resjson string message: The precise validation error.
     :status 400:
     """
-    return jsonify(
-        title='There was an error validating the given arguments.',
-        detail=error.message,
-    ), codes.BAD_REQUEST
+    return (
+        jsonify(
+            title='There was an error validating the given arguments.',
+            detail=error.message,
+        ),
+        codes.BAD_REQUEST,
+    )
 
 
 @STORAGE_FLASK_APP.route('/users/<email>', methods=['GET'])
@@ -130,10 +133,13 @@ def specific_user_get(email: str) -> Tuple[Response, int]:
     user = load_user_from_id(email)
 
     if user is None:
-        return jsonify(
-            title='The requested user does not exist.',
-            detail=f'No user exists with the email "{email}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested user does not exist.',
+                detail=f'No user exists with the email "{email}"',
+            ),
+            codes.NOT_FOUND,
+        )
 
     return_data = jsonify(email=user.email, password_hash=user.password_hash)
     return return_data, codes.OK
@@ -155,7 +161,8 @@ def users_get() -> Response:
         {
             'email': user.email,
             'password_hash': user.password_hash,
-        } for user in User.query.all()
+        }
+        for user in User.query.all()
     ]
 
     result: Response = make_response(
@@ -185,10 +192,13 @@ def users_post() -> Tuple[Response, int]:
     password_hash = request.get_json()['password_hash']
 
     if load_user_from_id(email) is not None:
-        return jsonify(
-            title='There is already a user with the given email address.',
-            detail=f'A user already exists with the email "{email}"',
-        ), codes.CONFLICT
+        return (
+            jsonify(
+                title='There is already a user with the given email address.',
+                detail=f'A user already exists with the email "{email}"',
+            ),
+            codes.CONFLICT,
+        )
 
     user = User(email=email, password_hash=password_hash)
     STORAGE_SQLALCHEMY_DB.session.add(user)
@@ -246,10 +256,13 @@ def specific_todo_get(todo_id: int) -> Tuple[Response, int]:
     todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
-        return jsonify(
-            title='The requested todo does not exist.',
-            detail=f'No todo exists with the id "{todo_id}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested todo does not exist.',
+                detail=f'No todo exists with the id "{todo_id}"',
+            ),
+            codes.NOT_FOUND,
+        )
 
     result = jsonify(todo.as_dict()), codes.OK
     return result
@@ -269,10 +282,13 @@ def delete_todo(todo_id: int) -> Tuple[Response, int]:
     todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
-        return jsonify(
-            title='The requested todo does not exist.',
-            detail=f'No todo exists with the id "{todo_id}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested todo does not exist.',
+                detail=f'No todo exists with the id "{todo_id}"',
+            ),
+            codes.NOT_FOUND,
+        )
 
     STORAGE_SQLALCHEMY_DB.session.delete(todo)
     STORAGE_SQLALCHEMY_DB.session.commit()
@@ -332,10 +348,13 @@ def update_todo(todo_id: int) -> Tuple[Response, int]:
     todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
-        return jsonify(
-            title='The requested todo does not exist.',
-            detail=f'No todo exists with the id "{todo_id}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested todo does not exist.',
+                detail=f'No todo exists with the id "{todo_id}"',
+            ),
+            codes.NOT_FOUND,
+        )
 
     if 'content' in request.get_json():
         todo.content = request.get_json()['content']

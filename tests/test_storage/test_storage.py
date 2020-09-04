@@ -631,11 +631,13 @@ class TestListTodos:
         list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({
-                'filter': {
-                    'completed': True,
+            data=json.dumps(
+                {
+                    'filter': {
+                        'completed': True,
+                    },
                 },
-            }),
+            ),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -671,11 +673,13 @@ class TestListTodos:
         list_todos = storage_app.get(
             '/todos',
             content_type='application/json',
-            data=json.dumps({
-                'filter': {
-                    'completed': False,
+            data=json.dumps(
+                {
+                    'filter': {
+                        'completed': False,
+                    },
                 },
-            }),
+            ),
         )
 
         list_todos_data = json.loads(list_todos.data.decode('utf8'))
@@ -844,10 +848,12 @@ class TestUpdateTodo:
         patch = storage_app.patch(
             f'todos/{item_id}',
             content_type='application/json',
-            data=json.dumps({
-                'content': new_content,
-                'completed': False,
-            }),
+            data=json.dumps(
+                {
+                    'content': new_content,
+                    'completed': False,
+                },
+            ),
         )
 
         expected = not_completed_todo_data.copy()

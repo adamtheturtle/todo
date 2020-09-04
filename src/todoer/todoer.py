@@ -102,10 +102,13 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     :resjson string message: The precise validation error.
     :status 400:
     """
-    return jsonify(
-        title='There was an error validating the given arguments.',
-        detail=error.message,
-    ), codes.BAD_REQUEST
+    return (
+        jsonify(
+            title='There was an error validating the given arguments.',
+            detail=error.message,
+        ),
+        codes.BAD_REQUEST,
+    )
 
 
 @TODOER_FLASK_APP.route('/login', methods=['POST'])
@@ -133,19 +136,25 @@ def login() -> Tuple[Response, int]:
 
     user = load_user_from_id(user_id=email)
     if user is None:
-        return jsonify(
-            title='The requested user does not exist.',
-            detail=f'No user exists with the email "{email}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested user does not exist.',
+                detail=f'No user exists with the email "{email}"',
+            ),
+            codes.NOT_FOUND,
+        )
 
     if not FLASK_BCRYPT.check_password_hash(user.password_hash, password):
-        return jsonify(
-            title='An incorrect password was provided.',
-            detail=(
-                f'The password for the user "{email}" does not match the '
-                'password provided.'
+        return (
+            jsonify(
+                title='An incorrect password was provided.',
+                detail=(
+                    f'The password for the user "{email}" does not match the '
+                    'password provided.'
+                ),
             ),
-        ), codes.UNAUTHORIZED
+            codes.UNAUTHORIZED,
+        )
 
     login_user(user, remember=True)
 
@@ -188,16 +197,19 @@ def signup() -> Tuple[Response, int]:
     password = request.get_json()['password']
 
     if load_user_from_id(email) is not None:
-        return jsonify(
-            title='There is already a user with the given email address.',
-            detail=f'A user already exists with the email "{email}"',
-        ), codes.CONFLICT
+        return (
+            jsonify(
+                title='There is already a user with the given email address.',
+                detail=f'A user already exists with the email "{email}"',
+            ),
+            codes.CONFLICT,
+        )
 
     data = {
-        'email':
-        email,
-        'password_hash':
-        FLASK_BCRYPT.generate_password_hash(password).decode('utf8'),
+        'email': email,
+        'password_hash': FLASK_BCRYPT.generate_password_hash(password).decode(
+            'utf8',
+        ),
     }
 
     requests.post(
