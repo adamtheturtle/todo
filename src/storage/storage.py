@@ -68,7 +68,7 @@ def create_app(database_uri: str) -> Flask:
     flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     STORAGE_SQLALCHEMY_DB.init_app(flask_app)
 
-    with flask_app.app_context():  # type: ignore
+    with flask_app.app_context():
         STORAGE_SQLALCHEMY_DB.create_all()
 
     return flask_app
