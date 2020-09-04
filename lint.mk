@@ -44,7 +44,7 @@ pip-missing-reqs:
 
 .PHONY: pylint
 pylint:
-	pylint --load-plugins pylint_flask_sqlalchemy *.py src/ tests/ docs/
+	pylint *.py src/ tests/ docs/
 
 .PHONY: pyroma
 pyroma:
