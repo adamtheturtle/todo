@@ -3,13 +3,13 @@ A storage service for use by a todoer authentication service.
 """
 
 import os
+from http import HTTPStatus
 from typing import Dict, Optional, Tuple, Union
 
 from flask import Flask, Response, json, jsonify, make_response, request
 from flask_jsonschema import JsonSchema, ValidationError, validate
 from flask_negotiate import consumes
 from flask_sqlalchemy import SQLAlchemy
-from requests import codes
 
 STORAGE_SQLALCHEMY_DB = SQLAlchemy()
 
@@ -68,7 +68,7 @@ def create_app(database_uri: str) -> Flask:
     flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     STORAGE_SQLALCHEMY_DB.init_app(flask_app)
 
-    with flask_app.app_context():  # type: ignore
+    with flask_app.app_context():
         STORAGE_SQLALCHEMY_DB.create_all()
 
     return flask_app
@@ -108,10 +108,13 @@ def on_validation_error(error: ValidationError) -> Tuple[Response, int]:
     :resjson string message: The precise validation error.
     :status 400:
     """
-    return jsonify(
-        title='There was an error validating the given arguments.',
-        detail=error.message,
-    ), codes.BAD_REQUEST
+    return (
+        jsonify(
+            title='There was an error validating the given arguments.',
+            detail=error.message,
+        ),
+        HTTPStatus.BAD_REQUEST,
+    )
 
 
 @STORAGE_FLASK_APP.route('/users/<email>', methods=['GET'])
@@ -130,13 +133,16 @@ def specific_user_get(email: str) -> Tuple[Response, int]:
     user = load_user_from_id(email)
 
     if user is None:
-        return jsonify(
-            title='The requested user does not exist.',
-            detail=f'No user exists with the email "{email}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested user does not exist.',
+                detail=f'No user exists with the email "{email}"',
+            ),
+            HTTPStatus.NOT_FOUND,
+        )
 
     return_data = jsonify(email=user.email, password_hash=user.password_hash)
-    return return_data, codes.OK
+    return return_data, HTTPStatus.OK
 
 
 @STORAGE_FLASK_APP.route('/users', methods=['GET'])
@@ -155,12 +161,13 @@ def users_get() -> Response:
         {
             'email': user.email,
             'password_hash': user.password_hash,
-        } for user in User.query.all()
+        }
+        for user in User.query.all()
     ]
 
     result: Response = make_response(
         json.dumps(details),
-        codes.OK,
+        HTTPStatus.OK,
         {'Content-Type': 'application/json'},
     )
     return result
@@ -185,16 +192,22 @@ def users_post() -> Tuple[Response, int]:
     password_hash = request.get_json()['password_hash']
 
     if load_user_from_id(email) is not None:
-        return jsonify(
-            title='There is already a user with the given email address.',
-            detail=f'A user already exists with the email "{email}"',
-        ), codes.CONFLICT
+        return (
+            jsonify(
+                title='There is already a user with the given email address.',
+                detail=f'A user already exists with the email "{email}"',
+            ),
+            HTTPStatus.CONFLICT,
+        )
 
     user = User(email=email, password_hash=password_hash)
     STORAGE_SQLALCHEMY_DB.session.add(user)
     STORAGE_SQLALCHEMY_DB.session.commit()
 
-    return jsonify(email=email, password_hash=password_hash), codes.CREATED
+    return (
+        jsonify(email=email, password_hash=password_hash),
+        HTTPStatus.CREATED,
+    )
 
 
 @STORAGE_FLASK_APP.route('/todos', methods=['POST'])
@@ -225,7 +238,7 @@ def todos_post() -> Tuple[Response, int]:
     STORAGE_SQLALCHEMY_DB.session.add(todo)
     STORAGE_SQLALCHEMY_DB.session.commit()
 
-    return jsonify(todo.as_dict()), codes.CREATED
+    return jsonify(todo.as_dict()), HTTPStatus.CREATED
 
 
 @STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['GET'])
@@ -246,12 +259,15 @@ def specific_todo_get(todo_id: int) -> Tuple[Response, int]:
     todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
-        return jsonify(
-            title='The requested todo does not exist.',
-            detail=f'No todo exists with the id "{todo_id}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested todo does not exist.',
+                detail=f'No todo exists with the id "{todo_id}"',
+            ),
+            HTTPStatus.NOT_FOUND,
+        )
 
-    result = jsonify(todo.as_dict()), codes.OK
+    result = jsonify(todo.as_dict()), HTTPStatus.OK
     return result
 
 
@@ -269,15 +285,18 @@ def delete_todo(todo_id: int) -> Tuple[Response, int]:
     todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
-        return jsonify(
-            title='The requested todo does not exist.',
-            detail=f'No todo exists with the id "{todo_id}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested todo does not exist.',
+                detail=f'No todo exists with the id "{todo_id}"',
+            ),
+            HTTPStatus.NOT_FOUND,
+        )
 
     STORAGE_SQLALCHEMY_DB.session.delete(todo)
     STORAGE_SQLALCHEMY_DB.session.commit()
 
-    return jsonify(), codes.OK
+    return jsonify(), HTTPStatus.OK
 
 
 @STORAGE_FLASK_APP.route('/todos', methods=['GET'])
@@ -300,7 +319,7 @@ def list_todos() -> Tuple[Response, int]:
         todo_filter = request.get_json()['filter']
 
     todos = Todo.query.filter_by(**todo_filter).all()
-    return jsonify(todos=[todo.as_dict() for todo in todos]), codes.OK
+    return jsonify(todos=[todo.as_dict() for todo in todos]), HTTPStatus.OK
 
 
 @STORAGE_FLASK_APP.route('/todos/<int:todo_id>', methods=['PATCH'])
@@ -332,10 +351,13 @@ def update_todo(todo_id: int) -> Tuple[Response, int]:
     todo = Todo.query.filter_by(todo_id=todo_id).first()
 
     if todo is None:
-        return jsonify(
-            title='The requested todo does not exist.',
-            detail=f'No todo exists with the id "{todo_id}"',
-        ), codes.NOT_FOUND
+        return (
+            jsonify(
+                title='The requested todo does not exist.',
+                detail=f'No todo exists with the id "{todo_id}"',
+            ),
+            HTTPStatus.NOT_FOUND,
+        )
 
     if 'content' in request.get_json():
         todo.content = request.get_json()['content']
@@ -347,7 +369,7 @@ def update_todo(todo_id: int) -> Tuple[Response, int]:
         todo.completion_timestamp = request.get_json()['completion_timestamp']
 
     STORAGE_SQLALCHEMY_DB.session.commit()
-    return jsonify(todo.as_dict()), codes.OK
+    return jsonify(todo.as_dict()), HTTPStatus.OK
 
 
 if __name__ == '__main__':  # pragma: no cover

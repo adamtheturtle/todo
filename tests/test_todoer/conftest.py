@@ -27,12 +27,12 @@ def _mock_storage_app() -> Iterator[None]:
 
 @pytest.fixture(autouse=True)
 def _mock_storage_database() -> Iterator[None]:
-    with STORAGE_FLASK_APP.app_context():  # type: ignore
+    with STORAGE_FLASK_APP.app_context():
         STORAGE_SQLALCHEMY_DB.create_all()
 
     yield
 
-    with STORAGE_FLASK_APP.app_context():  # type: ignore
+    with STORAGE_FLASK_APP.app_context():
         STORAGE_SQLALCHEMY_DB.session.remove()
         STORAGE_SQLALCHEMY_DB.drop_all()
 
